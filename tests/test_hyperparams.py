@@ -34,12 +34,8 @@ class TestEffAtH(unittest.TestCase):
         self.assertAlmostEqual(got, 0.470, delta=0.002)
 
     def test_reproduces_every_table10_entry_from_three_numbers(self):
-        """The strongest available check that ``eff@k`` is linear in ``h``.
-
-        Fifteen published numbers are rebuilt from three recovered per-level
-        means. If the aggregation were anything other than a weighted mean over
-        levels, the residuals would not all sit inside rounding error.
-        """
+        """Fifteen published entries rebuilt from three recovered level means:
+        the strongest available check that eff@k is linear in h."""
         for level, sweep in TABLE10.items():
             for weight, published in sweep.items():
                 h = list(PAPER_H)
@@ -74,9 +70,8 @@ class TestAttainableRange(unittest.TestCase):
         self.assertEqual(attainable_range(RECOVERED_F), (0.355, 0.638))
 
     def test_span_exceeds_the_leaderboard_spread(self):
-        """0.283 of reachable range against a 0.062 spread over the paper's top
-        four models: the ordering is not obviously robust to the choice of h,
-        which is what compare_under_h is for."""
+        """0.283 reachable range against a 0.062 spread over the paper's top
+        four models."""
         lo, hi = attainable_range(RECOVERED_F)
         self.assertGreater(hi - lo, 0.062)
 
@@ -123,8 +118,7 @@ class TestCompareUnderH(unittest.TestCase):
                 self.assertGreater(eff_at_h(b, cmp.witness_b), eff_at_h(a, cmp.witness_b))
 
     def test_the_paper_h_may_hide_a_reorderable_pair(self):
-        """Two models that tie exactly at h = (3, 3, 4) yet swap under other h.
-        A leaderboard reporting one h cannot show this."""
+        """These two tie exactly at h = (3, 3, 4) yet swap under other h."""
         a = (0.60, 0.60, 0.40)
         b = (0.50, 0.50, 0.55)
         self.assertAlmostEqual(eff_at_h(a, PAPER_H), eff_at_h(b, PAPER_H), places=12)
@@ -184,14 +178,8 @@ class TestRescoreAtAlpha(unittest.TestCase):
         self.assertAlmostEqual(got, (3.0 - 1.5) / (3.0 - 1.0), places=12)
 
     def test_alpha_sets_the_dynamic_range_not_just_the_timeout(self):
-        """A property the paper does not remark on.
-
-        ``f = (T - t)/(T - t*)`` tends to 1 as ``T`` grows, from below when the
-        candidate is slower than the reference and from above when it is faster.
-        So alpha is a compression knob: large alpha pulls every finite score
-        toward 1 and flattens the metric, and the reported rise of eff@1 with
-        alpha is that compression, not a tolerance effect.
-        """
+        """f = (T - t)/(T - t*) tends to 1 as T grows, from below for slow code
+        and from above for fast code, so alpha is a compression knob."""
         slow = [[1.5], [1.5], [1.5]]
         fast = [[0.5], [0.5], [0.5]]
         slow_scores = [
@@ -218,16 +206,11 @@ class TestRescoreAtAlpha(unittest.TestCase):
 
 
 class TestNumericalRobustness(unittest.TestCase):
-    """Regression tests for two float traps in the exact reorderability test.
-
-    Both were found by asserting that a witness reorders rather than trusting
-    that it does.
-    """
+    """Regression tests for two float traps in the exact reorderability test."""
 
     def test_a_witness_is_never_a_tie_produced_by_round_off(self):
-        """``h = (1, 1, 1)`` makes these two models exactly equal, and the
-        weighted difference is a total cancellation whose float residue is
-        positive. A naive ``> 0`` test accepts it and reports a tie as a win."""
+        """h = (1, 1, 1) makes these two exactly equal, and the weighted
+        difference is a total cancellation with a positive float residue."""
         a = (0.7, 0.4, 0.3)
         b = (0.5, 0.5, 0.4)
         cmp = compare_under_h(a, b)
@@ -236,17 +219,16 @@ class TestNumericalRobustness(unittest.TestCase):
         self.assertGreater(eff_at_h(b, cmp.witness_b), eff_at_h(a, cmp.witness_b))
 
     def test_round_off_in_a_level_difference_is_not_a_sign_change(self):
-        """0.1 + 0.2 != 0.3 in binary. The models are equal on level 1 and A
-        dominates on level 2, so the pair is stable; a bit of subtraction noise
-        must not turn that into a reorderable pair."""
+        """0.1 + 0.2 != 0.3 in binary; subtraction noise on an equal level must
+        not read as a sign change."""
         a = (0.3, 0.5)
         b = (0.1 + 0.2, 0.4)
         self.assertNotEqual(a[0] - b[0], 0.0)  # the trap is present
         self.assertEqual(compare_under_h(a, b).verdict, "a_always")
 
     def test_a_large_weight_witness_still_reorders(self):
-        """One level with a small edge against two with a larger one needs a
-        witness weight in the hundreds, where round-off scales with the weight."""
+        """Needs a witness weight in the hundreds, where round-off scales with
+        the weight."""
         a = (0.500, 0.500, 0.5010)
         b = (0.505, 0.505, 0.5000)
         cmp = compare_under_h(a, b)

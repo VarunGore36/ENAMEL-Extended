@@ -33,7 +33,6 @@ class TestBootstrapCI(unittest.TestCase):
         self.assertAlmostEqual(ci.hi, 0.4, places=12)
 
     def test_width_shrinks_with_more_problems(self):
-        """The reason the 142-problem count matters for a leaderboard claim."""
         rng = random.Random(0)
         pool = [rng.random() for _ in range(400)]
         narrow = bootstrap_ci(pool[:400], resamples=2000, seed=5)
@@ -63,8 +62,8 @@ class TestPairedComparison(unittest.TestCase):
         self.assertFalse(ci.excludes_zero)
 
     def test_constant_offset_is_recovered_exactly(self):
-        """Every paired difference is identical, so every bootstrap resample has
-        the same mean and the interval collapses onto the offset."""
+        """Identical differences give identical resample means, so the interval
+        collapses onto the offset."""
         b = [0.1, 0.9, 0.3, 0.0, 0.7]
         a = [x + 0.05 for x in b]
         ci = paired_bootstrap_diff_ci(a, b, resamples=500, seed=4)
@@ -73,12 +72,7 @@ class TestPairedComparison(unittest.TestCase):
         self.assertTrue(ci.excludes_zero)
 
     def test_pairing_separates_models_that_unpaired_intervals_cannot(self):
-        """The point of the paired design.
-
-        Problem difficulty dominates the spread of each model's own scores, so
-        their individual intervals overlap heavily. The difference is small but
-        consistent on every problem, and the paired interval sees it.
-        """
+        """A small but consistent edge is invisible to individual intervals."""
         rng = random.Random(11)
         difficulty = [rng.random() for _ in range(142)]
         b = difficulty
@@ -103,9 +97,8 @@ class TestPairedSignTest(unittest.TestCase):
         self.assertAlmostEqual(paired_sign_test(vals, vals), 1.0, places=12)
 
     def test_exact_enumeration_for_small_n(self):
-        """Ten problems, all favouring A by the same margin. Only the all-plus
-        and all-minus sign patterns reach the observed statistic, so the exact
-        two-sided p-value is 2/2**10."""
+        """Only the all-plus and all-minus patterns reach the observed
+        statistic, so the exact two-sided p is 2/2**10."""
         a = [1.0] * 10
         b = [0.0] * 10
         self.assertAlmostEqual(paired_sign_test(a, b), 2 / 1024, places=12)

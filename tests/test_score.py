@@ -1,9 +1,4 @@
-"""Tests for the per-sample efficiency score, Eq. (1)-(2).
-
-Includes a regression test that pins the score-compression numbers quoted in
-README section 2.2, so that if the scoring code ever changes the finding either
-still holds or fails loudly.
-"""
+"""Tests for the per-sample efficiency score, Eq. (1) and (2)."""
 
 from __future__ import annotations
 
@@ -26,8 +21,6 @@ class TestTimeLimit(unittest.TestCase):
         self.assertAlmostEqual(time_limit([[0.1, 0.2], [0.5], [1.0, 0.9]], PAPER), 2.0)
 
     def test_max_ranges_over_all_levels_not_just_the_hardest(self):
-        """A problem where level 2 is slower than level 3 must still get a limit
-        that admits its own reference on level 2."""
         self.assertAlmostEqual(time_limit([[0.1], [3.0], [2.0]], PAPER), 6.0)
 
     def test_rejects_level_count_mismatch(self):
@@ -59,13 +52,10 @@ class TestLevelFraction(unittest.TestCase):
         self.assertEqual(level_fraction([50.0], [1.0], 2.0), 0.0)
 
     def test_free_code_scores_alpha_over_alpha_minus_one(self):
-        """Instant code scores T/(T - t*) = 2 at alpha = 2, not 1. The score is
-        unbounded above by design."""
+        """Instant code scores 2 at alpha = 2, not 1: unbounded above by design."""
         self.assertAlmostEqual(level_fraction([0.0], [1.0], 2.0), 2.0, places=15)
 
     def test_worst_case_within_a_level_is_what_counts(self):
-        """One slow case drags the whole level down; the mean of the cases is
-        never used."""
         self.assertAlmostEqual(level_fraction([0.1, 0.1, 1.5], [1.0], 2.0), 0.5, places=15)
 
     def test_rejects_limit_below_reference(self):
@@ -102,16 +92,9 @@ class TestSampleScore(unittest.TestCase):
 class TestScoreCompression(unittest.TestCase):
     """Regression test for README section 2.2.
 
-    Setup: level 3's reference worst case is 1.0 s, so ``T_i = 2.0``. Consider a
-    level whose own reference time is ``q`` (a fraction of level 3's) and a
-    candidate ``X`` times slower than the expert on that level. Under the
-    paper's single per-problem limit the score is ``(2 - X*q)_+ / (2 - q)``,
-    which stays near 1 for large ``X`` whenever ``q`` is small.
-
-    Since levels 1 and 2 carry 60% of the weight, most of the metric's mass sits
-    wherever ``q`` is smallest -- i.e. where it discriminates least. Whether that
-    matters in practice depends on the actual distribution of ``q`` across the
-    142 problems, which is still unmeasured.
+    With ``T_i = 2.0``, a level whose own reference time is ``q`` and a candidate
+    ``X`` times slower than the expert scores ``(2 - X*q)_+ / (2 - q)``, which
+    stays near 1 for large ``X`` whenever ``q`` is small.
     """
 
     # (q, X) -> expected level fraction under the paper's global normalization
@@ -142,12 +125,9 @@ class TestScoreCompression(unittest.TestCase):
                 self.assertAlmostEqual(got, expected, places=3)
 
     def test_ten_times_slower_still_scores_above_point_nine_five(self):
-        """The headline of the finding, stated as an assertion."""
         self.assertGreater(level_fraction([10 * 0.01], [0.01], 2.0), 0.95)
 
     def test_per_level_normalization_removes_the_compression(self):
-        """Under the variant, being X times slower scores the same regardless of
-        which level it happened on -- 10x slower is 0 everywhere, not 0.955."""
         for q in (0.01, 0.05, 0.10, 1.00):
             with self.subTest(q=q):
                 self.assertEqual(level_fraction([10 * q], [q], 2.0 * q), 0.0)
@@ -164,22 +144,9 @@ class TestScoreCompression(unittest.TestCase):
 
 
 class TestScaleInvariance(unittest.TestCase):
-    """The score is invariant to a uniform rescaling of every measured time.
-
-    Because ``T_i = alpha * max t*``, scaling candidate and reference times by a
-    common factor ``c`` multiplies numerator and denominator of Eq. (1) by ``c``.
-    So a machine that is uniformly twice as fast produces identical scores --
-    provided the reference is measured in the same session as the candidates.
-
-    This is how we read Appendix C.1's otherwise underspecified line, "we use the
-    reference time on the slowest test case for each problem to further calibrate
-    the execution time of generated code": co-measure the reference and the
-    metric absorbs machine speed by construction, with no extra knob. The
-    invariance is only exact for a *uniform* factor -- real hardware differences
-    are program-dependent, since cache and branch behaviour do not scale
-    together -- so this removes drift between runs, not the need to pin the
-    measurement environment.
-    """
+    """The score is invariant to a uniform rescaling of every measured time,
+    because ``T_i = alpha * max t*`` scales with it. Exact only for a uniform
+    factor, so it removes drift between runs, not the need to pin the machine."""
 
     REF = [[0.01], [0.05], [1.0]]
     CAND = [[0.02], [0.2], [1.4]]
@@ -195,9 +162,7 @@ class TestScaleInvariance(unittest.TestCase):
                 )
 
     def test_rescaling_only_the_candidate_does_change_the_score(self):
-        """The invariance is not vacuous: it holds for a common factor only, so
-        measuring the candidate on a different machine than the reference is a
-        real error and not something the metric absorbs."""
+        """The invariance is not vacuous: it holds for a common factor only."""
         faster_cand = [[t * 0.5 for t in lvl] for lvl in self.CAND]
         self.assertGreater(
             sample_score(faster_cand, self.REF, PAPER),
@@ -215,8 +180,6 @@ class TestScaleInvariance(unittest.TestCase):
 
 class TestMetricConfig(unittest.TestCase):
     def test_alpha_must_exceed_one(self):
-        """At alpha = 1 the time limit equals the slowest reference case, so the
-        reference itself would score 0 on that level."""
         for alpha in (1.0, 0.5, 0.0, -1.0):
             with self.subTest(alpha=alpha), self.assertRaises(ValueError):
                 MetricConfig(alpha=alpha, level_weights=(3.0, 3.0, 4.0))

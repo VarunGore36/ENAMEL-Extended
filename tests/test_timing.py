@@ -1,4 +1,4 @@
-"""Tests for repeat aggregation (Hodges--Lehmann and alternatives)."""
+"""Tests for repeat aggregation (Hodges-Lehmann and alternatives)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from enamel_ext.metrics.score import TIMEOUT
 
 class TestHodgesLehmann(unittest.TestCase):
     def test_hand_computed(self):
-        """[1, 2, 3]: Walsh averages (a <= b) are 1, 1.5, 2, 2, 2.5, 3 -> median 2."""
+        """[1, 2, 3]: Walsh averages are 1, 1.5, 2, 2, 2.5, 3, so the median is 2."""
         self.assertAlmostEqual(hodges_lehmann([1.0, 2.0, 3.0]), 2.0, places=15)
 
     def test_single_repeat(self):
@@ -21,15 +21,13 @@ class TestHodgesLehmann(unittest.TestCase):
         self.assertAlmostEqual(hodges_lehmann([1.5] * 6), 1.5, places=15)
 
     def test_ignores_one_wild_outlier(self):
-        """The property the paper is buying: a single scheduler stall among R = 6
-        repeats must not move the estimate. The mean here is 17.5."""
+        """The property the paper is buying. The mean here is 17.5."""
         sample = [1.0, 1.0, 1.0, 1.0, 1.0, 100.0]
         self.assertAlmostEqual(hodges_lehmann(sample), 1.0, places=15)
         self.assertAlmostEqual(sum(sample) / len(sample), 17.5, places=12)
 
     def test_breakdown_at_two_of_six(self):
-        """Breakdown point is ~29%, so two contaminated repeats out of six is
-        enough to move it -- worth knowing before trusting R = 6."""
+        """Breakdown point ~29%: two contaminated repeats out of six move it."""
         clean = [1.0] * 6
         one_bad = [1.0] * 5 + [100.0]
         two_bad = [1.0] * 4 + [100.0, 100.0]
@@ -64,15 +62,11 @@ class TestAggregateRepeats(unittest.TestCase):
         self.assertEqual(aggregate_repeats(sample), hodges_lehmann(sample))
 
     def test_censoring_propagates(self):
-        """One killed repeat censors the case. Averaging it with the completed
-        repeats would report a finite time that was never observed."""
         self.assertTrue(math.isinf(aggregate_repeats([1.0, 2.0, TIMEOUT])))
         self.assertTrue(math.isinf(aggregate_repeats([TIMEOUT] * 6)))
 
     def test_hl_is_biased_above_min_under_one_sided_noise(self):
-        """Timing noise only ever adds time, so HL and min disagree
-        systematically -- HL sits above the noise floor that min targets. Which
-        one is used is a methodological choice, not a detail."""
+        """Timing noise only adds time, so HL and min disagree systematically."""
         true_cost = 1.0
         sample = [true_cost + noise for noise in (0.0, 0.02, 0.05, 0.01, 0.13, 0.04)]
         self.assertAlmostEqual(aggregate_repeats(sample, "min"), true_cost, places=12)

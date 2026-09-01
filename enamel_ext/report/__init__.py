@@ -1,8 +1,7 @@
 """Reporting: uncertainty, hyperparameter sensitivity, rank stability.
 
-Everything here is post-processing over recorded per-problem or per-level
-numbers. Nothing in this package executes code or touches a clock, which is why
-it can be built and tested without the benchmark's data.
+Post-processing over recorded per-problem or per-level numbers. Nothing here
+executes code or touches a clock.
 """
 
 from enamel_ext.report.hyperparams import (

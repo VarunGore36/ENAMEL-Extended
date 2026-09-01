@@ -10,10 +10,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 
-# Deliberately empty. The metric core and the harness must run on a bare CPython
-# so that a measurement environment can be reproduced without a dependency
-# resolver in the loop -- and so that the benchmark's own imports never perturb
-# the thing being timed. Optional extras carry anything heavier.
+# Deliberately empty: the metric core and harness must run on bare CPython so a
+# measurement environment is reproducible and imports never perturb the timing.
 dependencies = []
 
 [project.optional-dependencies]

@@ -1,21 +1,7 @@
 """Uncertainty and rank statistics over per-problem scores.
 
-The paper reports point estimates for ``eff@k`` and an estimator standard
-deviation (Table 11: 0.02 at ``k=1`` for the Rao--Blackwellized form), but not
-the between-problem standard error of the mean over the 142 problems, and no
-test on differences between models. Those are the two things this module adds.
-
-The resampling unit is the **problem**, not the sample. Sampling noise from
-finite ``n`` per problem enters the aggregate divided by roughly ``sqrt(142)``,
-so at 0.02 per problem it contributes on the order of 0.002 to the mean --
-negligible next to problem-to-problem spread. A fully nested bootstrap would
-resample samples within problems as well; it is not implemented here because
-resampling with replacement introduces ties into a statistic that assumes
-distinct draws, which biases the inner variance in a direction that is annoying
-to reason about.
-
-Every function takes an explicit ``seed``. Reported intervals must be
-reproducible.
+The resampling unit is the problem, not the sample. Every function takes an
+explicit ``seed``. Rationale in docs/decisions/0002-reporting-layer.md.
 """
 
 from __future__ import annotations
@@ -70,10 +56,7 @@ def bootstrap_ci(
 ) -> Interval:
     """Percentile bootstrap over problems for one model's aggregate score.
 
-    ``per_problem`` is ``eff_i@k`` for each problem. The interval describes how
-    much the reported mean would move on a different draw of 142 problems from
-    the same population -- which is the relevant question when the claim is
-    about code efficiency in general rather than about these problems.
+    ``per_problem`` is ``eff_i@k`` for each problem.
     """
     _check_level(level)
     if not per_problem:
@@ -99,12 +82,8 @@ def paired_bootstrap_diff_ci(
 ) -> Interval:
     """Paired bootstrap for ``mean(a) - mean(b)``, resampling problems jointly.
 
-    This is the comparison that matters for a leaderboard. Every model is scored
-    on the same problems, so problem difficulty is a shared nuisance term that
-    cancels in the difference. Two models can each have an interval half as wide
-    as the gap between them and still be separated cleanly, or the reverse --
-    unpaired intervals on the individual means answer a different question and
-    will usually be far too conservative here.
+    This, not two independent intervals, is the comparison a leaderboard needs:
+    problem difficulty is a shared term that cancels in the difference.
     """
     _check_level(level)
     if len(a_per_problem) != len(b_per_problem):
@@ -133,11 +112,8 @@ def paired_sign_test(
 ) -> float:
     """Two-sided p-value for ``mean(a) - mean(b) != 0`` by sign-flip permutation.
 
-    Under the null that the paired differences are symmetric about zero, flipping
-    the sign of any subset of them is equally likely. For ``<= 20`` problems every
-    one of the ``2**n`` sign patterns is enumerated exactly; above that the
-    patterns are sampled. The observed statistic is included in the null count,
-    which keeps the p-value valid (never 0) rather than merely unbiased.
+    Exact for ``n <= 20``; sampled above that, with the observed arrangement
+    counted in the null so the p-value is never 0.
     """
     if len(a_per_problem) != len(b_per_problem):
         raise ValueError("paired test needs the same problems on both sides")
@@ -156,7 +132,7 @@ def paired_sign_test(
         return at_least / total
 
     rng = random.Random(seed)
-    at_least = 1  # count the observed arrangement itself
+    at_least = 1  # the observed arrangement itself
     for _ in range(resamples):
         flipped = [d if rng.random() < 0.5 else -d for d in diffs]
         if abs(_mean(flipped)) >= observed:
@@ -165,12 +141,10 @@ def paired_sign_test(
 
 
 def kendall_tau(x: Sequence[float], y: Sequence[float]) -> float:
-    """Kendall's tau-b between two rankings, with tie correction.
+    """Kendall's tau-b between two rankings, tie-corrected.
 
-    Used to ask whether a leaderboard survives a change of hyperparameters. Ties
-    are corrected for because equal scores are common once numbers are rounded to
-    three decimals, and treating them as concordant would inflate agreement.
-    Returns 1.0 for identical orderings, -1.0 for exactly reversed.
+    1.0 for identical orderings, -1.0 for exactly reversed. Raises if either
+    ranking is entirely tied, where tau is undefined.
     """
     if len(x) != len(y):
         raise ValueError(f"length mismatch: {len(x)} vs {len(y)}")

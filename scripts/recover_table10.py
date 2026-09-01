@@ -1,16 +1,8 @@
 """Recover the per-level mean efficiency scores F_1, F_2, F_3 from Table 10.
 
-Appendix C.6 of arXiv:2406.06647v4 sweeps each level hardness h_l from 1 to 5
-for GPT-4 Turbo. Because
-
-    eff@1(h) = (h_1 F_1 + h_2 F_2 + h_3 F_3) / (h_1 + h_2 + h_3)
-
-is exactly linear in h, multiplying each reported eff@1 by its denominator
-recovers the numerator, and first differences along one sweep isolate that
-level's mean score. No measurement required.
-
-Writes nothing; prints the recovery and its self-consistency check. See
-docs/analysis/table10-recovery.md for what it means.
+Appendix C.6 of arXiv:2406.06647v4 sweeps each h_l from 1 to 5 for GPT-4 Turbo.
+Since eff@1(h) = sum(h_l F_l) / sum(h_l) is linear in h, first differences along
+one sweep isolate that level's mean. See docs/analysis/table10-recovery.md.
 """
 
 from __future__ import annotations
@@ -67,10 +59,6 @@ def main() -> None:
           f"[{min(f.values()):.3f}, {max(f.values()):.3f}]  span {span:.3f}")
     print(f"  alpha sweep (1.5 -> 3.5) span:        {ALPHA_SPAN:.3f}")
     print(f"  best-to-fourth-best model span:       {TOP4_SPAN:.3f}")
-    print("\nBoth hyperparameters have more leverage on the headline number than")
-    print("the choice of model does. The paper reports this; what it does not")
-    print("report is whether the ranking survives the sweep, since every entry")
-    print("in Table 10 is a single model.")
 
 
 if __name__ == "__main__":

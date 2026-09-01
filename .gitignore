@@ -12,7 +12,7 @@ venv/
 .ruff_cache/
 .mypy_cache/
 
-# Benchmark data is fetched at setup time, never vendored -- see README "Credit"
+# Benchmark data is fetched at setup time, never vendored; see README "Credit"
 enamel_ext/data/cache/
 
 # Measurement output: machine-specific, regenerate rather than commit

@@ -1,7 +1,7 @@
-"""Scoring and estimation: Eq. (1)-(6) of the paper.
+"""Scoring and estimation: Eq. (1) to (6) of the paper.
 
-``score``  -- per-sample efficiency score ``e_{i,j}`` from measured times
-``effk``   -- unbiased ``eff@k`` and ``pass@k`` estimators over ``n`` samples
+``score`` is the per-sample efficiency score; ``effk`` the ``eff@k`` and
+``pass@k`` estimators.
 """
 
 from enamel_ext.metrics.effk import (
