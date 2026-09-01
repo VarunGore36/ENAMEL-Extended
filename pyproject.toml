@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enamel-ext"
+version = "0.0.1"
+description = "A from-scratch Python reimplementation of the ENAMEL code-efficiency benchmark"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+# Deliberately empty. The metric core and the harness must run on a bare CPython
+# so that a measurement environment can be reproduced without a dependency
+# resolver in the loop -- and so that the benchmark's own imports never perturb
+# the thing being timed. Optional extras carry anything heavier.
+dependencies = []
+
+[project.optional-dependencies]
+report = ["numpy>=1.24", "matplotlib>=3.7"]
+dev = ["pytest>=7", "ruff>=0.4"]
+
+[project.urls]
+Homepage = "https://github.com/q-rz/enamel"
+Paper = "https://arxiv.org/abs/2406.06647"
+
+[tool.setuptools.packages.find]
+include = ["enamel_ext*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

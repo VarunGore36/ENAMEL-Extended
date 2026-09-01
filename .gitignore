@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Benchmark data is fetched at setup time, never vendored -- see README "Credit"
+enamel_ext/data/cache/
+
+# Measurement output: machine-specific, regenerate rather than commit
+results/
+*.raw.json
