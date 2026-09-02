@@ -116,8 +116,9 @@ to report, then derive all smaller ones by post-processing.**
 
 ## Level discrimination is reported as `q`, a slowdown, and a share
 
-`levels.py` exists because §2.2 is an arithmetic claim about Eq. (1) that only
-measurement can settle, and the claim needs three numbers rather than one.
+`levels.py` exists because §2.2 of open-questions.md is an arithmetic claim
+about Eq. (1) that only measurement can settle, and the claim needs three
+numbers rather than one.
 
 `q_ratios` normalizes each level's worst reference case by the largest one over
 levels, so the limit-setting level has `q = 1` by construction. Normalizing by
@@ -137,8 +138,8 @@ level is unsaturated, and a candidate in a worse complexity class slows more at
 the larger scales, so the last level's share is a floor and not an estimate.
 
 `level_fraction_at` delegates to `metrics.score.level_fraction` with times
-normalized by the limit-setting reference time rather than reimplementing Eq. (1)
-in normalized form. The table in README §2.2 is then a test fixture, so the
+normalized by the limit-setting reference time rather than reimplementing Eq.
+(1) in normalized form. The table in §2.2 is then a test fixture, so the
 document and the scorer check each other and neither can drift alone.
 
 

@@ -15,17 +15,17 @@ from enamel_ext.report.levels import (
     tolerated_slowdown,
 )
 
-#: README section 2.2: the level fraction at alpha = 2 for a candidate X times
-#: slower than the reference, at a level whose reference time is q of the one
-#: that sets T_i. Keyed q -> X -> published value.
-README_TABLE = {
+#: docs/open-questions.md section 2.2: the level fraction at alpha = 2 for a
+#: candidate X times slower than the reference, at a level whose reference time is
+#: q of the one that sets T_i. Keyed q -> X -> published value.
+OPEN_QUESTIONS_TABLE = {
     0.01: {2: 0.995, 5: 0.980, 10: 0.955, 50: 0.754},
     0.05: {2: 0.974, 5: 0.897, 10: 0.769, 50: 0.000},
     0.10: {2: 0.947, 5: 0.789, 10: 0.526, 50: 0.000},
 }
 
 #: The same section on level 3, where q = 1 by definition.
-README_SHARP = {1.25: 0.750, 1.5: 0.500, 2.0: 0.000}
+OPEN_QUESTIONS_SHARP = {1.25: 0.750, 1.5: 0.500, 2.0: 0.000}
 
 
 def _level(*times: float) -> tuple[float, ...]:
@@ -33,17 +33,17 @@ def _level(*times: float) -> tuple[float, ...]:
 
 
 class TestLevelFractionAt(unittest.TestCase):
-    def test_reproduces_the_readme_table(self):
+    def test_reproduces_the_documented_table(self):
         """Twelve tabulated values, so the document and the code check each
         other rather than the table being asserted prose."""
-        for q, row in README_TABLE.items():
+        for q, row in OPEN_QUESTIONS_TABLE.items():
             for slowdown, published in row.items():
                 with self.subTest(q=q, slowdown=slowdown):
                     got = level_fraction_at(q, slowdown, 2.0)
                     self.assertAlmostEqual(got, published, delta=0.001)
 
     def test_the_limit_setting_level_is_sharp(self):
-        for slowdown, published in README_SHARP.items():
+        for slowdown, published in OPEN_QUESTIONS_SHARP.items():
             with self.subTest(slowdown=slowdown):
                 self.assertAlmostEqual(level_fraction_at(1.0, slowdown, 2.0), published, places=9)
 

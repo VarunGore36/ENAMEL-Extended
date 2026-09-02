@@ -3,10 +3,10 @@
 Status: accepted. Code: `enamel_ext/measure/{values,_child,sandbox,runner}.py`,
 tests `tests/test_measure_runner.py` (52 tests).
 
-This layer is the only place model-generated code runs. It turns a `Problem` plus
-a solution string into per-level times and a correctness verdict, which
-`enamel_ext.metrics` then scores. README section 2.8 lists the absent sandbox as
-a gap in the original; this closes the process-level half of it.
+This layer is the only place model-generated code runs. It turns a `Problem`
+plus a solution string into per-level times and a correctness verdict, which
+`enamel_ext.metrics` then scores. open-questions.md §2.8 lists the absent
+sandbox as a gap in the original; this closes the process-level half of it.
 
 ## A fresh interpreter per level, and what that does not buy
 

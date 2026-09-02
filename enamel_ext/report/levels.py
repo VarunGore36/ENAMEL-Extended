@@ -30,7 +30,7 @@ __all__ = [
     "tolerated_slowdown",
 ]
 
-#: Slowdown factors tabulated in README section 2.2.
+#: Slowdown factors tabulated in docs/open-questions.md section 2.2.
 PAPER_SLOWDOWNS = (2.0, 5.0, 10.0, 50.0)
 
 

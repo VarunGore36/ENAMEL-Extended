@@ -55,10 +55,10 @@ but any reweighting belongs in that one function.
 
 `normalization="per_level"` sets `T_{i,l} = α · maxₘ t*[i,l,m]` so each level is
 scaled by its own reference. This is the candidate fix for the score-compression
-issue in README §2.2 and it is never used in a parity run. `test_score.py`
-pins both behaviours side by side: a candidate 10× slower than the expert on a
-level whose reference time is 1% of level 3's scores 0.955 under the published
-normalization and 0 under the variant.
+issue in §2.2 of open-questions.md and it is never used in a parity run.
+`test_score.py` pins both behaviours side by side: a candidate 10× slower than
+the expert on a level whose reference time is 1% of level 3's scores 0.955 under
+the published normalization and 0 under the variant.
 
 The timing aggregator is selectable for the same reason. Hodges–Lehmann is the
 paper's choice and the default; `min` is the standard microbenchmarking choice,

@@ -21,12 +21,12 @@ artifact just because it sat in the tree for a while.
 
 ## The reference is the oracle, so expected outputs are not stored
 
-Section 2.4 of the README notes that the expert reference simultaneously defines
-the efficiency ceiling and the correct answer. Storing expected outputs would
-create a third artifact that can disagree with both. Instead the runner computes
-them by executing the reference, which makes the coupling explicit rather than
-hidden in a data file, and keeps the second-oracle work of milestone 5 a change
-in one place.
+Section 2.4 of open-questions.md notes that the expert reference simultaneously
+defines the efficiency ceiling and the correct answer. Storing expected outputs
+would create a third artifact that can disagree with both. Instead the runner
+computes them by executing the reference, which makes the coupling explicit
+rather than hidden in a data file, and keeps the second-oracle work of milestone
+5 a change in one place.
 
 ## Two level kinds, because parity and reproducibility pull apart
 
@@ -50,9 +50,9 @@ larger than level 1.
 
 Upstream ships test inputs as a pickle. Unpickling is arbitrary code execution,
 and a benchmark whose stated gap in the original is the absence of a sandbox
-(README section 2.8) should not open with a deserialization hole. So the cache is
-JSON and `problem_set_to_json` raises on anything it cannot represent; converting
-a pickle is the fetch script's job, done once, in the open.
+(§2.8) should not open with a deserialization hole. So the cache is JSON and
+`problem_set_to_json` raises on anything it cannot represent; converting a
+pickle is the fetch script's job, done once, in the open.
 
 The cost is that JSON has no tuple. Argument tuples are stored as arrays and
 restored as tuples at the top level only, so an inner tuple comes back as a list.

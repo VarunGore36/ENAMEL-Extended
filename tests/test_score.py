@@ -90,7 +90,7 @@ class TestSampleScore(unittest.TestCase):
 
 
 class TestScoreCompression(unittest.TestCase):
-    """Regression test for README section 2.2.
+    """Regression test for docs/open-questions.md section 2.2.
 
     With ``T_i = 2.0``, a level whose own reference time is ``q`` and a candidate
     ``X`` times slower than the expert scores ``(2 - X*q)_+ / (2 - q)``, which

@@ -21,10 +21,10 @@ the report is computed from the times at the moment it is printed.
 The alternative is storing scores next to the measurements, and the failure mode
 there is a file that disagrees with itself: a stored `eff@1` computed under one
 `alpha` sitting beside times that yield another, with nothing in the file saying
-which one the reader is looking at. Since §2.1 of the README is specifically
-about how much the published numbers move with `alpha` and `h`, the sweep is not
-an optional extra view of a run, it is the main one, and the record has to make
-re-scoring the cheap path rather than a re-measurement.
+which one the reader is looking at. Since §2.1 of open-questions.md is
+specifically about how much the published numbers move with `alpha` and `h`, the
+sweep is not an optional extra view of a run, it is the main one, and the record
+has to make re-scoring the cheap path rather than a re-measurement.
 
 That makes the report a pure function of the record, and `evaluate.py report`
 re-derives the same text from a saved file with no measuring at all. It also
@@ -153,10 +153,10 @@ silent half-synthetic run.
 
 ## Open items
 
-- No caching and no resume. A re-run measures everything again, which is the
-  README's §2.8 complaint about replication cost still standing. The record is
-  the right place to build resume on, since it already says exactly what was
-  measured, but nothing reads it back for that yet.
+- No caching and no resume. A re-run measures everything again, which is §2.8's
+  complaint about replication cost still standing. The record is the right place
+  to build resume on, since it already says exactly what was measured, but
+  nothing reads it back for that yet.
 - Solution sets are JSON only, and nothing yet converts model output into one.
   The format is deliberately dumb, a mapping from model name to problem id to a
   list of code strings, so that whatever produces samples does not have to know

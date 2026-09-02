@@ -41,13 +41,13 @@ correct: at most 0.802 on level 1, 0.569 on level 2, 0.446 on level 3.
 
 ## What this settles
 
-**The extreme form of the score-compression concern (README §2.2) does not
-hold.** The worst case in that analysis says that when a level's reference time
-is a small fraction `q` of level 3's, the single per-problem limit `Tᵢ` leaves
-that level nearly constant: at `q = 0.01` every candidate within 10× of the
-expert scores between 0.955 and 1.005. If level 1 behaved that way for most
-problems, `F₁` would sit just under `pass@1 = 0.796`. It is 0.638. So level 1
-does discriminate.
+**The extreme form of the score-compression concern (§2.2 of
+open-questions.md) does not hold.** The worst case in that analysis says that
+when a level's reference time is a small fraction `q` of level 3's, the single
+per-problem limit `Tᵢ` leaves that level nearly constant: at `q = 0.01` every
+candidate within 10× of the expert scores between 0.955 and 1.005. If level 1
+behaved that way for most problems, `F₁` would sit just under
+`pass@1 = 0.796`. It is 0.638. So level 1 does discriminate.
 
 **What it does not settle is why.** `F₁ = 0.638` is equally consistent with two
 stories: `q` is simply not small for most problems, or `q` is small and roughly a
