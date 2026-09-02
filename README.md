@@ -142,21 +142,28 @@ Order of work: **faithful reimplementation and parity first**, then §2.2 → §
 
 ---
 
-## 5. Repository layout (planned)
+## 5. Repository layout
+
+Built so far: `metrics/`, `report/`, `data/`, `measure/`. The rest is planned.
 
 ```
 enamel_ext/
-  data/          problems, expert references, second oracle, generators
-  measure/       timing backends (wall clock, instruction count), memory, sandbox
-  metrics/       eff@k estimator, censored scoring, bootstrap CIs, complexity fitting
+  data/          problem schema, provenance, generators, JSON cache      [built]
+  measure/       sandboxed runner, timing backends, repeat aggregation   [built]
+  metrics/       eff@k estimator, censored scoring                       [built]
+  report/        bootstrap CIs, significance tests, h-sweeps             [built]
   adversarial/   property-based + evolutionary per-candidate input search
   models/        sampling adapters, feedback-loop track
-  report/        tables, sensitivity sweeps, rank-stability plots
 docs/
   paper/         rpaper1.pdf and our notes
   decisions/     one file per methodological decision, with rationale
+scripts/         one-off recovery and fetch scripts
 tests/           harness unit tests + parity tests against published numbers
 ```
+
+The data itself is not in the tree: it is fetched into a git-ignored cache, and
+`ENAMEL_EXT_DATA` repoints that cache at a pinned snapshot. See
+`docs/decisions/0003-data-adapter.md` and the license question under "Credit".
 
 ---
 
@@ -164,7 +171,7 @@ tests/           harness unit tests + parity tests against published numbers
 
 1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2, and resolve what the Appendix C.1 "further calibrate" step does. *(Started: Algorithm 1's recurrence reproduces the Eq. (6) binomial coefficients to machine precision and the weights sum to 1 — the estimator is sound and needs no changes.)*
 2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.**
-3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment.
+3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment. *(Started: process-level isolation is in place, and the runner deep-copies each test input before every repeat. Without that, a solution that sorts or pops its argument in place has five of its six repeats measuring already-transformed data.)*
 4. **Honest statistics.** Censored scoring, bootstrap CIs, full hyperparameter sweep across all models, pairwise significance tests.
 5. **Reference audit.** All 142 references reviewed; second oracle in place; disagreement rate published; anything we beat re-anchored.
 6. **Adversarial generation.** Per-candidate worst-case search; quantify how much scores move versus the fixed generators.
