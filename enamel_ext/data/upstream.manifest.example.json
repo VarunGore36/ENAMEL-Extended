@@ -1,0 +1,11 @@
+{
+  "_1_pin": "Copy this file to upstream.manifest.json and replace revision with the commit you intend to pin. 'git ls-remote https://github.com/q-rz/enamel HEAD' prints one. A branch or tag is refused: it can move, so it is not a snapshot.",
+  "_2_license": "license stays 'unknown' until the upstream terms are confirmed. Unknown means the snapshot must not be committed to this repository; fetching it locally is fine.",
+  "_3_include": "include holds fnmatch patterns against archive-relative paths, and '*' also matches '/', so the default takes the whole tree. Narrow it once 'fetch_upstream.py --inventory' has shown the real layout.",
+  "name": "ENAMEL (q-rz/enamel)",
+  "repo": "q-rz/enamel",
+  "revision": "REPLACE-WITH-A-40-CHARACTER-COMMIT-SHA",
+  "license": "unknown",
+  "url": "https://github.com/q-rz/enamel",
+  "include": ["*"]
+}

@@ -62,7 +62,7 @@ The reason is that `Tᵢ` is one constant per problem, fixed by the reference's 
 
 At `q = 0.01`, code **ten times slower than the expert** still scores 0.955 at that level. At level 3, where the reference's time *is* the one setting `Tᵢ`, the same formula is sharp: 1.25× slower scores 0.750, 1.5× scores 0.500, and 2× scores exactly 0. Since `h₁ + h₂ = 6` of the total weight 10, **60% of a problem's score sits at the levels where discrimination is weakest and 40% at the one level where it is severe.**
 
-If that reading holds, it reframes what the benchmark measures. The gradations in Table 3 are then mostly gradations in *how often a model's algorithm survives the largest input scale* — a coarser and more threshold-sensitive quantity than a runtime ratio, and one that inherits all of §2.1's fragility because it depends almost entirely on where `Tᵢ` falls. Appendix C.1 also mentions a further step — "we use the reference time on the slowest test case for each problem to further calibrate the execution time of generated code" — that is not specified precisely enough anywhere in the paper to reconstruct, which is itself a reproducibility gap. The table above is arithmetic, not measurement: what it does not tell us is the actual distribution of `q` across the 142 problems, which is what decides whether this matters in practice. **Measuring that distribution is milestone 1 of this project, because much of the rest depends on which way it goes.**
+If that reading holds, it reframes what the benchmark measures. The gradations in Table 3 are then mostly gradations in *how often a model's algorithm survives the largest input scale* — a coarser and more threshold-sensitive quantity than a runtime ratio, and one that inherits all of §2.1's fragility because it depends almost entirely on where `Tᵢ` falls. Appendix C.1 also mentions a further step — "we use the reference time on the slowest test case for each problem to further calibrate the execution time of generated code" — that is not specified precisely enough anywhere in the paper to reconstruct, which is itself a reproducibility gap. The table above is arithmetic, not measurement: what it does not tell us is the actual distribution of `q` across the 142 problems, which is what decides whether this matters in practice. **Measuring that distribution is milestone 1 of this project, because much of the rest depends on which way it goes.** The tooling for it is in place (`enamel_ext/report/levels.py`): it reports `q` per level, the slowdown `α/q` past which a level scores 0 for everyone, and each level's share of the score's response to a slowdown, which is the claim above stated as a measured ratio rather than a weight ratio. It also counts how often `Tᵢ` is set by a level other than the last, since the reasoning here assumes it is. The table in this section is a test fixture for that module, so it and the scorer cannot drift apart.
 
 ### 2.3 Wall-clock time on virtualized hardware is not a portable measurement
 
@@ -144,35 +144,53 @@ Order of work: **faithful reimplementation and parity first**, then §2.2 → §
 
 ## 5. Repository layout
 
-Built so far: `metrics/`, `report/`, `data/`, `measure/`. The rest is planned.
+Built so far: `metrics/`, `report/`, `data/`, `measure/`, `pipeline/`. The rest is planned.
 
 ```
 enamel_ext/
   data/          problem schema, provenance, generators, JSON cache      [built]
   measure/       sandboxed runner, timing backends, repeat aggregation   [built]
   metrics/       eff@k estimator, censored scoring                       [built]
-  report/        bootstrap CIs, significance tests, h-sweeps             [built]
+  report/        bootstrap CIs, tests, h-sweeps, level discrimination    [built]
+  pipeline/      solution sets, run record, orchestrator, text report    [built]
   adversarial/   property-based + evolutionary per-candidate input search
   models/        sampling adapters, feedback-loop track
 docs/
   paper/         rpaper1.pdf and our notes
   decisions/     one file per methodological decision, with rationale
-scripts/         one-off recovery and fetch scripts
+scripts/         fetch, recovery, and the evaluate entry point
 tests/           harness unit tests + parity tests against published numbers
 ```
 
-The data itself is not in the tree: it is fetched into a git-ignored cache, and
-`ENAMEL_EXT_DATA` repoints that cache at a pinned snapshot. See
-`docs/decisions/0003-data-adapter.md` and the license question under "Credit".
+`scripts/evaluate.py run` is the entry point: it measures each expert reference
+once, scores every model's samples against that same measurement, writes a run
+record, and prints the report. `scripts/evaluate.py report <record>` re-derives
+the same report from a saved record, so changing `k`, the confidence level or the
+bootstrap seed costs no measurement. The record stores times and never scores, so
+the α sweep and the `h` stability section are the same measurements read at
+another threshold rather than separate runs — with one asymmetry: α *above* the
+one a run measured is refused, because a censored sample's true time was never
+observed. With no `--problems`/`--solutions` it runs on a synthetic problem set,
+which is how the tests exercise it end to end. See
+`docs/decisions/0006-run-record.md`.
+
+The data itself is not in the tree: `scripts/fetch_upstream.py` fetches one
+pinned commit into a git-ignored cache, verifies it against a committed lock, and
+`ENAMEL_EXT_DATA` repoints the cache at that snapshot. See
+`docs/decisions/0003-data-adapter.md` and `0005-snapshot-pinning.md`, and the
+license question under "Credit".
+
+Everything is stdlib-only and the suite runs with
+`python3 -m unittest discover -s tests -t .` (336 tests).
 
 ---
 
 ## 6. Milestones
 
-1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2, and resolve what the Appendix C.1 "further calibrate" step does. *(Started: Algorithm 1's recurrence reproduces the Eq. (6) binomial coefficients to machine precision and the weights sum to 1 — the estimator is sound and needs no changes.)*
-2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.**
+1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2, and resolve what the Appendix C.1 "further calibrate" step does. *(Started: Algorithm 1's recurrence reproduces the Eq. (6) binomial coefficients to machine precision and the weights sum to 1 — the estimator is sound and needs no changes. The `q` measurement is now code rather than a plan: `report/levels.py` needs the data, not more design, and every run's report prints the level table from the reference times it just measured. One correction along the way: the score is linear in `h` at `k=1` only, so the rank-stability argument names `eff@1`.)*
+2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.** *(Started: the upstream snapshot is pinned by commit and archive digest with per-file digests recorded, so a parity number can state exactly which bytes produced it. The harness now runs end to end — `scripts/evaluate.py` measures, records and reports — so what parity is waiting on is the fetched data and a machine worth timing on, not more harness.)*
 3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment. *(Started: process-level isolation is in place, and the runner deep-copies each test input before every repeat. Without that, a solution that sorts or pops its argument in place has five of its six repeats measuring already-transformed data.)*
-4. **Honest statistics.** Censored scoring, bootstrap CIs, full hyperparameter sweep across all models, pairwise significance tests.
+4. **Honest statistics.** Censored scoring, bootstrap CIs, full hyperparameter sweep across all models, pairwise significance tests. *(Started: every run's report already carries bootstrap CIs, paired differences with a sign-flip p on the problems both models answered, an α sweep rescored from the same measurements, and the reachable-`eff@1` range under any admissible `h`. Two constraints fell out of building it: raising α above the one a run measured is refused rather than approximated, since a censored sample's true time was never observed, and the `h` analysis is `eff@1` only.)*
 5. **Reference audit.** All 142 references reviewed; second oracle in place; disagreement rate published; anything we beat re-anchored.
 6. **Adversarial generation.** Per-candidate worst-case search; quantify how much scores move versus the fixed generators.
 7. **Two-axis and complexity reporting.** Memory axis; scaling-exponent fits with abstention.

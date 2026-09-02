@@ -264,7 +264,11 @@ def run_level(
     n_cases = _n_cases(inputs, seeds)
     if n_cases == 0:
         raise SandboxError("level has no test cases")
-    wall = _wall_timeout(time_limit, repeats, n_cases) if wall_timeout is None else float(wall_timeout)
+    wall = (
+        _wall_timeout(time_limit, repeats, n_cases)
+        if wall_timeout is None
+        else float(wall_timeout)
+    )
     if not wall > 0:
         raise SandboxError(f"wall timeout must be positive, got {wall}")
 

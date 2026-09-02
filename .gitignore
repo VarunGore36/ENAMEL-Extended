@@ -17,4 +17,5 @@ enamel_ext/data/cache/
 
 # Measurement output: machine-specific, regenerate rather than commit
 results/
+runs/
 *.raw.json

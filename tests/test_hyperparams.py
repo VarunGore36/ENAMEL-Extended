@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import unittest
 
-from enamel_ext.metrics.score import TIMEOUT
+from enamel_ext.metrics.effk import eff_at_k
+from enamel_ext.metrics.score import TIMEOUT, MetricConfig, sample_score
 from enamel_ext.report.hyperparams import (
     attainable_range,
     compare_under_h,
@@ -35,7 +36,7 @@ class TestEffAtH(unittest.TestCase):
 
     def test_reproduces_every_table10_entry_from_three_numbers(self):
         """Fifteen published entries rebuilt from three recovered level means:
-        the strongest available check that eff@k is linear in h."""
+        the strongest available check that eff@1 is linear in h."""
         for level, sweep in TABLE10.items():
             for weight, published in sweep.items():
                 h = list(PAPER_H)
@@ -78,6 +79,41 @@ class TestAttainableRange(unittest.TestCase):
     def test_rejects_empty(self):
         with self.assertRaises(ValueError):
             attainable_range([])
+
+
+class TestLinearityIsAKOneFact(unittest.TestCase):
+    """The h-linearity this module assumes holds at k=1 and fails above it.
+
+    Two samples at k=2 reduce eff@k to a max over sample scores, so two score
+    functions that cross as h varies make the aggregate piecewise linear.
+    """
+
+    #: One case per level, reference matched exactly, so T_i = 2 * 1.0.
+    REFERENCE = ((1.0,), (1.0,))
+
+    #: Level fractions (1, 0) and (0, 1): at the reference on one level, at the
+    #: limit on the other.
+    SAMPLES = (((1.0,), (2.0,)), ((2.0,), (1.0,)))
+
+    def _eff(self, k: int, h: tuple[float, ...]) -> float:
+        config = MetricConfig(alpha=2.0, level_weights=h)
+        scores = [sample_score(c, self.REFERENCE, config) for c in self.SAMPLES]
+        return eff_at_k(scores, k)
+
+    def test_at_k_one_the_midpoint_identity_holds(self):
+        ends = (self._eff(1, (1.0, 0.0)) + self._eff(1, (0.0, 1.0))) / 2
+        self.assertAlmostEqual(self._eff(1, (1.0, 1.0)), ends, places=12)
+
+    def test_at_k_two_the_midpoint_identity_fails_by_half_the_range(self):
+        ends = (self._eff(2, (1.0, 0.0)) + self._eff(2, (0.0, 1.0))) / 2
+        self.assertAlmostEqual(ends, 1.0, places=12)
+        self.assertAlmostEqual(self._eff(2, (1.0, 1.0)), 0.5, places=12)
+
+    def test_level_means_do_not_bound_eff_at_two(self):
+        """attainable_range is a k=1 statement: at k=2 the score leaves it."""
+        means = (self._eff(1, (1.0, 0.0)), self._eff(1, (0.0, 1.0)))
+        self.assertEqual(attainable_range(means), (0.5, 0.5))
+        self.assertAlmostEqual(self._eff(2, (1.0, 0.0)), 1.0, places=12)
 
 
 class TestCompareUnderH(unittest.TestCase):
@@ -165,7 +201,8 @@ class TestRescoreAtAlpha(unittest.TestCase):
 
     def test_lowering_alpha_can_clamp_a_level_to_zero(self):
         candidate = [[1.5], [1.5], [1.5]]
-        self.assertEqual(rescore_at_alpha(candidate, self.REF, new_alpha=1.4, measured_alpha=2.0), 0.0)
+        got = rescore_at_alpha(candidate, self.REF, new_alpha=1.4, measured_alpha=2.0)
+        self.assertEqual(got, 0.0)
 
     def test_raising_alpha_on_censored_data_is_refused(self):
         candidate = [[1.5], [TIMEOUT], [TIMEOUT]]
@@ -182,11 +219,12 @@ class TestRescoreAtAlpha(unittest.TestCase):
         and from above for fast code, so alpha is a compression knob."""
         slow = [[1.5], [1.5], [1.5]]
         fast = [[0.5], [0.5], [0.5]]
+        alphas = (1.5, 2.0, 4.0, 100.0)
         slow_scores = [
-            rescore_at_alpha(slow, self.REF, new_alpha=a, measured_alpha=a) for a in (1.5, 2.0, 4.0, 100.0)
+            rescore_at_alpha(slow, self.REF, new_alpha=a, measured_alpha=a) for a in alphas
         ]
         fast_scores = [
-            rescore_at_alpha(fast, self.REF, new_alpha=a, measured_alpha=a) for a in (1.5, 2.0, 4.0, 100.0)
+            rescore_at_alpha(fast, self.REF, new_alpha=a, measured_alpha=a) for a in alphas
         ]
         self.assertEqual(slow_scores, sorted(slow_scores))  # rises toward 1
         self.assertEqual(fast_scores, sorted(fast_scores, reverse=True))  # falls toward 1

@@ -6,7 +6,7 @@ measurement — this is arithmetic on published numbers. Reproduce with
 
 ## The trick
 
-The efficiency score is exactly linear in the level hardnesses:
+At `k = 1` the efficiency score is exactly linear in the level hardnesses:
 
 ```
 eff@1(h) = (h₁F₁ + h₂F₂ + h₃F₃) / (h₁ + h₂ + h₃)
@@ -17,6 +17,11 @@ that fails correctness contributes 0 to every level). Table 10 sweeps each `h_l`
 from 1 to 5 while holding the other two at their defaults. Multiplying each
 reported `eff@1` by its denominator `Σh` recovers the numerator, and first
 differences along a sweep isolate `F_l` directly.
+
+The `k = 1` restriction matters: above it, the `eff@k` weights attach to order
+statistics whose ordering moves with `h`, so the score is piecewise linear and
+this inversion does not apply. Every published sweep is `eff@1`, so nothing here
+is lost. See docs/decisions/0002-reporting-layer.md.
 
 ## Result, for GPT-4 Turbo under greedy decoding
 

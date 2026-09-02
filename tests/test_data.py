@@ -38,7 +38,11 @@ def _problem(pid: int = 0, **kw) -> Problem:
         reference_solution="def total(xs):\n    return sum(xs)\n",
         input_generator=GEN,
         levels=tuple(
-            GeneratedLevel(level=lvl, scale=10 ** (lvl + 1), seeds=tuple(range(lvl * 10, lvl * 10 + n)))
+            GeneratedLevel(
+                level=lvl,
+                scale=10 ** (lvl + 1),
+                seeds=tuple(range(lvl * 10, lvl * 10 + n)),
+            )
             for lvl, n in enumerate(PAPER_CASE_COUNTS)
         ),
     )

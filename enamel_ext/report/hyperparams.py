@@ -1,14 +1,16 @@
 """Hyperparameter sensitivity and rank stability.
 
-``eff@k`` is exactly linear in the level hardnesses::
+At ``k = 1`` the score is exactly linear in the level hardnesses::
 
-    eff@k(h) = (h_1 F_1 + ... + h_L F_L) / (h_1 + ... + h_L)
+    eff@1(h) = (h_1 F_1 + ... + h_L F_L) / (h_1 + ... + h_L)
 
 so the published hardness sweeps invert to recover ``F_l``
 (``scripts/recover_table10.py``), and whether a model pair can be reordered by
 choosing ``h`` is decidable exactly: the pair is reorderable iff
-``d_l = F^A_l - F^B_l`` has mixed signs. ``alpha`` is neither linear nor free.
-Rationale in docs/decisions/0002-reporting-layer.md.
+``d_l = F^A_l - F^B_l`` has mixed signs. For ``k > 1`` the ``eff@k`` weights
+attach to order statistics whose ordering itself moves with ``h``, so the score
+is piecewise linear and level means no longer determine it. ``alpha`` is neither
+linear nor free. Rationale in docs/decisions/0002-reporting-layer.md.
 """
 
 from __future__ import annotations
@@ -29,7 +31,7 @@ __all__ = [
 
 
 def eff_at_h(level_means: Sequence[float], h: Sequence[float]) -> float:
-    """Aggregate score for given level means and hardnesses."""
+    """``eff@1`` for given per-level means and hardnesses."""
     if len(level_means) != len(h):
         raise ValueError(f"length mismatch: {len(level_means)} level means vs {len(h)} weights")
     if not level_means:
@@ -40,10 +42,12 @@ def eff_at_h(level_means: Sequence[float], h: Sequence[float]) -> float:
 
 
 def attainable_range(level_means: Sequence[float]) -> tuple[float, float]:
-    """Range of ``eff@k`` reachable by reweighting ``h`` alone.
+    """Range of ``eff@1`` reachable by reweighting ``h`` alone.
 
-    The score is a convex combination of the level means. Returned closed,
-    although ``h_l > 0`` strictly makes the endpoints unattainable.
+    ``eff@1`` is a convex combination of the level means. Returned closed,
+    although ``h_l > 0`` strictly makes the endpoints unattainable. Does not
+    bound ``eff@k`` for ``k > 1``, which can leave this range: the level means
+    average over samples that ``eff@k`` selects among.
     """
     if not level_means:
         raise ValueError("no levels")
@@ -108,10 +112,12 @@ def _integer_witness(d: Sequence[float]) -> tuple[int, ...] | None:
 
 
 def compare_under_h(a_level_means: Sequence[float], b_level_means: Sequence[float]) -> HComparison:
-    """Decide whether ``h`` can reorder two models, exactly.
+    """Decide whether ``h`` can reorder two models' ``eff@1``, exactly.
 
     Stable when one model's level means dominate the other's on every level;
-    otherwise a hardness vector exists for each ordering.
+    otherwise a hardness vector exists for each ordering. Exact only for the
+    ``k = 1`` means: at higher ``k`` the ordering of the order statistics moves
+    with ``h`` too, and this verdict is neither necessary nor sufficient.
     """
     if len(a_level_means) != len(b_level_means):
         raise ValueError("both models need the same number of levels")
@@ -136,7 +142,7 @@ def compare_under_h(a_level_means: Sequence[float], b_level_means: Sequence[floa
 def reorderable_pairs(
     models: Mapping[str, Sequence[float]],
 ) -> list[tuple[str, str, HComparison]]:
-    """Every model pair whose ordering depends on the choice of ``h``.
+    """Every model pair whose ``eff@1`` ordering depends on the choice of ``h``.
 
     An empty result means the leaderboard is a consequence of the models rather
     than of the hardness weights. Pairs are keyed in the iteration order of

@@ -5,6 +5,15 @@ docs/decisions/0003-data-adapter.md.
 """
 
 from enamel_ext.data.cases import load_generator, materialize, materialize_level
+from enamel_ext.data.pin import (
+    Extraction,
+    FileRecord,
+    Lock,
+    Manifest,
+    PinError,
+    digest_file,
+    extract_archive,
+)
 from enamel_ext.data.schema import (
     PAPER_CASE_COUNTS,
     PAPER_PROBLEM_COUNT,
@@ -35,15 +44,22 @@ __all__ = [
     "PAPER_PROBLEM_COUNT",
     "SCHEMA_VERSION",
     "UNKNOWN_LICENSE",
+    "Extraction",
+    "FileRecord",
     "GeneratedLevel",
     "JsonSource",
     "Level",
+    "Lock",
+    "Manifest",
     "MaterializedLevel",
+    "PinError",
     "Problem",
     "ProblemSet",
     "ProblemSource",
     "Provenance",
     "default_cache_dir",
+    "digest_file",
+    "extract_archive",
     "load_generator",
     "materialize",
     "materialize_level",

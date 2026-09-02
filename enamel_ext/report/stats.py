@@ -10,7 +10,13 @@ import itertools
 import random
 from typing import Callable, NamedTuple, Sequence
 
-__all__ = ["Interval", "bootstrap_ci", "paired_bootstrap_diff_ci", "paired_sign_test", "kendall_tau"]
+__all__ = [
+    "Interval",
+    "bootstrap_ci",
+    "kendall_tau",
+    "paired_bootstrap_diff_ci",
+    "paired_sign_test",
+]
 
 
 class Interval(NamedTuple):
@@ -69,7 +75,12 @@ def bootstrap_ci(
         statistic([per_problem[rng.randrange(n)] for _ in range(n)]) for _ in range(resamples)
     )
     tail = (1.0 - level) / 2.0
-    return Interval(statistic(per_problem), _percentile(draws, tail), _percentile(draws, 1.0 - tail), level)
+    return Interval(
+        statistic(per_problem),
+        _percentile(draws, tail),
+        _percentile(draws, 1.0 - tail),
+        level,
+    )
 
 
 def paired_bootstrap_diff_ci(

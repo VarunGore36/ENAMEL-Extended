@@ -12,6 +12,18 @@ from enamel_ext.report.hyperparams import (
     reorderable_pairs,
     rescore_at_alpha,
 )
+from enamel_ext.report.levels import (
+    PAPER_SLOWDOWNS,
+    LevelSummary,
+    describe_levels,
+    level_fraction_at,
+    limit_level,
+    limit_level_counts,
+    q_distribution,
+    q_ratios,
+    sensitivity_shares,
+    tolerated_slowdown,
+)
 from enamel_ext.report.stats import (
     Interval,
     bootstrap_ci,
@@ -21,15 +33,25 @@ from enamel_ext.report.stats import (
 )
 
 __all__ = [
+    "PAPER_SLOWDOWNS",
     "HComparison",
     "Interval",
+    "LevelSummary",
     "attainable_range",
     "bootstrap_ci",
     "compare_under_h",
+    "describe_levels",
     "eff_at_h",
     "kendall_tau",
+    "level_fraction_at",
+    "limit_level",
+    "limit_level_counts",
     "paired_bootstrap_diff_ci",
     "paired_sign_test",
+    "q_distribution",
+    "q_ratios",
     "reorderable_pairs",
     "rescore_at_alpha",
+    "sensitivity_shares",
+    "tolerated_slowdown",
 ]

@@ -106,8 +106,9 @@ verdict.
 
 ## Open items
 
-- Confirm the `q-rz/enamel` license, then write the fetch script and pin a
-  snapshot fingerprint in the repo so parity runs are checkable.
+- Confirm the `q-rz/enamel` license. The snapshot itself is now pinned and
+  verifiable (decision 0005); what remains is the record-to-`Problem` converter,
+  which waits on an inventory of the real layout.
 - Decide whether level 0's 8 cases are stored materialized for parity even when
   timed levels are generated. Correctness verdicts are the input to `pass@k`, so
   they are the part least tolerant of input drift.

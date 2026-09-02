@@ -229,13 +229,13 @@ class TestSandbox(unittest.TestCase):
             "def total(xs):\n"
             "    CALLS.append(1)\n"
             "    if len(CALLS) == 1:\n"
-            "        time.sleep(0.03)\n"
+            "        time.sleep(0.1)\n"
             "    return sum(xs)\n"
         )
-        result = run_level(code, "total", inputs=[([1, 2],)], repeats=6, time_limit=0.02)
+        result = run_level(code, "total", inputs=[([1, 2],)], repeats=6, time_limit=0.05)
         self.assertEqual(result.status, OK)
         self.assertEqual(len(result.cases[0].times), 6)
-        self.assertGreater(result.cases[0].times[0], 0.02)
+        self.assertGreater(result.cases[0].times[0], 0.05)
 
     def test_a_timed_out_case_still_reports_the_answer_it_computed(self):
         """Correctness is judged on the first call's output, so it has to survive
@@ -378,8 +378,9 @@ class TestReferenceMeasurement(unittest.TestCase):
         self.assertTrue(all(t > 0 for level in ref.timed() for t in level))
 
     def test_a_broken_reference_is_bad_data_not_a_low_score(self):
+        broken = _problem("def total(xs):\n    raise KeyError\n")
         with self.assertRaises(SandboxError):
-            measure_reference(_problem("def total(xs):\n    raise KeyError\n"), RunConfig(repeats=1))
+            measure_reference(broken, RunConfig(repeats=1))
 
     def test_level_count_must_match_the_metric_config(self):
         problem = _problem(

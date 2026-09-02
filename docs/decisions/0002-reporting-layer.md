@@ -49,7 +49,7 @@ returning 0 — tau is undefined there, and 0 would read as "no agreement".
 
 ## Rank stability under `h` is decidable, not a sweep
 
-`eff@k(h) = Σ h_l F_l / Σ h_l` is exactly linear in the hardness weights, so
+`eff@1(h) = Σ h_l F_l / Σ h_l` is exactly linear in the hardness weights, so
 `sign(eff^A − eff^B) = sign(Σ h_l d_l)` with `d_l = F^A_l − F^B_l` and
 `h_l > 0`. A pair is reorderable **iff `d` has mixed signs** — no search, no
 sweep, three numbers per model. `compare_under_h` returns that verdict plus
@@ -61,6 +61,27 @@ The linearity itself is validated against the paper rather than assumed:
 published Table 10 sweep entries from the three recovered per-level means to
 within 0.002. If the aggregation were anything but a weighted mean over levels,
 the residuals would not all sit inside rounding error.
+
+### The linearity is a `k = 1` fact, and the module says so
+
+`e_{i,j}` is linear in `h` for every sample, but `eff_i@k` is `Σ_r λ_r e_{i,(r)}`
+over the *sorted* sample scores, and which sample is `(r)`-th depends on `h`.
+For `k = 1` the weights are uniform, the ordering drops out, and `eff_i@1` is the
+plain mean over samples — linear. For `k > 1` the score is a `λ`-weighted average
+of order statistics of linear functions: continuous and piecewise linear, but not
+linear, and not determined by the level means at all.
+
+The failure is not asymptotic. With two samples at `k = 2` the estimator reduces
+to `max`, so level fractions `(1, 0)` and `(0, 1)` give `eff@2 = 1` at both
+`h = (1, 0)` and `h = (0, 1)` and `0.5` at `h = (1, 1)`: the midpoint identity
+linearity forces is violated by half the range. The same two samples have level
+means `(0.5, 0.5)`, so `attainable_range` would claim the score cannot leave
+`[0.5, 0.5]` while it in fact reaches 1. Both cases are tests.
+
+This is why the functions here name `eff@1` rather than `eff@k`. It costs
+nothing: the paper's headline numbers, its Table 10 sweep, and everything
+`recover_table10.py` inverts are all `eff@1`. What it buys is that the rank
+stability claim cannot be quietly carried over to a `k` where it does not hold.
 
 ## Two float tolerances, deliberately different
 
@@ -92,6 +113,35 @@ every larger-`alpha` result downward, so `rescore_at_alpha` raises instead.
 
 Harness consequence: **measure once at the largest `alpha` you will ever want
 to report, then derive all smaller ones by post-processing.**
+
+## Level discrimination is reported as `q`, a slowdown, and a share
+
+`levels.py` exists because §2.2 is an arithmetic claim about Eq. (1) that only
+measurement can settle, and the claim needs three numbers rather than one.
+
+`q_ratios` normalizes each level's worst reference case by the largest one over
+levels, so the limit-setting level has `q = 1` by construction. Normalizing by
+*the largest* rather than by the last level is deliberate: `T_i` is defined as
+`alpha * max` over all levels, so it is the largest that sets the scale, and
+§2.2's reasoning silently assumes the two coincide. `limit_level_counts` reports
+how often they do not, which is a fact about the data nobody has published.
+
+From `q` follow two derived quantities. `tolerated_slowdown` is `alpha / q`, the
+factor at which the level first scores 0 and past which every candidate scores
+the same: it states a level's resolution as a single number. `sensitivity_shares`
+differentiates the score, giving `h_l q_l / (alpha - q_l)` normalized, which is
+how the response to a uniform slowdown decomposes over levels. That is §2.2's
+"60% of the weight sits where discrimination is weakest" turned from a weight
+ratio into a measured response ratio. It is a local statement, valid while each
+level is unsaturated, and a candidate in a worse complexity class slows more at
+the larger scales, so the last level's share is a floor and not an estimate.
+
+`level_fraction_at` delegates to `metrics.score.level_fraction` with times
+normalized by the limit-setting reference time rather than reimplementing Eq. (1)
+in normalized form. The table in README §2.2 is then a test fixture, so the
+document and the scorer check each other and neither can drift alone.
+
+
 
 ## `alpha` sets the metric's dynamic range, not just its timeout tolerance
 

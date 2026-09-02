@@ -32,6 +32,8 @@ __all__ = [
     "problem_set_to_json",
     "problem_set_from_json",
     "problems_from_records",
+    "provenance_from_json",
+    "provenance_to_json",
     "synthetic_problem_set",
 ]
 
@@ -74,18 +76,32 @@ def _level_from_json(raw: Mapping[str, Any], problem_id: int) -> Level:
     raise ValueError(f"problem {problem_id}: unknown level kind {kind!r}")
 
 
+def provenance_to_json(prov: Provenance) -> dict[str, str]:
+    """Shared by every artifact that records where its inputs came from."""
+    return {
+        "name": prov.name,
+        "url": prov.url,
+        "license": prov.license,
+        "retrieved": prov.retrieved,
+    }
+
+
+def provenance_from_json(raw: Mapping[str, Any]) -> Provenance:
+    return Provenance(
+        name=raw["name"],
+        url=raw["url"],
+        license=raw["license"],
+        retrieved=raw["retrieved"],
+    )
+
+
 def problem_set_to_json(pset: ProblemSet) -> str:
     """Serialize to the cache format. Raises if any materialized input is not
     JSON-representable, because the cache must never require unpickling."""
     payload = {
         "schema_version": SCHEMA_VERSION,
         "fingerprint": pset.fingerprint(),
-        "provenance": {
-            "name": pset.provenance.name,
-            "url": pset.provenance.url,
-            "license": pset.provenance.license,
-            "retrieved": pset.provenance.retrieved,
-        },
+        "provenance": provenance_to_json(pset.provenance),
         "problems": [
             {
                 "problem_id": p.problem_id,
@@ -109,12 +125,7 @@ def problem_set_from_json(text: str) -> ProblemSet:
         raise ValueError(f"cache schema version {version!r}, expected {SCHEMA_VERSION}")
     prov = raw["provenance"]
     pset = ProblemSet(
-        provenance=Provenance(
-            name=prov["name"],
-            url=prov["url"],
-            license=prov["license"],
-            retrieved=prov["retrieved"],
-        ),
+        provenance=provenance_from_json(prov),
         problems=tuple(
             Problem(
                 problem_id=p["problem_id"],
