@@ -1,7 +1,8 @@
 # 0002 — Reporting layer: uncertainty, hyperparameter sensitivity, rank stability
 
 Status: accepted. Supersedes nothing. Code: `enamel_ext/report/`, tests
-`tests/test_stats.py`, `tests/test_hyperparams.py` (115 tests total in the repo).
+`tests/test_stats.py`, `tests/test_hyperparams.py`, `tests/test_levels.py` and
+`tests/test_recover_table10.py`.
 
 Everything here is post-processing over recorded per-problem or per-level
 numbers. Nothing in the package executes code or reads a clock, which is why it

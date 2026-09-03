@@ -12,7 +12,7 @@ That document reads as criticism because that is the honest way to write down "h
 
 ## Status
 
-Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (336 tests). Design rationale is in `docs/decisions/`, one file per decision.
+Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (351 tests). Design rationale is in `docs/decisions/`, one file per decision.
 
 Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness.
 
@@ -28,11 +28,12 @@ enamel_ext/
   adversarial/   property-based + evolutionary per-candidate input search
   models/        sampling adapters, feedback-loop track
 docs/
-  paper/         rpaper1.pdf and our notes
+  open-questions.md  what the paper leaves to the implementer, and our answers
   decisions/     one file per methodological decision, with rationale
   analysis/      what the paper's own published numbers can be made to say
 scripts/         fetch, recovery, and the evaluate entry point
 tests/           harness unit tests + parity tests against published numbers
+rpaper1.pdf      the paper itself
 ```
 
 ## Running it

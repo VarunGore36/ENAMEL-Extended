@@ -2,7 +2,9 @@
 
 Derived 2026-09-01 from arXiv:2406.06647v4, Appendix C.6, Table 10. No new
 measurement — this is arithmetic on published numbers. Reproduce with
-`scripts/recover_table10.py`.
+`scripts/recover_table10.py`; the inversion, the round trip back to all fifteen
+published entries and the numbers below are checked in
+`tests/test_recover_table10.py`.
 
 ## The trick
 

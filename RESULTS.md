@@ -10,9 +10,9 @@ Nothing here has been measured on the 142 problems. That section is last and it
 is empty, which is the honest state of the project and most of the reason this
 file exists.
 
-`§2.x` refers to [`docs/open-questions.md`](docs/open-questions.md). The exact
-checks re-run with `python3 -m unittest discover -s tests -t .`; the derived
-numbers with `python3 scripts/recover_table10.py`.
+`§2.x` refers to [`docs/open-questions.md`](docs/open-questions.md). Everything
+here re-runs with `python3 -m unittest discover -s tests -t .`, including the
+derived numbers; `python3 scripts/recover_table10.py` prints the derivation.
 
 ## Verified exactly
 
