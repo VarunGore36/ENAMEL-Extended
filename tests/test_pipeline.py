@@ -9,6 +9,7 @@ import math
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import replace as dataclass_replace
 from pathlib import Path
 from unittest import mock
 
@@ -28,12 +29,14 @@ from enamel_ext.metrics.effk import eff_at_k as raw_eff_at_k
 from enamel_ext.metrics.score import PAPER, TIMEOUT, MetricConfig, sample_score
 from enamel_ext.pipeline import (
     CENSORED_TOKEN,
+    COMPARABLE_FIELDS,
     RECORD_SCHEMA_VERSION,
     SOLUTIONS_SCHEMA_VERSION,
     Environment,
     ProblemRecord,
     RunRecord,
     SampleRecord,
+    Segment,
     SolutionSet,
     format_summary,
     load_record,
@@ -41,6 +44,8 @@ from enamel_ext.pipeline import (
     orchestrate,
     record_from_json,
     record_to_json,
+    resume_evaluation,
+    resume_mismatches,
     run_evaluation,
     save_record,
     selected_ids,
@@ -48,6 +53,7 @@ from enamel_ext.pipeline import (
     solution_set_to_json,
     synthetic_solutions,
 )
+from enamel_ext.pipeline import record as record_module
 from enamel_ext.report.hyperparams import eff_at_h
 
 PROV = Provenance(name="test", url="local", license="Apache-2.0", retrieved="1970-01-01")
@@ -76,7 +82,15 @@ def _sample(index, times, *, correct=True):
     return SampleRecord(index=index, correct=correct, level_times=times)
 
 
-def _record(problems, *, metric=ONE_LEVEL, failures=(), repeats=PAPER_REPEATS, cpu_count=8):
+def _record(
+    problems,
+    *,
+    metric=ONE_LEVEL,
+    failures=(),
+    repeats=PAPER_REPEATS,
+    cpu_count=8,
+    segments=(),
+):
     return RunRecord(
         started="2026-01-01T00:00:00+00:00",
         finished="2026-01-01T00:01:00+00:00",
@@ -95,6 +109,18 @@ def _record(problems, *, metric=ONE_LEVEL, failures=(), repeats=PAPER_REPEATS, c
         solutions_fingerprint="s" * 64,
         problems=problems,
         failures=failures,
+        segments=segments,
+    )
+
+
+def _segment(started, ids, *, cpu_count=8, python="CPython 3.10.12", platform="test"):
+    return Segment(
+        started=started,
+        finished=started,
+        environment=Environment(
+            python=python, platform=platform, machine="x86_64", cpu_count=cpu_count
+        ),
+        problem_ids=ids,
     )
 
 
@@ -476,6 +502,126 @@ class CaveatsTest(unittest.TestCase):
         self.assertGreater(env.cpu_count, 0)
 
 
+class EnvironmentComparisonTest(unittest.TestCase):
+    BASE = Environment(
+        python="CPython 3.10.12", platform="test", machine="x86_64", cpu_count=8
+    )
+
+    def test_an_identical_machine_has_no_differences(self):
+        self.assertEqual(self.BASE.differences(self.BASE), ())
+
+    def test_load_average_is_not_a_difference(self):
+        busy = Environment(
+            python="CPython 3.10.12",
+            platform="test",
+            machine="x86_64",
+            cpu_count=8,
+            load_average=(7.0, 7.0, 7.0),
+        )
+        self.assertEqual(self.BASE.differences(busy), ())
+        self.assertEqual(COMPARABLE_FIELDS, ("python", "platform", "machine", "cpu_count"))
+
+    def test_names_every_field_that_disagrees(self):
+        other = Environment(
+            python="CPython 3.12.1", platform="test", machine="arm64", cpu_count=8
+        )
+        differences = self.BASE.differences(other)
+        self.assertEqual(len(differences), 2)
+        self.assertIn("python: 'CPython 3.10.12' then 'CPython 3.12.1'", differences[0])
+        self.assertIn("machine:", differences[1])
+
+
+class SegmentTest(unittest.TestCase):
+    def test_problem_ids_are_sorted_and_typed(self):
+        segment = _segment("t", ["2", 0, 1])
+        self.assertEqual(segment.problem_ids, (0, 1, 2))
+
+    def test_rejects_a_repeated_id_within_one_segment(self):
+        with self.assertRaisesRegex(ValueError, "repeats a problem id"):
+            _segment("t", (1, 1))
+
+
+class RecordSegmentsTest(unittest.TestCase):
+    def setUp(self):
+        self.problems = tuple(
+            _problem(pid, ((1.0,),), {"m": (_sample(0, ((1.0,),)),)}) for pid in (0, 1, 2)
+        )
+
+    def test_a_single_session_run_gets_one_segment_from_the_record(self):
+        record = _record(self.problems)
+        self.assertEqual(len(record.segments), 1)
+        segment = record.segments[0]
+        self.assertEqual(segment.problem_ids, (0, 1, 2))
+        self.assertEqual(segment.started, record.started)
+        self.assertEqual(segment.finished, record.finished)
+        self.assertEqual(segment.environment, record.environment)
+        self.assertFalse(record.resumed)
+        self.assertEqual(record.drift(), ())
+
+    def test_segments_are_ordered_by_start_time(self):
+        record = _record(
+            self.problems,
+            segments=(_segment("2026-01-02", (2,)), _segment("2026-01-01", (0, 1))),
+        )
+        self.assertEqual([s.problem_ids for s in record.segments], [(0, 1), (2,)])
+        self.assertTrue(record.resumed)
+
+    def test_two_segments_cannot_claim_the_same_problem(self):
+        with self.assertRaisesRegex(ValueError, r"more than one segment: \[1\]"):
+            _record(
+                self.problems,
+                segments=(_segment("2026-01-01", (0, 1)), _segment("2026-01-02", (1, 2))),
+            )
+
+    def test_every_scored_problem_needs_a_segment(self):
+        with self.assertRaisesRegex(ValueError, r"unattributed \[2\]"):
+            _record(
+                self.problems,
+                segments=(_segment("2026-01-01", (0,)), _segment("2026-01-02", (1,))),
+            )
+
+    def test_a_segment_cannot_claim_a_problem_the_record_does_not_hold(self):
+        with self.assertRaisesRegex(ValueError, r"not in the record \[9\]"):
+            _record(
+                self.problems,
+                segments=(
+                    _segment("2026-01-01", (0, 1)),
+                    _segment("2026-01-02", (2, 9)),
+                ),
+            )
+
+    def test_drift_names_the_later_session_and_the_field(self):
+        record = _record(
+            self.problems,
+            segments=(
+                _segment("2026-01-01", (0, 1)),
+                _segment("2026-01-02", (2,), cpu_count=2),
+            ),
+        )
+        self.assertEqual(record.drift(), ("2026-01-02: cpu_count: 8 then 2",))
+
+    def test_resuming_is_a_caveat_and_a_changed_machine_is_another(self):
+        clean = _record(
+            self.problems,
+            segments=(_segment("2026-01-01", (0, 1)), _segment("2026-01-02", (2,))),
+        )
+        caveats = clean.caveats()
+        self.assertEqual(len(caveats), 1)
+        self.assertIn("measured over 2 sessions", caveats[0])
+        self.assertIn("2 from 2026-01-01", caveats[0])
+        self.assertIn("1 from 2026-01-02", caveats[0])
+
+        moved = _record(
+            self.problems,
+            segments=(
+                _segment("2026-01-01", (0, 1)),
+                _segment("2026-01-02", (2,), python="CPython 3.12.1"),
+            ),
+        )
+        self.assertIn("machine changed between sessions", moved.caveats()[1])
+        self.assertIn("CPython 3.12.1", moved.caveats()[1])
+
+
 class RecordCodecTest(unittest.TestCase):
     def setUp(self):
         self.record = _record(
@@ -528,6 +674,45 @@ class RecordCodecTest(unittest.TestCase):
             self.assertEqual(load_record(path), self.record)
             with self.assertRaises(FileNotFoundError):
                 load_record(Path(tmp) / "absent.json")
+
+    def test_segments_survive_the_round_trip(self):
+        record = _record(
+            self.record.problems,
+            failures=self.record.failures,
+            segments=(
+                _segment("2026-01-01", (1,)),
+                _segment("2026-01-02", (2,), cpu_count=2),
+            ),
+        )
+        parsed = record_from_json(record_to_json(record))
+        self.assertEqual(parsed, record)
+        self.assertTrue(parsed.resumed)
+        self.assertEqual(parsed.segments[1].environment.cpu_count, 2)
+        self.assertEqual(parsed.drift(), ("2026-01-02: cpu_count: 8 then 2",))
+
+    def test_a_record_written_by_the_previous_schema_is_refused(self):
+        raw = json.loads(record_to_json(self.record))
+        raw["schema_version"] = 1
+        raw.pop("segments")
+        with self.assertRaisesRegex(ValueError, "schema version"):
+            record_from_json(json.dumps(raw))
+
+    def test_saving_leaves_no_scratch_file_behind(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            save_record(self.record, Path(tmp) / "run.json")
+            self.assertEqual([p.name for p in Path(tmp).iterdir()], ["run.json"])
+
+    def test_a_failed_write_leaves_the_old_record_intact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = save_record(self.record, Path(tmp) / "run.json")
+            before = path.read_text()
+            with mock.patch.object(
+                record_module, "record_to_json", side_effect=ValueError("boom")
+            ):
+                with self.assertRaises(ValueError):
+                    save_record(self.record, path)
+            self.assertEqual(path.read_text(), before)
+            self.assertEqual([p.name for p in Path(tmp).iterdir()], ["run.json"])
 
 
 class SelectedIdsTest(unittest.TestCase):
@@ -677,6 +862,193 @@ class OrchestrateTest(unittest.TestCase):
         self.assertIn("no reference measurement", " ".join(record.caveats()))
 
 
+class _ResumeCase(unittest.TestCase):
+    """``late`` answers only problem 2, which no first session here measures."""
+
+    def setUp(self):
+        self.problems = synthetic_problem_set()  # ids 0, 1, 2
+        self.solutions = SolutionSet(
+            PROV,
+            {
+                "fast": {0: ("a", "b"), 1: ("a",)},
+                "slow": {0: ("c",), 2: ("c",)},
+                "late": {2: ("a",)},
+            },
+        )
+        self.paces = {"a": 0.5, "b": 1.0, "c": 1.5}
+        self.seen = []
+
+    def _measuring(self, crash=()):
+        def reference(problem, config, metric):
+            if problem.problem_id in crash:
+                raise SandboxError("reference crashed")
+            self.seen.append(("reference", problem.problem_id))
+            return _fake_reference(problem.problem_id)
+
+        def solution(problem, code, ref, config):
+            self.seen.append((code, problem.problem_id))
+            return _fake_solution(problem.problem_id, self.paces[code])
+
+        return mock.patch.multiple(
+            orchestrate, measure_reference=reference, evaluate_solution=solution
+        )
+
+    def _first(self, *, ids=(0, 1), crash=(), **kwargs):
+        with self._measuring(crash):
+            return run_evaluation(self.problems, self.solutions, ids=ids, **kwargs)
+
+    def _resume(self, record, *, crash=(), **kwargs):
+        with self._measuring(crash):
+            return resume_evaluation(record, self.problems, self.solutions, **kwargs)
+
+
+class ResumeTest(_ResumeCase):
+    def test_measures_only_what_the_record_is_missing(self):
+        first = self._first()
+        self.seen.clear()
+        extended = self._resume(first)
+        self.assertEqual([pid for what, pid in self.seen if what == "reference"], [2])
+        self.assertEqual(extended.ids(), (0, 1, 2))
+        self.assertEqual(extended.models, ("fast", "late", "slow"))
+
+    def test_the_first_session_keeps_its_own_measurements(self):
+        first = self._first()
+        extended = self._resume(first)
+        for pid in first.ids():
+            self.assertEqual(extended[pid], first[pid])
+        self.assertEqual(extended.started, first.started)
+        self.assertGreaterEqual(extended.finished, first.finished)
+
+    def test_each_session_becomes_a_segment_that_names_its_own_problems(self):
+        extended = self._resume(self._first())
+        self.assertTrue(extended.resumed)
+        self.assertEqual(
+            [s.problem_ids for s in extended.segments], [(0, 1), (2,)]
+        )
+        self.assertEqual(extended.drift(), ())
+        self.assertIn("measured over 2 sessions", " ".join(extended.caveats()))
+
+    def test_a_record_with_nothing_missing_comes_back_untouched(self):
+        whole = self._first(ids=None)
+        lines = []
+        again = self._resume(whole, on_progress=lines.append)
+        self.assertIs(again, whole)
+        self.assertEqual(lines, ["nothing left: all 3 problems are already measured"])
+
+    def test_a_recorded_failure_is_retried_and_cleared_when_it_runs(self):
+        first = self._first(ids=None, crash=(1,), keep_going=True)
+        self.assertEqual(first.failures, ((1, "reference crashed"),))
+        self.assertEqual(first.ids(), (0, 2))
+
+        extended = self._resume(first)
+        self.assertEqual(extended.ids(), (0, 1, 2))
+        self.assertEqual(extended.failures, ())
+        self.assertEqual([s.problem_ids for s in extended.segments], [(0, 2), (1,)])
+
+    def test_a_failure_that_fails_again_is_recorded_once(self):
+        first = self._first(ids=None, crash=(1,), keep_going=True)
+        extended = self._resume(first, crash=(1,), keep_going=True)
+        self.assertEqual(extended.failures, ((1, "reference crashed"),))
+        self.assertEqual(extended.ids(), (0, 2))
+        self.assertEqual([s.problem_ids for s in extended.segments], [(0, 2), ()])
+
+    def test_a_failure_still_stops_a_resume_that_was_not_told_to_keep_going(self):
+        first = self._first(ids=None, crash=(1,), keep_going=True)
+        with self.assertRaises(SandboxError):
+            self._resume(first, crash=(1,))
+
+    def test_a_model_confined_to_unmeasured_problems_may_join(self):
+        extended = self._resume(self._first())
+        self.assertEqual(extended.covered_ids("late"), (2,))
+        self.assertEqual(extended.covered_ids("fast"), (0, 1))
+
+    def test_needs_a_model(self):
+        with self.assertRaisesRegex(ValueError, "no models"):
+            self._resume(self._first(), models=[])
+
+
+class ResumeMismatchTest(_ResumeCase):
+    """The refusals, which are what keeps two sessions one measurement."""
+
+    def _why(self, record, **kwargs):
+        return resume_mismatches(record, self.problems, self.solutions, **kwargs)
+
+    def test_a_clean_continuation_has_nothing_to_report(self):
+        self.assertEqual(self._why(self._first()), ())
+
+    def test_refuses_a_changed_metric_or_measurement_setting(self):
+        first = self._first()
+        self.assertIn("metric:", " ".join(self._why(first, metric=FLAT_H)))
+        self.assertIn(
+            f"repeats: {PAPER_REPEATS} then 3", self._why(first, config=RunConfig(repeats=3))
+        )
+        self.assertIn(
+            "aggregator: 'hodges_lehmann' then 'min'",
+            self._why(first, config=RunConfig(aggregator="min")),
+        )
+
+    def test_refuses_changed_problem_or_solution_bytes(self):
+        first = self._first()
+        moved = SolutionSet(PROV, {"fast": {0: ("z",), 1: ("a",)}, "slow": {0: ("c",)}})
+        why = resume_mismatches(first, self.problems, moved)
+        self.assertIn("solution set fingerprint differs", " ".join(why))
+
+        stale = dataclass_replace(first, data_fingerprint="0" * 64)
+        self.assertIn("problem set fingerprint differs", " ".join(self._why(stale)))
+
+    def test_refuses_a_different_machine(self):
+        first = self._first()
+        elsewhere = dataclass_replace(first.environment, machine="vax")
+        why = self._why(first, environment=elsewhere)
+        self.assertEqual(len(why), 1)
+        self.assertIn("machine machine:", why[0])
+        self.assertIn("'vax'", why[0])
+
+    def test_a_busier_machine_is_not_a_mismatch(self):
+        first = self._first()
+        busy = dataclass_replace(first.environment, load_average=(99.0, 99.0, 99.0))
+        self.assertEqual(self._why(first, environment=busy), ())
+
+    def test_refuses_an_older_schema(self):
+        stale = dataclass_replace(self._first(), schema_version=1)
+        self.assertIn("record schema 1", " ".join(self._why(stale)))
+
+    def test_refuses_a_selection_that_would_skip_measured_problems(self):
+        why = self._why(self._first(), ids=[1, 2])
+        self.assertEqual(len(why), 1)
+        self.assertIn("already measured: [0]", why[0])
+
+    def test_refuses_dropping_a_model_the_record_measured(self):
+        why = self._why(self._first(), models=["fast", "late"])
+        self.assertEqual(len(why), 1)
+        self.assertIn("measured but not requested now: ['slow']", why[0])
+
+    def test_refuses_a_new_model_that_answers_a_measured_problem(self):
+        first = self._first(models=["fast", "late"])
+        why = self._why(first)
+        self.assertEqual(len(why), 1)
+        self.assertIn("already-measured problems", why[0])
+        self.assertIn("['slow']", why[0])
+
+    def test_an_unusable_selection_is_reported_rather_than_raised(self):
+        why = self._why(self._first(), ids=[7])
+        self.assertIn("problems [7]", why[-1])
+
+    def test_reports_every_mismatch_at_once(self):
+        why = self._why(
+            self._first(), metric=FLAT_H, config=RunConfig(repeats=3), ids=[1, 2]
+        )
+        self.assertEqual(len(why), 3)
+
+    def test_resume_refuses_with_the_whole_list(self):
+        with self.assertRaises(ValueError) as caught:
+            self._resume(self._first(), metric=FLAT_H, config=RunConfig(repeats=3))
+        message = str(caught.exception)
+        self.assertIn("cannot resume this record", message)
+        self.assertIn("metric:", message)
+        self.assertIn("repeats:", message)
+
+
 def _report_record(models=("fast", "slow"), *, metric=PAPER, n_problems=4):
     """A record with enough shape for every report section to have something to say."""
     reference = ((0.4,), (0.7,), (1.0,))
@@ -737,6 +1109,27 @@ class SummaryTest(unittest.TestCase):
         self.assertIn("below the paper's R", header)
         self.assertIn("2 cores", header)
 
+    def test_a_resumed_run_names_every_session_and_its_machine(self):
+        problems = _report_record().problems
+        record = _record(
+            problems,
+            metric=PAPER,
+            segments=(
+                _segment("2026-01-01T00:00:00+00:00", (0,)),
+                _segment("2026-01-02T00:00:00+00:00", (1, 2, 3), cpu_count=2),
+            ),
+        )
+        text = format_summary(record, resamples=200)
+        self.assertIn("sessions: 2", text)
+        self.assertIn("1 problem, 2026-01-01T00:00:00+00:00", text)
+        self.assertIn("3 problems, 2026-01-02T00:00:00+00:00", text)
+        self.assertIn("2 cores", text)
+        self.assertIn("measured over 2 sessions", text)
+        self.assertIn("machine changed between sessions", text)
+
+    def test_a_single_session_run_says_nothing_about_sessions(self):
+        self.assertNotIn("sessions:", format_summary(_report_record(), resamples=200))
+
     def test_a_zero_weight_leaves_the_h_column_unfilled(self):
         record = _report_record(metric=MetricConfig(2.0, (3.0, 3.0, 0.0)))
         text = format_summary(record, resamples=200)
@@ -755,6 +1148,33 @@ class SummaryTest(unittest.TestCase):
         text = format_summary(record, resamples=200)
         self.assertIn("models share no problems", text)
         self.assertIn("a - b", text)
+
+    def test_names_the_paper_never_published_omit_the_parity_section(self):
+        text = format_summary(_report_record(), resamples=200)
+        self.assertNotIn("Parity against", text)
+
+    def test_a_run_named_by_api_identifier_is_still_compared(self):
+        """The reason names are resolved: a sample set keyed the way the provider
+        keys it would otherwise miss every published row."""
+        record = _report_record(models=("gpt-4-1106-preview", "claude-3-opus-20240229"))
+        text = format_summary(record, resamples=200)
+        self.assertIn("Parity against", text)
+        self.assertIn("GPT-4 Turbo", text)
+        self.assertIn("Claude 3 Opus", text)
+
+    def test_a_name_that_looks_published_is_queried_rather_than_ignored(self):
+        record = _report_record(models=("CodeLlama-34b-Python-hf",))
+        text = format_summary(record, resamples=200)
+        self.assertIn("unmatched CodeLlama-34b-Python-hf", text)
+        self.assertIn("Code Llama 34B Python", text)
+
+    def test_a_comparison_with_no_published_model_in_it_cannot_pass(self):
+        """The section prints only because a name looked published, so there is
+        nothing to compare and the verdict has to say so."""
+        record = _report_record(models=("CodeLlama-34b-Python-hf",))
+        text = format_summary(record, resamples=200)
+        self.assertIn("nothing compared", text)
+        self.assertNotIn("verdict: pass", text)
 
 
 def _script():
@@ -815,6 +1235,7 @@ class CliTest(unittest.TestCase):
         quiet = ["--no-save", "--quiet"]
         cases = {
             "missing record": ["report", "/nonexistent/run.json"],
+            "missing record to resume": ["run", "--resume", "/nonexistent/run.json", *quiet],
             "problems alone": ["run", "--problems", "p.json", *quiet],
             "solutions alone": ["run", "--solutions", "s.json", *quiet],
             "unparsable ids": ["run", "--ids", "1,two", *quiet],
@@ -844,3 +1265,44 @@ class CliTest(unittest.TestCase):
         self.assertEqual(path.parent, Path("runs"))
         self.assertTrue(path.name.startswith("run-"))
         self.assertEqual(path.suffix, ".json")
+
+    def test_a_resume_writes_back_over_the_record_it_extended(self):
+        namespace = self.script.argparse.Namespace
+        resumed = Path("runs/first.json")
+        self.assertEqual(
+            self.script._out_path(namespace(out=None, resume=resumed)), resumed
+        )
+        self.assertEqual(
+            self.script._out_path(namespace(out=Path("other.json"), resume=resumed)),
+            Path("other.json"),
+        )
+
+    def test_resume_extends_a_real_record_in_place(self):
+        """Also times code, so it stays at two problems and R = 1."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "run.json"
+            base = ["run", "--repeats", "1", "--resamples", "50", "--quiet"]
+            code, _, _ = self._main([*base, "--limit", "1", "--out", str(path)])
+            self.assertEqual(code, self.script.OK)
+            self.assertEqual(load_record(path).ids(), (0,))
+
+            code, out, err = self._main([*base, "--limit", "2", "--resume", str(path)])
+            self.assertEqual(code, self.script.OK)
+            self.assertIn(f"record written to {path}", err)
+            self.assertIn("sessions: 2", out)
+            record = load_record(path)
+
+        self.assertEqual(record.ids(), (0, 1))
+        self.assertEqual([s.problem_ids for s in record.segments], [(0,), (1,)])
+        self.assertEqual(record.drift(), ())
+
+    def test_a_resume_the_record_cannot_accept_is_a_usage_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = save_record(_report_record(), Path(tmp) / "run.json")
+            code, out, err = self._main(
+                ["run", "--resume", str(path), "--no-save", "--quiet"]
+            )
+            self.assertEqual(code, self.script.USAGE_FAILURE)
+            self.assertEqual(out, "")
+            self.assertIn("cannot resume this record", err)
+            self.assertEqual(load_record(path), _report_record())

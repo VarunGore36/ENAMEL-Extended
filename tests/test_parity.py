@@ -137,6 +137,98 @@ def _greedy(column: str = "eff1") -> dict[str, float]:
     return {m: getattr(s, column) for m, s in pub.TABLE3_GREEDY.items()}
 
 
+class Table7Test(unittest.TestCase):
+    """Table 7's two rankings: a check on Table 3, and a published disagreement."""
+
+    def test_the_eff1_column_reproduces_table_3s_greedy_order(self):
+        """Appendix C.3 prints this order independently of Table 3, so a mismatch
+        would mean one of the two transcriptions is wrong."""
+        board = [model for model, _ in pub.leaderboard("eff1", "greedy")]
+        self.assertEqual(
+            tuple(board[: len(pub.TABLE7_EFF1_RANKING)]), pub.TABLE7_EFF1_RANKING
+        )
+
+    def test_the_two_rankings_cover_the_same_models(self):
+        self.assertEqual(
+            set(pub.TABLE7_EFF1_RANKING), set(pub.TABLE7_SPEEDUP_RANKING)
+        )
+
+    def test_the_papers_own_two_rankings_correlate_at_0_848(self):
+        """The paper calls this pair 'very different' and argues from the
+        difference that speedup is unreasonable under censoring."""
+        self.assertEqual(round(parity.published_disagreement_tau(), 3), 0.848)
+
+    def test_that_disagreement_is_milder_than_our_worst_case_floor(self):
+        """The tau a maximally wrong local ordering still earns sits above the tau
+        the paper treats as disqualifying, so no threshold between them exists."""
+        floor = parity.tau_floor(_greedy(), parity.EFF_TOLERANCE)
+        self.assertGreater(floor.tau, parity.published_disagreement_tau())
+
+    def test_the_ranking_prints_orders_its_own_precision_cannot_resolve(self):
+        eff = _greedy()
+        gaps = [
+            round(eff[a] - eff[b], 3)
+            for a, b in zip(pub.TABLE7_EFF1_RANKING, pub.TABLE7_EFF1_RANKING[1:])
+        ]
+        self.assertEqual(sorted(gaps)[:2], [0.001, 0.002])
+
+    def test_rankings_over_different_model_sets_are_refused(self):
+        with self.assertRaises(ValueError):
+            parity.ranking_tau(("a", "b"), ("a", "c"))
+
+    def test_a_single_model_cannot_be_correlated(self):
+        with self.assertRaises(ValueError):
+            parity.ranking_tau(("a",), ("a",))
+
+    def test_an_identical_ranking_correlates_perfectly(self):
+        order = pub.TABLE7_EFF1_RANKING
+        self.assertEqual(parity.ranking_tau(order, order), 1.0)
+
+    def test_a_reversed_ranking_correlates_negatively(self):
+        order = pub.TABLE7_EFF1_RANKING
+        self.assertEqual(parity.ranking_tau(order, tuple(reversed(order))), -1.0)
+
+
+class Table9Test(unittest.TestCase):
+    """The cross-benchmark row, which repeats one Table 3 entry."""
+
+    def test_the_enamel_entry_repeats_table_3(self):
+        metric, value = pub.TABLE9_CROSS_BENCHMARK["ENAMEL (ours)"]
+        self.assertEqual(metric, "eff@1")
+        self.assertEqual(value, pub.TABLE3_GREEDY[pub.TABLE9_MODEL].eff1)
+
+    def test_the_compared_model_is_a_published_one(self):
+        self.assertIn(pub.TABLE9_MODEL, pub.TABLE3_GREEDY)
+
+
+class IdentifierTest(unittest.TestCase):
+    """The five checkpoints Appendix C.1 names, and the many it does not."""
+
+    def test_every_named_identifier_belongs_to_a_published_model(self):
+        for display in pub.MODEL_IDENTIFIERS:
+            with self.subTest(model=display):
+                self.assertIn(display, pub.TABLE3_GREEDY)
+
+    def test_most_published_models_have_no_stated_identifier(self):
+        """Why run names cannot be resolved to table keys from the paper alone:
+        25 of the 30 rows are named only by whatever their source release called
+        them."""
+        unnamed = set(pub.TABLE3_GREEDY) - set(pub.MODEL_IDENTIFIERS)
+        self.assertEqual(len(unnamed), 25)
+
+    def test_the_greedy_only_models_are_all_named(self):
+        self.assertLessEqual(set(pub.GREEDY_ONLY), set(pub.MODEL_IDENTIFIERS))
+
+    def test_identifiers_are_distinct(self):
+        values = list(pub.MODEL_IDENTIFIERS.values())
+        self.assertEqual(len(values), len(set(values)))
+
+    def test_the_model_with_a_known_sample_size_is_published(self):
+        for model in pub.KNOWN_SAMPLE_SIZE:
+            with self.subTest(model=model):
+                self.assertIn(model, pub.TABLE3_SAMPLING)
+
+
 class ResolutionTest(unittest.TestCase):
     """What the published spacing lets a tolerance test, before any measurement."""
 
@@ -397,6 +489,37 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(result.resolution.pairs, 0)
         self.assertEqual(result.resolution.share, 0.0)
         self.assertEqual(result.eff, ())
+
+    def test_nothing_in_common_is_a_failure_rather_than_a_vacuous_pass(self):
+        """Three criteria with nothing to check are satisfied by default, which is
+        the one shape of emptiness the gate refuses. Unlike low coverage, it is not
+        a weak result but an absent one."""
+        result = parity.compare({"x": 0.4}, {"x": 0.8})
+        self.assertEqual(result.compared, 0)
+        self.assertEqual(
+            (result.eff_misses, result.pass_misses, result.gated_inversions),
+            ((), (), ()),
+        )
+        self.assertFalse(result.passed)
+
+    def test_the_report_says_that_nothing_was_compared(self):
+        lines = parity.format_parity(parity.compare({"x": 0.4}, {"x": 0.8}))
+        verdict = next(line for line in lines if "verdict" in line)
+        self.assertIn("FAIL", verdict)
+        self.assertIn("nothing compared", verdict)
+
+    def test_one_model_in_common_is_enough_to_be_judged(self):
+        """The boundary: the refusal is of an empty comparison, not a small one."""
+        result = parity.compare({"GPT-4": 0.454}, {"GPT-4": 0.831})
+        self.assertEqual(result.compared, 1)
+        self.assertTrue(result.passed)
+
+    def test_a_run_missing_its_pass_scores_cannot_pass(self):
+        """Both columns are criteria, so a run that supplies only one of them has
+        not been checked against the other."""
+        result = parity.compare(self.eff, {})
+        self.assertEqual(result.passes, ())
+        self.assertFalse(result.passed)
 
     def test_an_eff_miss_fails_and_a_pass_miss_fails(self):
         bad_eff = dict(self.eff)

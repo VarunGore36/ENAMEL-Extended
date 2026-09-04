@@ -24,18 +24,24 @@ from enamel_ext.report.hyperparams import rescore_at_alpha
 
 __all__ = [
     "CENSORED_TOKEN",
+    "COMPARABLE_FIELDS",
     "RECORD_SCHEMA_VERSION",
     "Environment",
     "ProblemRecord",
     "RunRecord",
     "SampleRecord",
+    "Segment",
     "load_record",
     "record_from_json",
     "record_to_json",
     "save_record",
 ]
 
-RECORD_SCHEMA_VERSION = 1
+RECORD_SCHEMA_VERSION = 2
+
+#: Environment fields that have to agree for two measurement sessions to belong
+#: to one run. ``load_average`` is deliberately absent; see decision 0009.
+COMPARABLE_FIELDS = ("python", "platform", "machine", "cpu_count")
 
 #: JSON has no infinity and these files are written with ``allow_nan=False``, so
 #: a right-censored time travels as this string instead.
@@ -108,6 +114,19 @@ class Environment:
             load_average=load,
         )
 
+    def differences(self, other: Environment) -> tuple[str, ...]:
+        """Fields whose disagreement makes two measurements incomparable.
+
+        ``load_average`` is left out on purpose: it differs between almost any two
+        sessions and is noise on the measurement rather than a change in what is
+        being measured.
+        """
+        return tuple(
+            f"{field}: {getattr(self, field)!r} then {getattr(other, field)!r}"
+            for field in COMPARABLE_FIELDS
+            if getattr(self, field) != getattr(other, field)
+        )
+
     def caveats(self) -> tuple[str, ...]:
         """Reasons to distrust timings taken here, in the report's own words."""
         out = []
@@ -122,6 +141,27 @@ class Environment:
                     "the run started"
                 )
         return tuple(out)
+
+
+@dataclass(frozen=True)
+class Segment:
+    """One measurement session's contribution to a record.
+
+    A resumed run is measured over more than one session, so the environment and
+    the clock belong to the session rather than to the record. ``problem_ids`` is
+    what this session measured, which is what makes every scored problem
+    attributable to a machine. See docs/decisions/0009-resume.md.
+    """
+
+    started: str
+    finished: str
+    environment: Environment
+    problem_ids: tuple[int, ...] = ()
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "problem_ids", tuple(sorted(int(i) for i in self.problem_ids)))
+        if len(set(self.problem_ids)) != len(self.problem_ids):
+            raise ValueError(f"segment repeats a problem id: {self.problem_ids}")
 
 @dataclass(frozen=True)
 class SampleRecord:
@@ -230,6 +270,9 @@ class RunRecord:
 
     Holds no scores. ``failures`` names problems whose reference did not run, so
     a number computed over fewer problems can be seen for what it is.
+    ``started``, ``finished`` and ``environment`` describe the session the run
+    began in; ``segments`` describes each session separately, which for a resumed
+    run is the only place the second machine is named.
     """
 
     started: str
@@ -244,6 +287,7 @@ class RunRecord:
     solutions_fingerprint: str
     problems: tuple[ProblemRecord, ...]
     failures: tuple[tuple[int, str], ...] = ()
+    segments: tuple[Segment, ...] = ()
     schema_version: int = RECORD_SCHEMA_VERSION
 
     def __post_init__(self) -> None:
@@ -260,6 +304,7 @@ class RunRecord:
             raise ValueError("a run record needs at least one problem or one failure")
         if self.repeats < 1:
             raise ValueError(f"repeats must be >= 1, got {self.repeats}")
+        self._check_segments(ids)
         for problem in ordered:
             if problem.n_timed_levels != self.metric.n_levels:
                 raise ValueError(
@@ -272,6 +317,53 @@ class RunRecord:
                     f"problem {problem.problem_id}: stored time limit {problem.time_limit} is "
                     f"not alpha * worst reference case ({expected})"
                 )
+
+    def _check_segments(self, ids: Sequence[int]) -> None:
+        """Default a single-session run to one segment; otherwise account for every id.
+
+        Every scored problem has to belong to exactly one session, since that is
+        what says which machine measured it.
+        """
+        if not self.segments:
+            object.__setattr__(
+                self,
+                "segments",
+                (
+                    Segment(
+                        started=self.started,
+                        finished=self.finished,
+                        environment=self.environment,
+                        problem_ids=tuple(ids),
+                    ),
+                ),
+            )
+            return
+        chronological = tuple(sorted(self.segments, key=lambda s: s.started))
+        object.__setattr__(self, "segments", chronological)
+        claimed: list[int] = [pid for segment in chronological for pid in segment.problem_ids]
+        if len(set(claimed)) != len(claimed):
+            dupes = sorted({i for i in claimed if claimed.count(i) > 1})
+            raise ValueError(f"problems measured by more than one segment: {dupes}")
+        if set(claimed) != set(ids):
+            unclaimed = sorted(set(ids) - set(claimed))
+            unmeasured = sorted(set(claimed) - set(ids))
+            raise ValueError(
+                "segments must account for exactly the scored problems; "
+                f"unattributed {unclaimed}, not in the record {unmeasured}"
+            )
+
+    @property
+    def resumed(self) -> bool:
+        return len(self.segments) > 1
+
+    def drift(self) -> tuple[str, ...]:
+        """How later sessions' machines differed from the first one's."""
+        first = self.segments[0].environment
+        out = []
+        for segment in self.segments[1:]:
+            for difference in first.differences(segment.environment):
+                out.append(f"{segment.started}: {difference}")
+        return tuple(out)
 
     def __len__(self) -> int:
         return len(self.problems)
@@ -463,6 +555,14 @@ class RunRecord:
         counts = sorted({n for model in self.models for n in self.sample_counts(model)})
         if len(counts) > 1:
             out.append(f"n varies across problems or models: {counts}")
+        if self.resumed:
+            out.append(
+                f"measured over {len(self.segments)} sessions: "
+                + ", ".join(
+                    f"{len(s.problem_ids)} from {s.started}" for s in self.segments
+                )
+            )
+            out += [f"machine changed between sessions, {d}" for d in self.drift()]
         return tuple(out)
 
 def _sample_to_json(record: SampleRecord) -> dict[str, Any]:
@@ -512,22 +612,54 @@ def _problem_from_json(raw: Mapping[str, Any]) -> ProblemRecord:
         },
     )
 
+def _environment_to_json(environment: Environment) -> dict[str, Any]:
+    return {
+        "python": environment.python,
+        "platform": environment.platform,
+        "machine": environment.machine,
+        "cpu_count": environment.cpu_count,
+        "load_average": (
+            list(environment.load_average) if environment.load_average is not None else None
+        ),
+    }
+
+
+def _environment_from_json(raw: Mapping[str, Any]) -> Environment:
+    load = raw.get("load_average")
+    return Environment(
+        python=raw["python"],
+        platform=raw["platform"],
+        machine=raw["machine"],
+        cpu_count=int(raw["cpu_count"]),
+        load_average=tuple(float(x) for x in load) if load is not None else None,
+    )
+
+
+def _segment_to_json(segment: Segment) -> dict[str, Any]:
+    return {
+        "started": segment.started,
+        "finished": segment.finished,
+        "environment": _environment_to_json(segment.environment),
+        "problem_ids": list(segment.problem_ids),
+    }
+
+
+def _segment_from_json(raw: Mapping[str, Any]) -> Segment:
+    return Segment(
+        started=raw["started"],
+        finished=raw["finished"],
+        environment=_environment_from_json(raw["environment"]),
+        problem_ids=tuple(int(i) for i in raw.get("problem_ids", ())),
+    )
+
+
 def record_to_json(record: RunRecord) -> str:
     payload = {
         "schema_version": RECORD_SCHEMA_VERSION,
         "started": record.started,
         "finished": record.finished,
-        "environment": {
-            "python": record.environment.python,
-            "platform": record.environment.platform,
-            "machine": record.environment.machine,
-            "cpu_count": record.environment.cpu_count,
-            "load_average": (
-                list(record.environment.load_average)
-                if record.environment.load_average is not None
-                else None
-            ),
-        },
+        "environment": _environment_to_json(record.environment),
+        "segments": [_segment_to_json(s) for s in record.segments],
         "metric": {
             "alpha": record.metric.alpha,
             "level_weights": list(record.metric.level_weights),
@@ -554,20 +686,12 @@ def record_from_json(text: str) -> RunRecord:
     version = raw.get("schema_version")
     if version != RECORD_SCHEMA_VERSION:
         raise ValueError(f"record schema version {version!r}, expected {RECORD_SCHEMA_VERSION}")
-    env = raw["environment"]
-    load = env.get("load_average")
     metric = raw["metric"]
     measurement = raw["measurement"]
     return RunRecord(
         started=raw["started"],
         finished=raw["finished"],
-        environment=Environment(
-            python=env["python"],
-            platform=env["platform"],
-            machine=env["machine"],
-            cpu_count=int(env["cpu_count"]),
-            load_average=tuple(float(x) for x in load) if load is not None else None,
-        ),
+        environment=_environment_from_json(raw["environment"]),
         metric=MetricConfig(
             alpha=float(metric["alpha"]),
             level_weights=tuple(float(w) for w in metric["level_weights"]),
@@ -581,13 +705,21 @@ def record_from_json(text: str) -> RunRecord:
         solutions_fingerprint=raw["solutions"]["fingerprint"],
         problems=tuple(_problem_from_json(p) for p in raw["problems"]),
         failures=tuple((int(pid), why) for pid, why in raw.get("failures", ())),
+        segments=tuple(_segment_from_json(s) for s in raw.get("segments", ())),
     )
 
 
 def save_record(record: RunRecord, path: Path | str) -> Path:
+    """Write atomically, so a crash cannot leave a half-written record.
+
+    Resume overwrites the file it read, and that file may be the only copy of
+    hours of measurement.
+    """
     location = Path(path)
     location.parent.mkdir(parents=True, exist_ok=True)
-    location.write_text(record_to_json(record))
+    scratch = location.with_name(location.name + ".partial")
+    scratch.write_text(record_to_json(record))
+    os.replace(scratch, location)
     return location
 
 

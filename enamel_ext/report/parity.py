@@ -12,7 +12,14 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import Mapping, NamedTuple, Sequence
 
-from enamel_ext.data.published import ALPHA, COLUMNS, PAPER, table
+from enamel_ext.data.published import (
+    ALPHA,
+    COLUMNS,
+    PAPER,
+    TABLE7_EFF1_RANKING,
+    TABLE7_SPEEDUP_RANKING,
+    table,
+)
 from enamel_ext.report.stats import kendall_tau
 
 __all__ = [
@@ -29,6 +36,8 @@ __all__ = [
     "differential_bound",
     "format_parity",
     "inversions",
+    "published_disagreement_tau",
+    "ranking_tau",
     "resolution",
     "resolvable_pairs",
     "tau_floor",
@@ -146,6 +155,30 @@ def tau_floor(
             ours[i], ours[i + 1] = ours[i + 1], ours[i]
             inverted, last = inverted + 1, i
     return TauFloor(kendall_tau(values, ours), inverted, len(values) - 1)
+
+
+def ranking_tau(first: Sequence[str], second: Sequence[str]) -> float:
+    """Kendall tau between two orderings of the same models, each best first."""
+    if set(first) != set(second):
+        raise ValueError("rankings must cover the same models")
+    if len(first) < 2:
+        raise ValueError("need at least two models to rank")
+    place = {model: -index for index, model in enumerate(second)}
+    return kendall_tau(
+        [-index for index in range(len(first))], [place[model] for model in first]
+    )
+
+
+def published_disagreement_tau() -> float:
+    """Tau between Table 7's own two rankings of the same twelve models.
+
+    The paper calls the pair 'very different' and argues from the difference that
+    the classic speedup metric is unreasonable under censoring, so this is the
+    rank correlation that accompanies a disagreement its authors treat as
+    disqualifying. It is the published counterpart to ``tau_floor``, and the
+    reason neither is a criterion.
+    """
+    return ranking_tau(TABLE7_EFF1_RANKING, TABLE7_SPEEDUP_RANKING)
 
 
 class Deviation(NamedTuple):
@@ -267,13 +300,22 @@ class ParityResult:
         return tuple(row for row in self.inverted if row.gated)
 
     @property
-    def passed(self) -> bool:
-        """All three criteria, over the models compared.
+    def compared(self) -> int:
+        """Models carrying both an eff and a pass comparison against the paper."""
+        return min(len(self.eff), len(self.passes))
 
-        Silent on coverage: a run over two models can pass this and is not
-        parity. ``missing`` is the number to read alongside.
+    @property
+    def passed(self) -> bool:
+        """All three criteria, over a comparison that had something in it.
+
+        Still silent on how much coverage: a run over two models can pass this and
+        is not parity, and ``missing`` is the number to read alongside. Zero
+        overlap is refused outright, because criteria with nothing to check are
+        vacuously satisfied rather than met. Rationale in decision 0007.
         """
-        return not (self.eff_misses or self.pass_misses or self.gated_inversions)
+        return bool(self.compared) and not (
+            self.eff_misses or self.pass_misses or self.gated_inversions
+        )
 
 
 def _column(name: str, column: str) -> dict[str, float]:
@@ -352,7 +394,8 @@ def format_parity(result: ParityResult, limit: int = 8) -> list[str]:
         f"{res.adjacent_resolvable}/{res.adjacent} adjacent",
         f"  verdict: {'pass' if result.passed else 'FAIL'} "
         f"({len(result.eff_misses)} eff, {len(result.pass_misses)} pass, "
-        f"{len(result.gated_inversions)} order)",
+        f"{len(result.gated_inversions)} order)"
+        f"{'' if result.compared else ', nothing compared'}",
     ]
     if result.tau is not None and result.floor is not None:
         out.append(

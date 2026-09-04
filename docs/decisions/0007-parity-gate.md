@@ -2,8 +2,9 @@
 
 Status: accepted, and pre-committed. Code: `enamel_ext/data/published.py`,
 `enamel_ext/report/parity.py`, the parity section of
-`enamel_ext/pipeline/summary.py`, tests `tests/test_parity.py` (71 tests, 6 of
-them the gate itself, which skips until a run record exists).
+`enamel_ext/pipeline/summary.py`, tests `tests/test_parity.py` (94 tests, 6 of
+them the gate itself, which skips until a run record exists). How a run's model
+names reach the published keys is decision 0008.
 
 README milestone 2 says parity gates the rest of the list. That is only a real
 constraint if the criteria are fixed before the measurement, so this file fixes
@@ -43,6 +44,23 @@ tau still reports **0.931**. A tau threshold anywhere a reasonable person would
 put it therefore passes a result that has every locally contested ordering
 backwards. Tau is printed in the report next to that floor so it cannot be read
 as a criterion, and the criterion is the inversion count instead.
+
+The paper supplies the other end of the same argument, which is the stronger
+half because it needs no construction. Table 7 ranks its top twelve greedy models
+twice, once by `eff@1` and once by the classic speedup metric, and Appendix C.3
+calls the two rankings "very different" and argues from that difference that
+speedup is not a reasonable metric under censoring. Kendall tau between them is
+**0.848** (`parity.published_disagreement_tau`, five discordant pairs of 66). So
+a disagreement the authors treat as disqualifying for an entire metric sits
+*below* the tau our own maximally-wrong local ordering would still earn. There is
+no threshold between the two, and a criterion has to live somewhere.
+
+Table 7 also sharpens the resolvability point above: it prints a rank order for
+neighbours separated by 0.001 (Claude 3 Sonnet over Llama 3 8B Instruct) and
+0.002 (Code Llama 34B Python over Mixtral 8x7B Instruct), both far under what
+this decision claims two machines can resolve. Publishing an order is not the
+same as establishing one, which is why the gate judges only the pairs the table
+separates widely.
 
 ## Where 0.05 comes from
 
@@ -156,27 +174,44 @@ actually compared rather than the full table, so a six-model run cannot borrow
 the thirty-model table's discriminating power. The gate's own coverage assertions
 are separate tests: all 142 problems, and no missing model.
 
+One shape of emptiness is refused, and it is worth being precise about why it is
+not a coverage rule. All three criteria are stated as absences — no deviation over
+tolerance, no gated inversion — so a comparison whose model overlap with the
+published table is *zero* satisfies all three by having nothing to check, and the
+first version of this printed "compared 0 of 30 models" directly above
+"verdict: pass". That is the likely failure mode in practice rather than a
+contrived one: our run's models are named by whatever produced the samples, the
+published tables are keyed by the paper's display names, and one mismatch in that
+mapping empties the intersection without erroring anywhere. `passed` therefore
+requires at least one model compared on both columns. The distinction being drawn
+is between a weak result and an absent one: two models compared is weak evidence
+and passes, nought models is not evidence and cannot.
+
 ## Cross-checks on the transcription
 
 The published numbers are typed in by hand, so `published.py` carries checks that
 a slipped digit tends to break. Table 3's sampling row minus Table 6's two
 subsets leaves the 47 problems in neither, and every implied remainder lands in
-range across 27 models and 6 columns. Table 12's basic rows repeat Table 3's
-greedy rows for the two models it covers. Table 10's default column reproduces
-Table 3's GPT-4 Turbo entry at `α = 2` and at each default hardness. `pass@k`
-rises with `k` everywhere, no `eff` exceeds `α/(α − 1)`, and every published
-`eff` sits below its own `pass` — the last of which is a fact about these models
-rather than a law, since a sample that beats the reference scores above 1.
+range across 27 models and 6 columns. Table 7's `eff@1` column is an independent
+printing of Table 3's greedy top twelve and reproduces our sorted order exactly.
+Table 9's ENAMEL row repeats Table 3's greedy `eff@1` for Code Llama 34B Python.
+Table 12's basic rows repeat Table 3's greedy rows for the two models it covers.
+Table 10's default column reproduces Table 3's GPT-4 Turbo entry at `α = 2` and
+at each default hardness. `pass@k` rises with `k` everywhere, no `eff` exceeds
+`α/(α − 1)`, and every published `eff` sits below its own `pass` — the last of
+which is a fact about these models rather than a law, since a sample that beats
+the reference scores above 1.
 
 ## Open items
 
 - The 47-problem remainder assumes Section 4.2's two subsets are disjoint. The
   paper implies it by calling one set "hard" and the other "seemingly easy" but
   never states it. Every implied remainder being in range is evidence, not proof.
-- `n` per model is not published. Appendix C.1 gives three sampling-size buckets
-  and assigns no model to any of them, and only Llama 3 70B Instruct is pinned,
-  at 100, by Appendix C.7. Counting the released samples would settle it, and the
-  gate uses the greedy column partly to avoid depending on the answer.
+- `n` per model is not published. Appendix C.1 gives 200 samples for "relatively
+  smaller models" and 100 for "larger models" without saying which are which, and
+  only Llama 3 70B Instruct is pinned, at 100, by Appendix C.7. Counting the
+  released samples would settle it, and the gate uses the greedy column partly to
+  avoid depending on the answer.
 - If their samples are not released, our sampling numbers carry their own
   sampling noise and the `pass@1` criterion has to loosen to a stated interval
   rather than a point. The greedy column has no such problem, which is the other

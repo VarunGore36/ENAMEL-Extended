@@ -171,6 +171,18 @@ contested ordering backwards. `report/parity.py` builds that floor and prints it
 beside the measured tau so the diagnostic cannot be read as a pass, and the
 criterion is an inversion count over resolvable pairs instead.
 
+**The paper's own two rankings of the same twelve models correlate at 0.848, and
+it calls them "very different".** Table 7 ranks its top greedy models by `eff@1`
+and by the classic speedup metric, and Appendix C.3 argues from the gap between
+those two columns that speedup is not a reasonable metric under censoring. Kendall
+tau between them is 0.848: five discordant pairs out of 66. That is a published
+demonstration that a disagreement its authors consider disqualifying for a whole
+metric sits *below* the 0.931 a maximally wrong local ordering still earns, which
+closes the argument above without needing the synthetic construction at all.
+Table 7 also prints a rank order for neighbours separated by 0.001 and 0.002,
+under what any of this can resolve, so publishing an order is not the same as
+establishing one.
+
 **A uniform slowdown cancels exactly, so a machine-based tolerance is a statement
 about differential speed.** `Tᵢ` is set by the reference measured on the same
 machine, so if everything is `s` times slower the ratio in Eq. (1) is unchanged
@@ -215,6 +227,19 @@ one of them adjacent. Those are counted and printed and not gated, because
 gating them would gate something the tolerance already declined to resolve.
 `tests/test_parity.py` asserts the implication against the real table rather than
 trusting the algebra, and every count quoted in this section is pinned by a test.
+
+**The published tables check our transcription of them in four places.** Every
+number above is read off a PDF by hand, so the paper's own redundancy is worth
+using: Table 7's `eff@1` column is an independent printing of Table 3's greedy
+top twelve and reproduces our sorted order exactly, Table 9's ENAMEL row repeats
+Table 3's `eff@1` for Code Llama 34B Python, Table 12's basic rows repeat two more
+greedy entries, and Table 10's default column reproduces GPT-4 Turbo's at `α = 2`
+and at each default hardness. Table 6's two subsets give a fifth, weaker check:
+subtracted from Table 3 they imply means over the remaining 47 problems, and every
+implied `pass@k` lands inside `[0, 1]`, which a slipped digit in any of the three
+tables would be likely to break. All five are assertions in
+`tests/test_parity.py`, so a mistyped constant fails the suite rather than quietly
+moving a tolerance.
 
 ## Found while building the harness
 
@@ -292,6 +317,52 @@ answered from the record at all, because treating a censored sample as having
 finished exactly at the old limit hands the slowest possible run the best score
 consistent with the data. See
 [`docs/decisions/0006-run-record.md`](docs/decisions/0006-run-record.md).
+
+**A gate whose criteria are all absences passes when there is nothing to check.**
+The parity verdict is the conjunction of three negatives: no deviation over
+tolerance, no `pass@1` miss, no inversion of a widely separated pair. A comparison
+whose model overlap with the published table is empty satisfies all three by
+default, and the first version printed "compared 0 of 30 models" directly above
+"verdict: pass". This is reachable by accident rather than by contrivance, because
+the two sides are joined by model name and nothing required the names to agree:
+the tables are keyed by the paper's display names and a run is keyed by whatever
+produced the samples, of which the paper pins only five. The verdict now requires
+at least one model compared, which is not a coverage rule — two models is weak
+evidence and still passes, nought models is not evidence at all.
+
+**The first fix for that was itself a silent failure.** The report already skipped
+the parity section when no run model matched a published one, which looks like
+prudence and is worse than the vacuous pass: an absent section is
+indistinguishable from a run that legitimately had nothing to compare, so nothing
+in the output invites a second look. Names are now normalized past case, spacing
+and punctuation, mapped through the five identifiers Appendix C.1 states, and
+anything still unmatched is checked for near misses so that a name which *looks*
+published forces the section to print with the query attached. The suggestion is
+never applied: for 25 of the 30 published rows the upstream name is whatever the
+EvalPlus release called it and the paper does not say, so guessing there would be
+inventing data. See
+[`docs/decisions/0008-model-naming.md`](docs/decisions/0008-model-naming.md).
+
+**A run measured in two sittings has to attach the machine to the session, not to
+the record.** Resuming a benchmark of *speed* sounds unsound, and for Eq. (1) it
+is not: each problem's `Tᵢ` comes from its own reference, measured beside its own
+candidates, so a session that is uniformly `c` times slower scales `t` and `t*`
+together and cancels exactly. That is the algebra the machine tolerance above
+rests on, applied across time on one machine instead of across two machines. What
+does not cancel is the bookkeeping. A record carrying one `Environment` and one
+clock claims every problem in it was measured on the machine named in its header,
+and after a resume half of that is false with nothing in the file saying which
+half, so a level mean can be credited to the wrong machine and the report will
+print it without hesitation. Each session is therefore its own segment, with its
+own environment, timestamps and the problem ids it contributed, and every scored
+problem has to belong to exactly one of them. The same algebra decides what a
+resume may refuse: a differential change — another CPython, another CPU — makes
+the two halves measurements of different things, while a busier machine does not,
+because load is the uniform case that cancels. A measured problem is never
+re-measured, since that would put a candidate and its reference in different
+sessions; a recorded failure always is, because a reference that did not run may
+have lost a race rather than be unrunnable. See
+[`docs/decisions/0009-resume.md`](docs/decisions/0009-resume.md).
 
 ## Measured on the 142 problems
 

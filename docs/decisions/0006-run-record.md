@@ -3,7 +3,7 @@
 Status: accepted. Code: `enamel_ext/pipeline/record.py`,
 `enamel_ext/pipeline/solutions.py`, `enamel_ext/pipeline/orchestrate.py`,
 `enamel_ext/pipeline/summary.py`, `scripts/evaluate.py`,
-tests `tests/test_pipeline.py` (75 tests).
+tests `tests/test_pipeline.py` (121 tests).
 
 Decisions 0001 through 0005 each built one layer: the metric, the reporting
 statistics, the data adapter, the sandboxed runner, the snapshot pin. Nothing
@@ -153,17 +153,17 @@ silent half-synthetic run.
 
 ## Open items
 
-- No caching and no resume. A re-run measures everything again, which is §2.8's
-  complaint about replication cost still standing. The record is the right place
-  to build resume on, since it already says exactly what was measured, but
-  nothing reads it back for that yet.
+- Resume is built, in decision 0009: `run --resume` measures what a record is
+  missing and records each session as its own `Segment`. What is still missing is
+  checkpointing *within* a session, so a crash loses the current session's work.
 - Solution sets are JSON only, and nothing yet converts model output into one.
   The format is deliberately dumb, a mapping from model name to problem id to a
   list of code strings, so that whatever produces samples does not have to know
   about this package.
 - `schema_version` is checked for equality, so an older record is rejected rather
   than migrated. That is right while the schema is a week old and wrong once a
-  parity number depends on a file we want to keep readable.
+  parity number depends on a file we want to keep readable. Decision 0009 bumped
+  it to 2 on those grounds.
 - The record stores per-level worst-case times, not per-case times, following
   Eq. (1)'s `max` over cases. That is enough to score and not enough to ask which
   test case was slow, which the §2.5 adversarial work will want. Per-repeat times

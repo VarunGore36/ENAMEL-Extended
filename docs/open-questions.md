@@ -315,6 +315,33 @@ described caching, resume, pinned image, or CI, which makes independent
 replication expensive enough that it rarely happens. That matters mostly
 because it is why §2.1 through §2.3 could sit unexamined for a year.
 
+### 2.9 The published rows are not fully identified
+
+This one surfaced from trying to line our results up against theirs, and it is
+the plainest reproducibility gap in the paper. Appendix C.1 names the checkpoint
+behind five of the thirty display names in Table 3 (`gpt-4-1106-preview`,
+`gpt-4-0613`, and the three Claude 3 dates). For the rest it says only that "for
+models that are included in Liu et al. (2023a), we re-use their generated code
+samples", without listing which models those are. So for 25 rows neither the
+checkpoint nor the decoding settings behind the number are recoverable from the
+paper: they are whatever the EvalPlus release used, and which rows those are is
+left to inference.
+
+The sampling block has the same shape. Appendix C.1 says 200 samples per problem
+for "relatively smaller models" and 100 for "larger models", and never says which
+models are which. (Its third clause is not a third bucket: the "largest commercial
+models" are greedy-only, and Table 3 already identifies those three by giving them
+no sampling row.) So the split falls across the 27 sampling rows with nothing to
+resolve it. Only Llama 3 70B Instruct is pinned, at 100, and only incidentally, by
+Appendix C.7 computing Table 11 "from the 100 generated samples". Since `eff@k` is
+estimated from `n` samples, a reader cannot reconstruct the estimator's variance
+for the other 26.
+
+None of this affects the paper's conclusion, which is why it reads as a
+housekeeping item rather than an objection. It does affect anyone trying to
+reproduce a specific number, and it is the reason our parity gate targets the
+greedy column, where there is no `n` to get wrong.
+
 ---
 
 ## 3. The fix list
@@ -339,7 +366,9 @@ authors either flag themselves or would likely welcome.
 | *(authors' D.2)* Complexity not measured | Time across ≥5 input scales and fit a scaling exponent, reporting an estimated complexity class. The authors' objection — that high-degree polynomials are indistinguishable from exponentials — is correct, so we report a confidence band and abstain rather than guess when the fit is ambiguous |
 | *(authors' D.2)* Time-only metric | Peak-memory tracking (`tracemalloc` + RSS ceiling) reported as a second axis, never folded into one number, since the time–space tradeoff has no principled exchange rate |
 | §2.8 Unsandboxed execution | Container isolation, no network, read-only mounts, seccomp, hard resource caps |
-| §2.8 Replication cost | Content-addressed result cache, resumable runs, pinned dependencies, CI on a smoke subset |
+| §2.8 Replication cost | Resumable runs, so a crash costs one session instead of the whole run and "start again with fewer problems" stops being the cheap option; each session's machine and clock are recorded beside the problems it contributed, and a continuation onto a differently-behaving machine is refused. See [`decisions/0009-resume.md`](decisions/0009-resume.md). Still open: content-addressed result cache, pinned dependencies, CI on a smoke subset |
+| §2.9 25 of 30 rows have no stated checkpoint | Record the five the paper does state, resolve run names onto table keys through case/punctuation normalization only, and report every name we could not match instead of guessing one. See [`decisions/0008-model-naming.md`](decisions/0008-model-naming.md) |
+| §2.9 `n` per model unpublished | Count the released samples per model and publish the table the paper omits; until then target the greedy column, which has no `n`, and state any sampling comparison as an interval rather than a point |
 
 Order of work: **faithful reimplementation and parity first**, then §2.2 → §2.3
 → §2.1 → §2.4/§2.5 → §2.7. Nothing in this table gets built before the original

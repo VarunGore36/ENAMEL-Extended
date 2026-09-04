@@ -1,8 +1,8 @@
 """The paper's published numbers, as data.
 
-Tables 3, 6, 10, 11 and 12 of arXiv:2406.06647v4 plus the Appendix C.1 setting,
-so parity has one source rather than a constant per call site. Rationale in
-docs/decisions/0007-parity-gate.md.
+Tables 3, 6, 7, 9, 10, 11 and 12 of arXiv:2406.06647v4 plus the Appendix C.1
+setting, so parity has one source rather than a constant per call site. Rationale
+in docs/decisions/0007-parity-gate.md.
 """
 
 from __future__ import annotations
@@ -42,18 +42,36 @@ ENVIRONMENT = (
     "Intel Xeon CPU @ 2.20GHz, Python 3.10.12"
 )
 
-#: Appendix C.1 gives three sampling-size buckets and assigns no model to any of
-#: them, so ``n`` per model is not recoverable from the paper. Counting the
-#: released samples is the open question this leaves; see decision 0007.
+#: Appendix C.1 gives 200 samples for "relatively smaller models" and 100 for
+#: "larger models" without saying which are which, so ``n`` is not recoverable for
+#: the sampling rows. Its third clause is not a bucket: the largest commercial
+#: models are greedy-only, which is ``GREEDY_ONLY``. Counting the released samples
+#: is the open question this leaves; see decision 0007.
 SAMPLE_SIZE_BUCKETS = {
     "relatively smaller models": 200,
     "larger models": 100,
-    "largest commercial models": None,
 }
 
 #: The one model the text pins: Appendix C.7 computes Table 11 "from the 100
 #: generated samples" of this one.
 KNOWN_SAMPLE_SIZE = {"Llama 3 70B Instruct": 100}
+
+#: Appendix C.1 names the checkpoint behind five display names and no others.
+#: The rest are models whose samples the paper re-uses from Liu et al. (2023a),
+#: so their naming follows that release rather than anything stated here.
+MODEL_IDENTIFIERS = {
+    "Claude 3 Opus": "claude-3-opus-20240229",
+    "Claude 3 Sonnet": "claude-3-sonnet-20240229",
+    "Claude 3 Haiku": "claude-3-haiku-20240307",
+    "GPT-4 Turbo": "gpt-4-1106-preview",
+    "GPT-4": "gpt-4-0613",
+}
+
+#: Appendix C.1: "For models that are included in Liu et al. (2023a), we re-use
+#: their generated code samples." Which models those are is not listed, so which
+#: rows carry EvalPlus's sampling settings rather than the paper's own is not
+#: recoverable from the text.
+REUSED_SAMPLES_SOURCE = "Liu et al. (2023a), HumanEval+ / EvalPlus"
 
 #: Table 3, greedy decoding, in the paper's row order. The parity target.
 TABLE3_GREEDY: dict[str, Scores] = {
@@ -193,6 +211,53 @@ TABLE6_IMPLEMENTATION: dict[str, Scores] = {
     "PolyCoder": Scores(0.004, 0.007, 0.034, 0.051, 0.092, 0.122),
     "StableLM 7B": Scores(0.002, 0.003, 0.016, 0.025, 0.074, 0.099),
 }
+
+#: Table 7, Appendix C.3: the top 12 greedy models ranked by ``eff@1`` and by the
+#: classic speedup metric. The ``eff@1`` column is an independent publication of
+#: Table 3's greedy ordering and is used as a cross-check on that transcription.
+TABLE7_EFF1_RANKING = (
+    "GPT-4 Turbo",
+    "GPT-4",
+    "Llama 3 70B Instruct",
+    "Mixtral 8x22B Instruct",
+    "Claude 3 Opus",
+    "Phind Code Llama V2",
+    "Claude 3 Haiku",
+    "ChatGPT",
+    "Claude 3 Sonnet",
+    "Llama 3 8B Instruct",
+    "Code Llama 34B Python",
+    "Mixtral 8x7B Instruct",
+)
+
+#: Table 7's other column. The paper calls the two rankings "very different" and
+#: argues from the difference that speedup is unreasonable under censoring, which
+#: makes this pair a published statement about how much disagreement matters.
+TABLE7_SPEEDUP_RANKING = (
+    "GPT-4 Turbo",
+    "Mixtral 8x22B Instruct",
+    "Llama 3 70B Instruct",
+    "GPT-4",
+    "Claude 3 Opus",
+    "Phind Code Llama V2",
+    "ChatGPT",
+    "Claude 3 Haiku",
+    "Claude 3 Sonnet",
+    "Llama 3 8B Instruct",
+    "Mixtral 8x7B Instruct",
+    "Code Llama 34B Python",
+)
+
+#: Table 9, Appendix C.5: ENAMEL against two other efficiency benchmarks, on Code
+#: Llama 34B Python because Mercury did not evaluate GPT-4. The metrics are not
+#: comparable to each other; the ENAMEL entry repeats Table 3's greedy ``eff@1``
+#: for that model, which is why it is here.
+TABLE9_CROSS_BENCHMARK = {
+    "EffiBench": ("1/NET", 0.336),
+    "Mercury": ("Beyond", 0.424),
+    "ENAMEL (ours)": ("eff@1", 0.268),
+}
+TABLE9_MODEL = "Code Llama 34B Python"
 
 #: Table 10 (a): GPT-4 Turbo greedy ``eff@1`` as alpha varies, h at defaults.
 TABLE10_ALPHA: dict[float, float] = {

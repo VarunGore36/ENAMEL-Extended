@@ -26,6 +26,7 @@ from enamel_ext.metrics.score import PAPER, MetricConfig  # noqa: E402
 from enamel_ext.pipeline import (  # noqa: E402
     format_summary,
     load_record,
+    resume_evaluation,
     run_evaluation,
     save_record,
     selected_ids,
@@ -61,6 +62,12 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--solutions", type=Path, default=None, help="solution set JSON")
     run.add_argument("--out", type=Path, default=None, help="where to write the run record")
     run.add_argument("--no-save", action="store_true", help="do not write a record")
+    run.add_argument(
+        "--resume",
+        type=Path,
+        default=None,
+        help="extend this record: measure only what it is missing, retrying its failures",
+    )
     run.add_argument("--models", default="", help="comma-separated subset of models")
     run.add_argument("--ids", default="", help="comma-separated subset of problem ids")
     run.add_argument("--limit", type=int, default=0, help="attempt only the first N problems")
@@ -132,21 +139,42 @@ def _run(args: argparse.Namespace) -> int:
     if not ids:
         raise ValueError("no problem is both present in the data and answered by a model")
 
-    record = run_evaluation(
-        problems,
-        solutions,
-        config=config,
-        metric=metric,
-        models=models,
-        ids=ids,
-        keep_going=args.keep_going,
-        on_progress=None if args.quiet else lambda msg: print(msg, file=sys.stderr),
-    )
+    on_progress = None if args.quiet else lambda msg: print(msg, file=sys.stderr)
+    if args.resume is not None:
+        record = resume_evaluation(
+            load_record(args.resume),
+            problems,
+            solutions,
+            config=config,
+            metric=metric,
+            models=models,
+            ids=ids,
+            keep_going=args.keep_going,
+            on_progress=on_progress,
+        )
+    else:
+        record = run_evaluation(
+            problems,
+            solutions,
+            config=config,
+            metric=metric,
+            models=models,
+            ids=ids,
+            keep_going=args.keep_going,
+            on_progress=on_progress,
+        )
     if not args.no_save:
-        path = save_record(record, args.out if args.out is not None else _default_out())
+        path = save_record(record, _out_path(args))
         print(f"record written to {path}", file=sys.stderr)
     print(_summary(record, args), end="")
     return OK
+
+
+def _out_path(args: argparse.Namespace) -> Path:
+    """Resume writes back over the record it extended unless told otherwise."""
+    if args.out is not None:
+        return args.out
+    return args.resume if args.resume is not None else _default_out()
 
 
 def _summary(record, args: argparse.Namespace) -> str:

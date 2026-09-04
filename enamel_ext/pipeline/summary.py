@@ -8,8 +8,9 @@ from __future__ import annotations
 
 from typing import Sequence
 
+from enamel_ext.data.naming import rename
 from enamel_ext.data.published import COLUMNS, table
-from enamel_ext.pipeline.record import RunRecord
+from enamel_ext.pipeline.record import Environment, RunRecord
 from enamel_ext.report.hyperparams import attainable_range, eff_at_h, reorderable_pairs
 from enamel_ext.report.levels import (
     PAPER_SLOWDOWNS,
@@ -55,17 +56,20 @@ def _table(
 
     return [line(header)] + [line(row) for row in rows]
 
-def _header(record: RunRecord) -> list[str]:
-    env = record.environment
+def _machine(env: Environment) -> str:
     load = (
         "load " + "/".join(_num(x, 2) for x in env.load_average) + " at start"
         if env.load_average
         else "load unknown"
     )
+    return f"{env.python}, {env.platform}, {env.cpu_count} cores, {load}"
+
+
+def _header(record: RunRecord) -> list[str]:
     out = [
         "ENAMEL-Extended run",
         f"  measured {record.started} .. {record.finished}",
-        f"  {env.python}, {env.platform}, {env.cpu_count} cores, {load}",
+        f"  {_machine(record.environment)}",
         f"  alpha {record.metric.alpha}, h {record.metric.level_weights}, "
         f"{record.metric.normalization} normalization, R = {record.repeats}, "
         f"{record.aggregator}",
@@ -74,6 +78,15 @@ def _header(record: RunRecord) -> list[str]:
         f"  solutions: {record.solutions.name} ({record.solutions.url}) "
         f"{record.solutions_fingerprint[:12]}",
     ]
+    if record.resumed:
+        out.append(f"  sessions: {len(record.segments)}")
+        for index, segment in enumerate(record.segments, start=1):
+            count = len(segment.problem_ids)
+            out.append(
+                f"    {index}. {count} problem{'' if count == 1 else 's'}, "
+                f"{segment.started} .. {segment.finished}"
+            )
+            out.append(f"       {_machine(segment.environment)}")
     caveats = record.caveats()
     if caveats:
         out.append("  caveats:")
@@ -270,15 +283,24 @@ def _comparisons(
     return out
 
 def _parity(record: RunRecord, k: int, name: str) -> list[str]:
-    """Empty unless some model in the run is one the paper published."""
+    """Empty only when no run model resolves to a published one and none looks like it.
+
+    Names are resolved first, so a run whose models are spelled the way their
+    source release spelled them is still compared. A name that looks like a
+    published model but did not match is printed rather than passed over, since
+    silence there is indistinguishable from having nothing to compare.
+    """
     if f"eff{k}" not in COLUMNS:
         return []
+    eff, report = rename({m: record.eff_at_k(m, k) for m in record.models})
+    passes, _ = rename({m: record.pass_at_k(m, k) for m in record.models})
     published = set(table(name))
-    if not published & set(record.models):
+    if not published & set(eff) and not report.suspect:
         return []
-    eff = {m: record.eff_at_k(m, k) for m in record.models}
-    passes = {m: record.pass_at_k(m, k) for m in record.models}
-    return format_parity(compare(eff, passes, name=name, k=k))
+    out = format_parity(compare(eff, passes, name=name, k=k))
+    for model, candidates in report.suspect.items():
+        out.append(f"    unmatched {model}: did you mean {', '.join(candidates)}?")
+    return out
 
 
 def format_summary(

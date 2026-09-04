@@ -12,7 +12,7 @@ That document reads as criticism because that is the honest way to write down "h
 
 ## Status
 
-Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, the parity comparison against the published tables, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (454 tests). Design rationale is in `docs/decisions/`, one file per decision.
+Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, the parity comparison against the published tables, and the pipeline that ties them together, including resumable runs. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (544 tests). Design rationale is in `docs/decisions/`, one file per decision.
 
 Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness. The parity *criteria*, though, are already fixed in writing — [`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md) states the tolerances, what the published spacing can resolve at all, and one signed prediction, all derived before any measurement exists.
 
@@ -20,11 +20,11 @@ Blocked, and not on code: the upstream snapshot needs network access this enviro
 
 ```
 enamel_ext/
-  data/          problem schema, provenance, generators, published tables  [built]
-  measure/       sandboxed runner, timing backends, repeat aggregation     [built]
-  metrics/       eff@k estimator, censored scoring                         [built]
-  report/        bootstrap CIs, tests, h-sweeps, levels, parity            [built]
-  pipeline/      solution sets, run record, orchestrator, text report      [built]
+  data/          problem schema, provenance, generators, published tables, naming  [built]
+  measure/       sandboxed runner, timing backends, repeat aggregation             [built]
+  metrics/       eff@k estimator, censored scoring                                 [built]
+  report/        bootstrap CIs, tests, h-sweeps, levels, parity                    [built]
+  pipeline/      solution sets, run record, resumable orchestrator, text report    [built]
   adversarial/   property-based + evolutionary per-candidate input search
   models/        sampling adapters, feedback-loop track
 docs/
@@ -49,6 +49,13 @@ one a run measured is refused, because a censored sample's true time was never
 observed. With no `--problems`/`--solutions` it runs on a synthetic problem set,
 which is how the tests exercise it end to end. See
 `docs/decisions/0006-run-record.md`.
+
+A run that dies partway is not lost: `run --resume <record>` measures only the
+problems that record is missing, retries the ones whose reference failed, and
+writes both sessions back as one file with each session's own machine and clock
+recorded beside the problems it contributed. It refuses to continue onto a
+different metric, a different snapshot or a different machine, and reports every
+such reason at once. See `docs/decisions/0009-resume.md`.
 
 The data itself is not in the tree: `scripts/fetch_upstream.py` fetches one
 pinned commit into a git-ignored cache, verifies it against a committed lock, and
