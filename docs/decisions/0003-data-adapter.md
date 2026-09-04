@@ -112,5 +112,9 @@ verdict.
 - Decide whether level 0's 8 cases are stored materialized for parity even when
   timed levels are generated. Correctness verdicts are the input to `pass@k`, so
   they are the part least tolerant of input drift.
-- The Appendix C.1 "further calibrate" step is still unreconstructed. If it turns
-  out to touch inputs rather than times, it belongs in this layer.
+- The Appendix C.1 "further calibrate" step does not touch inputs, so nothing in
+  this layer depends on it. It names the per-problem reference maximum that `Tᵢ`
+  is built from; see
+  [`../analysis/appendix-c1-calibration.md`](../analysis/appendix-c1-calibration.md).
+  What remains is a question for the snapshot rather than for this adapter:
+  whether upstream applies a per-run scaling the paper does not describe.

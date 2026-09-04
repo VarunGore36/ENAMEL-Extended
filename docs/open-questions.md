@@ -154,13 +154,24 @@ If that reading holds, it reframes what the benchmark measures. The gradations
 in Table 3 are then mostly gradations in *how often a model's algorithm
 survives the largest input scale* — a coarser and more threshold-sensitive
 quantity than a runtime ratio, and one that inherits all of §2.1's fragility
-because it depends almost entirely on where `Tᵢ` falls. Appendix C.1 also
-mentions a further step — "we use the reference time on the slowest test case
-for each problem to further calibrate the execution time of generated code" —
-that is not specified precisely enough anywhere in the paper to reconstruct,
-which is itself a reproducibility gap. The table above is arithmetic, not
-measurement: what it does not tell us is the actual distribution of `q` across
-the 142 problems, which is what decides whether this matters in practice.
+because it depends almost entirely on where `Tᵢ` falls.
+
+Appendix C.1 mentions a further step — "we use the reference time on the slowest
+test case for each problem to further calibrate the execution time of generated
+code" — which reads at first like an unstated correction sitting on the numerator
+of Eq. (1). It is not: "the slowest test case for each problem" is a maximum over
+levels as well as cases, the paper uses that quantity in exactly one place,
+`Tᵢ := α · max_{l,m} t*ᵢ,ₗ,ₘ`, and the nomenclature in Table 5 contains no
+scaling factor for it to be. The sentence restates how `Tᵢ` is built. See
+[`docs/analysis/appendix-c1-calibration.md`](analysis/appendix-c1-calibration.md),
+which also works out what the other reading would cost: a drift correction
+applied to the times but not to the kill threshold silently censors every
+candidate whose true worst case lands in `[Tᵢ/s, Tᵢ)`, and the resulting error is
+one-sided.
+
+The table above is arithmetic, not measurement: what it does not tell us is the
+actual distribution of `q` across the 142 problems, which is what decides whether
+this matters in practice.
 **Measuring that distribution is milestone 1 of this project, because much of
 the rest depends on which way it goes.** The tooling for it is in place
 (`enamel_ext/report/levels.py`): it reports `q` per level, the slowdown `α/q`

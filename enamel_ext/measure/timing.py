@@ -1,7 +1,9 @@
 """Collapsing ``R`` timing repeats of one test case into a single estimate.
 
-The paper uses ``R = 6`` and the Hodges-Lehmann estimator. Rationale and the
-open convention question in docs/decisions/0001-metric-core.md.
+The paper uses ``R = 6`` and the Hodges-Lehmann estimator. Also holds the
+stopping rule the runner censors on, which has to be the same threshold the
+score uses. Rationale and the open convention question in
+docs/decisions/0001-metric-core.md.
 """
 
 from __future__ import annotations
@@ -12,7 +14,13 @@ from typing import Sequence
 
 from enamel_ext.metrics.score import TIMEOUT
 
-__all__ = ["hodges_lehmann", "aggregate_repeats", "AGGREGATORS"]
+__all__ = [
+    "hodges_lehmann",
+    "aggregate_repeats",
+    "aggregate_lower_bound",
+    "reaches_limit",
+    "AGGREGATORS",
+]
 
 
 def hodges_lehmann(sample: Sequence[float]) -> float:
@@ -66,3 +74,32 @@ def aggregate_repeats(sample: Sequence[float], method: str = "hodges_lehmann") -
     if any(math.isinf(x) for x in sample):
         return TIMEOUT
     return AGGREGATORS[method](sample)
+
+
+def aggregate_lower_bound(
+    sample: Sequence[float], repeats: int, method: str = "hodges_lehmann"
+) -> float:
+    """Smallest aggregate still reachable after ``sample``, over ``repeats`` total.
+
+    The unrun repeats are counted as 0, which is the best case for the candidate
+    because every aggregator here is non-decreasing in each repeat. Under ``min``
+    the bound is therefore 0 until the last repeat.
+    """
+    if repeats < len(sample):
+        raise ValueError(f"{len(sample)} repeats already run, but repeats={repeats}")
+    padded = list(sample) + [0.0] * (repeats - len(sample))
+    return aggregate_repeats(padded, method)
+
+
+def reaches_limit(
+    sample: Sequence[float], repeats: int, limit: float | None, method: str = "hodges_lehmann"
+) -> bool:
+    """Whether the case is already certain to score 0 at this level.
+
+    True once no completion of the remaining repeats can bring the aggregate
+    back under ``limit``, so stopping here cannot cost the candidate a score it
+    would otherwise have earned.
+    """
+    if limit is None:
+        return False
+    return aggregate_lower_bound(sample, repeats, method) >= limit

@@ -1,7 +1,9 @@
 # 0001 — The metric core
 
 Status: implemented, 2026-09-01. Covers `enamel_ext/metrics/effk.py`,
-`enamel_ext/metrics/score.py`, `enamel_ext/measure/timing.py`.
+`enamel_ext/metrics/score.py`, `enamel_ext/measure/timing.py`. Amended
+2026-09-04: Appendix C.1's calibration step is resolved and moved out of the open
+items, with `tests/test_calibration.py` pinning the part of it that is exact.
 
 This is the part of the benchmark that needs no test data, no model samples and
 no clock, so it goes first and it goes in exactly as published. Everything here
@@ -38,7 +40,24 @@ If any of the `R` repeats of a test case was killed at the limit, the case
 reports `inf` rather than aggregating the completed repeats. Mixing a censored
 repeat into a Hodges–Lehmann estimate would report a finite time that was never
 observed, biased downward by an unbounded amount since the killed repeat's true
-time is only known to be `≥ Tᵢ`.
+time is only known to be `≥ Tᵢ`. The measurement side has to agree about which
+cases those are: a case the runner stops has to be a case this function's
+aggregate would put at or above `Tᵢ` anyway, so the stopping rule is stated
+against that aggregate rather than against a proxy for it. See decision 0004.
+
+**Times are consumed as given; Appendix C.1's "further calibrate" step is not a
+missing factor.** The sentence "we use the reference time on the slowest test
+case for each problem to further calibrate the execution time of generated code"
+names `max_{l,m} t*ᵢ,ₗ,ₘ`, which the paper uses in exactly one place,
+`Tᵢ = α · max`, and Table 5's nomenclature has no scaling factor for it to be. So
+it restates how the limit is built rather than describing a step absent from
+Eq. (1), and `sample_score` taking times unmodified is a positive decision rather
+than a deferral. Reasoning in
+[`../analysis/appendix-c1-calibration.md`](../analysis/appendix-c1-calibration.md).
+`tests/test_calibration.py` holds the part that is exact and that any future drift
+correction has to respect: scaling the times without scaling the kill threshold
+censors every candidate whose true worst case lands in `[Tᵢ/s, Tᵢ)`, forfeiting up
+to `(1 − 1/s)/(1 − 1/α)` of that level's score, and the error is one-sided.
 
 **Level skipping is the caller's job.** The paper stops evaluating a sample
 after its first timeout, which is only equivalent to scoring the remaining
@@ -87,14 +106,6 @@ one-sample form over Walsh averages `(x_a + x_b)/2` for `a ≤ b`, including the
 them, which some references do, gives a slightly different number; for `R = 6`
 the two differ by order 1% on skewed samples. If a parity run comes out
 systematically off, flip this first.
-
-Appendix C.1's calibration step — "we use the reference time on the slowest test
-case for each problem to further calibrate the execution time of generated
-code" — is still not reconstructed. It reads like a per-machine scaling
-correction, but the description does not pin down what is scaled by what. No
-guess is baked into the code; `sample_score` consumes times as given. This has
-to be resolved before parity can mean anything, since it sits directly on the
-numerator of Eq. (1).
 
 `R = 6` repeats with a Hodges–Lehmann breakdown point near 29% tolerates one
 contaminated repeat out of six and not two, which `test_timing.py` demonstrates.

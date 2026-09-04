@@ -12,7 +12,7 @@ That document reads as criticism because that is the honest way to write down "h
 
 ## Status
 
-Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (351 tests). Design rationale is in `docs/decisions/`, one file per decision.
+Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (380 tests). Design rationale is in `docs/decisions/`, one file per decision.
 
 Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness.
 
@@ -30,7 +30,7 @@ enamel_ext/
 docs/
   open-questions.md  what the paper leaves to the implementer, and our answers
   decisions/     one file per methodological decision, with rationale
-  analysis/      what the paper's own published numbers can be made to say
+  analysis/      what the paper's own text and published numbers can be made to say
 scripts/         fetch, recovery, and the evaluate entry point
 tests/           harness unit tests + parity tests against published numbers
 rpaper1.pdf      the paper itself
@@ -58,7 +58,7 @@ license question under "Credit".
 
 ## Milestones
 
-1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2, and resolve what the Appendix C.1 "further calibrate" step does. *(Estimator reproduced and checked exactly; the `q` measurement is code waiting on data.)*
+1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2. *(Estimator reproduced and checked exactly; the Appendix C.1 "further calibrate" step is [resolved](docs/analysis/appendix-c1-calibration.md) and needs no code; the `q` measurement is code waiting on data.)*
 2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.** *(Harness runs end to end and the snapshot is pinned; waiting on the data and a machine worth timing on.)*
 3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment. *(Process-level isolation in place; containerization and the instruction-count metric not started.)*
 4. **Honest statistics.** Censored scoring, bootstrap CIs, full hyperparameter sweep across all models, pairwise significance tests. *(In every run's report already.)*

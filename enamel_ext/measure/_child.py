@@ -16,6 +16,7 @@ import sys
 import time
 from typing import Any
 
+from enamel_ext.measure.timing import reaches_limit
 from enamel_ext.measure.values import decode, encode
 
 OK = "ok"
@@ -78,20 +79,25 @@ def _build_cases(request: dict[str, Any]) -> list[tuple[Any, ...]]:
 
 
 def _time_case(
-    fn: Any, args: tuple[Any, ...], repeats: int, budget: float | None, no_gc: bool
+    fn: Any,
+    args: tuple[Any, ...],
+    repeats: int,
+    limit: float | None,
+    aggregator: str,
+    no_gc: bool,
 ) -> tuple[list[float], Any, bool, str]:
     """Time ``repeats`` calls, each on a fresh copy of ``args``.
 
     Copying matters: a solution that sorts its input in place would make every
-    repeat after the first measure already-sorted data. ``budget`` caps the
-    accumulated time rather than a single repeat, so one noisy repeat cannot
-    censor a case whose aggregate is under the limit. The first call's return
-    value is encoded immediately, before a later repeat can mutate it.
+    repeat after the first measure already-sorted data. Stops early only once no
+    completion of the remaining repeats can bring the aggregate back under
+    ``limit``, so the stop and the score agree on which cases are censored. The
+    first call's return value is encoded immediately, before a later repeat can
+    mutate it.
     """
     times: list[float] = []
     output: Any = None
     has_output = False
-    total = 0.0
     for r in range(repeats):
         call_args = _DEEPCOPY(args)
         collecting = _GC_ISENABLED()
@@ -108,8 +114,7 @@ def _time_case(
             output = encode(value)
             has_output = True
         times.append(elapsed)
-        total += elapsed
-        if budget is not None and total > budget:
+        if reaches_limit(times, repeats, limit, aggregator):
             return times, output, has_output, TIMEOUT
     return times, output, has_output, OK
 
@@ -117,7 +122,8 @@ def _time_case(
 def _run(request: dict[str, Any]) -> dict[str, Any]:
     repeats = int(request.get("repeats", 1))
     limit = request.get("time_limit")
-    budget = None if limit is None else float(limit) * repeats
+    limit = None if limit is None else float(limit)
+    aggregator = str(request.get("aggregator", "hodges_lehmann"))
     no_gc = bool(request.get("disable_gc", False))
     try:
         cases = _build_cases(request)
@@ -128,7 +134,9 @@ def _run(request: dict[str, Any]) -> dict[str, Any]:
     results: list[dict[str, Any]] = []
     for args in cases:
         try:
-            times, output, has_output, status = _time_case(fn, args, repeats, budget, no_gc)
+            times, output, has_output, status = _time_case(
+                fn, args, repeats, limit, aggregator, no_gc
+            )
         except BaseException as exc:
             detail = f"{type(exc).__name__}: {exc}"
             results.append({"status": ERROR, "detail": detail})
@@ -141,8 +149,8 @@ def _run(request: dict[str, Any]) -> dict[str, Any]:
         if status == TIMEOUT:
             return {
                 "status": TIMEOUT,
-                "detail": f"case {len(results) - 1} used more than {budget:.6g}s "
-                f"over {repeats} repeats",
+                "detail": f"case {len(results) - 1} cannot come in under {limit:.6g}s "
+                f"however the remaining repeats go",
                 "cases": results,
             }
     return {"status": OK, "detail": "", "cases": results}

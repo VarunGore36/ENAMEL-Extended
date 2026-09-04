@@ -18,6 +18,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Sequence
 
+from enamel_ext.measure.timing import AGGREGATORS
 from enamel_ext.measure.values import decode, encode
 
 __all__ = [
@@ -48,7 +49,11 @@ _BOOTSTRAP = (
     "from enamel_ext.measure._child import main; main(sys.argv[2])"
 )
 
-#: Wall clock allowed = base + slack * (per-case limit) * repeats * cases.
+#: Wall clock allowed = base + slack * (per-case limit) * repeats * cases. The
+#: slack has to cover the most a case can consume before the aggregate bound in
+#: :func:`~enamel_ext.measure.timing.reaches_limit` trips; under Hodges-Lehmann
+#: with ``R = 6`` that is under ``8 * time_limit``, against an allowance of
+#: ``WALL_SLACK * repeats`` per case.
 WALL_BASE = 15.0
 WALL_SLACK = 4.0
 
@@ -110,6 +115,7 @@ def _request(
     seeds: Sequence[int] | None,
     repeats: int,
     time_limit: float | None,
+    aggregator: str,
     limits: Limits,
     result_path: str,
 ) -> dict[str, Any]:
@@ -124,6 +130,7 @@ def _request(
         "seeds": None if seeds is None else list(seeds),
         "repeats": repeats,
         "time_limit": time_limit,
+        "aggregator": aggregator,
         "disable_gc": limits.disable_gc,
         "result_path": result_path,
         "limits": {
@@ -249,18 +256,22 @@ def run_level(
     seeds: Sequence[int] | None = None,
     repeats: int = 1,
     time_limit: float | None = None,
+    aggregator: str = "hodges_lehmann",
     limits: Limits = Limits(),
     wall_timeout: float | None = None,
 ) -> LevelResult:
     """Run one level's test cases in a fresh interpreter.
 
     Either ``inputs`` or ``generator`` plus ``scale`` and ``seeds`` must be
-    given. A case stops once its accumulated time passes ``time_limit`` times
-    ``repeats``, and the level stops with it: a level is scored on its worst
-    case, so the remaining cases cannot change the outcome.
+    given. A case stops once no completion of its remaining repeats can bring the
+    ``aggregator``'s estimate back under ``time_limit``, and the level stops with
+    it: a level is scored on its worst case, so the remaining cases cannot change
+    the outcome. ``aggregator`` therefore has to be the one the score will use.
     """
     if repeats < 1:
         raise SandboxError(f"repeats must be >= 1, got {repeats}")
+    if aggregator not in AGGREGATORS:
+        raise SandboxError(f"unknown aggregator {aggregator!r}; have {sorted(AGGREGATORS)}")
     n_cases = _n_cases(inputs, seeds)
     if n_cases == 0:
         raise SandboxError("level has no test cases")
@@ -285,6 +296,7 @@ def run_level(
             seeds=seeds,
             repeats=repeats,
             time_limit=time_limit,
+            aggregator=aggregator,
             limits=_effective_limits(limits, wall),
             result_path=result_path,
         )

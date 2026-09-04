@@ -2,9 +2,10 @@
 
 What this project has established so far, and how it was established. The
 grouping is by kind of evidence, because the kinds are not interchangeable: an
-exact check of an estimator settles something permanently, arithmetic on
-published numbers settles less than a measurement would, and a defect found
-while building the harness says nothing about ENAMEL at all.
+exact check of an estimator settles something permanently, a close reading of the
+paper settles what the method *is* and not how well it works, arithmetic on
+published numbers settles less than a measurement would, and a defect found while
+building the harness says nothing about ENAMEL at all.
 
 Nothing here has been measured on the 142 problems. That section is last and it
 is empty, which is the honest state of the project and most of the reason this
@@ -46,6 +47,45 @@ worst case is `q` times the limit-setting one: 2.0 at the level that sets `Tᵢ`
 discrimination §2.2 is about, and with `h = (3,3,4)` and `q₁ = q₂ = 0.01` no
 sample can score above 1.403 however fast it is. This is arithmetic on Eq. (1),
 like the §2.2 table; how much it matters depends on the same unmeasured `q`.
+
+**A machine-drift correction has to scale the time limit, not only the times.**
+Suppose the machine is `s` times slower while a candidate runs than it was while
+the reference was timed. Dividing the observed times by `s` recovers the
+reference-machine time for every case that finished — but the kill happened in
+wall-clock at `Tᵢ`, so a case is censored once its true time reaches `Tᵢ/s`, while
+the score is defined against `Tᵢ`. Every candidate landing in `[Tᵢ/s, Tᵢ)` is
+killed, its time is never observed, and it scores 0 where it should have scored up
+to `(1 − 1/s)/(1 − 1/α)` of that level: 0.18 at 10% drift, 0.40 at 25%, and the
+level's whole score at 2×, with α = 2. Killing at `s·Tᵢ` instead makes the
+censored set identical to the undrifted one and the score exact. The error is also
+one-sided, since a machine that has got *faster* loses nothing, so it does not
+average out over a long run — it is a downward bias concentrated in exactly the
+periods of load that would motivate the correction. Both magnitude and frequency
+concentrate at the level that sets `Tᵢ`, which §2.2 identifies as the level
+carrying the discrimination. Checked in `tests/test_calibration.py`. This
+constrains any correction we or anyone else adds; it is not something ENAMEL does,
+and the reason it came up is in the next section.
+
+## Settled by reading the paper
+
+**Appendix C.1's "further calibrate" step is not a step missing from Eq. (1).**
+The paper says once, and nowhere else, that "we use the reference time on the
+slowest test case for each problem to further calibrate the execution time of
+generated code". This project had been treating that as an unreconstructed
+correction sitting on the numerator of Eq. (1), and as a blocker on parity. It is
+not one. "The slowest test case for each problem" is a maximum over levels as well
+as cases, `max_{l,m} t*ᵢ,ₗ,ₘ`, which the paper uses in exactly one place,
+`Tᵢ := α · max_{l,m} t*ᵢ,ₗ,ₘ`; Eq. (1)'s denominator uses the different, per-level
+`max_m t*ᵢ,ₗ,ₘ`. Table 5's nomenclature is complete and contains no scaling
+factor, `t*ᵢ,ₗ,ₘ` is defined there as one fixed quantity per case rather than a
+recorded-and-re-measured pair, and Appendix C.3 rules out the remaining reading by
+introducing `speedup` as a contrast to `eff@k`. So the sentence restates how `Tᵢ`
+is built and what it is for, our implementation was already complete, and the
+metric is not waiting on anything. What cannot be ruled out from the text is an
+*implementation* detail that never entered the formalism; that is a question for
+the upstream snapshot, and working out what it would take is where the drift
+result above came from. See
+[`docs/analysis/appendix-c1-calibration.md`](docs/analysis/appendix-c1-calibration.md).
 
 ## Derived from the paper's published numbers
 
@@ -107,7 +147,8 @@ finished and the timeout branch was checked first. Level 0 ran under `Tᵢ`,
 though its inputs are adversarial rather than large, so slow there is
 inefficient and not incorrect; a timeout there still has to set
 `correct = False`, since nothing was verified. Censoring was applied per repeat
-rather than to the aggregate the score actually compares. `repr` of an int wider
+rather than to the aggregate the score compares, and the rule that replaced it
+was wrong in the same way, which is the next entry. `repr` of an int wider
 than `sys.get_int_max_str_digits()` raises, so an answer like `7 ** 20000`
 truncated the result file and killed the whole problem. And two subprocess
 traps: `-I` implies `-E`, which discards `PYTHONHASHSEED` and lets set iteration
@@ -116,6 +157,25 @@ produced the candidate's, while `communicate(timeout=)` waits for pipe EOF
 rather than process exit, so a solution that forks a helper looked like a
 timeout with a valid result already on disk. See
 [`docs/decisions/0004-sandboxed-runner.md`](docs/decisions/0004-sandboxed-runner.md).
+
+**A stopping rule has to censor exactly what the score gives 0.** The runner
+stopped a case once its accumulated time over the `R` repeats passed `Tᵢ·R`,
+which is stopping when the *mean* repeat time passes `Tᵢ`, while Eq. (1)
+compares the Hodges-Lehmann aggregate. Timing noise is right-skewed, so the mean
+sits above the aggregate and the two disagree in one direction only. Six repeats
+at `(0.5, 0.5, 0.5, 0.5, 0.5, 4.0)·Tᵢ` have a mean of `1.08·Tᵢ` and an aggregate
+of `0.5·Tᵢ`, so against a reference whose worst case is `Tᵢ/α` that candidate
+matches the expert and earns the whole level — and the accumulated rule scored it
+0. One outlier repeat out of six was enough, which is the contamination the
+robust estimator was chosen to absorb in the first place. The rule now stops only
+once no completion of the remaining repeats can bring the aggregate back under
+`Tᵢ`, so "censored" and "scores 0 here" become the same statement; the price is
+that the accumulated total no longer bounds the work and the wall clock has to,
+which it does with room to spare, and that `min` gets no early stop at all
+because its bound stays 0 until the last repeat. Third instance of one rule: a
+cap or correction applied to measured times has to be applied to the threshold
+those times are judged against. The other two are the drift result above and the
+`α` asymmetry below. Checked in `tests/test_stopping.py`.
 
 **Output comparison cannot go over plain JSON.** JSON cannot distinguish a tuple
 from a list, and a HumanEval signature that should return `(1, 2)` returning

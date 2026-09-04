@@ -1,7 +1,9 @@
 # 0004 — Sandboxed evaluation runner
 
-Status: accepted. Code: `enamel_ext/measure/{values,_child,sandbox,runner}.py`,
-tests `tests/test_measure_runner.py` (52 tests).
+Status: accepted. Code:
+`enamel_ext/measure/{values,timing,_child,sandbox,runner}.py`, tests
+`tests/test_measure_runner.py` (52 tests) and `tests/test_stopping.py`
+(17 tests).
 
 This layer is the only place model-generated code runs. It turns a `Problem`
 plus a solution string into per-level times and a correctness verdict, which
@@ -152,22 +154,50 @@ The transport fix would have been undone by the error message describing it.
 
 `T_i` is on the order of microseconds to milliseconds, so:
 
-- The child accumulates elapsed time across a case's repeats and stops the level
-  at the first case whose total passes `T_i * R`. A level is scored on its worst
-  case, so the remaining cases cannot change the outcome. This is the mechanism
-  that produces the paper's right-censoring.
+- The child stops a case once no completion of its remaining repeats can bring
+  the aggregate back under `T_i`, and stops the level with it. A level is scored
+  on its worst case, so the remaining cases cannot change the outcome. This is
+  the mechanism that produces the paper's right-censoring.
 - `RLIMIT_CPU` is a backstop with integer-second granularity that also counts
   input generation, so it can only catch runaway CPU, not an over-limit run.
 - The wall-clock kill catches code that never returns from a single call, which
   no in-child check can see.
 
-The budget is the accumulated total rather than each repeat, because the score
-compares the Hodges-Lehmann aggregate of the repeats against `T_i`. Censoring on
+The threshold the child stops at has to be the threshold the score censors at.
+The score compares the Hodges-Lehmann aggregate of a case's repeats against
+`T_i`, so the rule is stated in terms of that aggregate: after each repeat the
+child computes the smallest aggregate still reachable, counting the unrun
+repeats as 0, and stops only once that lower bound has reached `T_i`. A stopped
+case is then exactly a case the score gives 0 at that level, and nothing the
+remaining repeats could have done would have rescued it. The bound is sound
+because every aggregator here is non-decreasing in each repeat, and it never
+falls as repeats arrive, which is what makes "stop at the first trip" well
+defined rather than dependent on where the check happens to sit.
+
+Two simpler rules are both wrong, and wrong in the same direction. Censoring on
 any single repeat rejects solutions the score itself would have kept: one noisy
-repeat out of six, on a shared machine, is enough. For uniform repeat times the
-two rules coincide exactly, so nothing changes for the typical case; they differ
-only for skewed distributions, which is precisely where the aggregate is the
-number that should decide.
+repeat out of six, on a shared machine, is enough. Censoring when the
+accumulated total passes `T_i * R` is censoring when the *mean* passes `T_i`,
+and timing noise is right-skewed, so the mean sits above the estimate the score
+reads. Six repeats at `(0.5, 0.5, 0.5, 0.5, 0.5, 4.0) * T_i` have a mean of
+`1.08 * T_i` and a Hodges-Lehmann estimate of `0.5 * T_i`; against a reference
+whose worst case is `T_i / alpha` that candidate matches the expert exactly and
+earns the whole level, and the accumulated rule scored it 0. For uniform repeat
+times all three rules censor the same cases, so nothing changes for the typical
+case; they differ where the distribution is skewed, which is where the aggregate
+is the number that should decide.
+
+Dropping the accumulated total drops a work bound, so the wall clock has to
+cover what is left. Under Hodges-Lehmann at `R = 6`, a case whose aggregate
+stays under the limit can consume at most `7.9 * T_i` in total, against a wall
+allowance of `WALL_SLACK * R = 24` times the limit per case, so the existing
+kill suffices and no new cap was added; `tests/test_stopping.py` searches for
+that worst case rather than trusting the algebra. `min` is the exception worth
+naming: its lower bound is 0 until the last repeat has been observed, so under
+`min` no early stop is available at all and only the wall clock bounds the work.
+That is a property of the aggregator rather than a defect, and the aggregator
+the child is told to use is always the one the score will apply, which
+`run_level` validates rather than assumes.
 
 The three mechanisms have to be ordered, or they disagree about the same
 solution. `RLIMIT_CPU` reports as `SIGXCPU` rather than as a timeout, and a
@@ -179,8 +209,9 @@ crossover around half a second. `_effective_limits` therefore treats
 budget is larger, so the precise mechanism fires first, and `-SIGXCPU` is mapped
 to `timeout` rather than `crashed` for the cases where it still wins.
 
-A wall-clock kill and an over-budget case both report `timeout`, because both
-mean the same thing to the metric: the runtime is unknown and at least `T_i`.
+A wall-clock kill and a case stopped by the aggregate bound both report
+`timeout`, because both mean the same thing to the metric: the runtime is
+unknown and no smaller than `T_i`.
 A crash or an exception reports `error` or `crashed` instead, which the runner
 turns into an incorrect verdict. Both score 0, but for different reasons, and a
 harness that cannot tell "too slow" from "wrong" cannot audit its own numbers.

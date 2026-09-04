@@ -166,6 +166,11 @@ silent half-synthetic run.
   parity number depends on a file we want to keep readable.
 - The record stores per-level worst-case times, not per-case times, following
   Eq. (1)'s `max` over cases. That is enough to score and not enough to ask which
-  test case was slow, which the §2.5 adversarial work will want.
+  test case was slow, which the §2.5 adversarial work will want. Per-repeat times
+  are not stored either, so the Hodges-Lehmann convention that decision 0001
+  names as the first thing to flip if parity is off needs a re-measurement rather
+  than a re-read. Storing them would only half fix that: a case now stops as soon
+  as its aggregate can no longer come in under `T_i` (decision 0004), so a case
+  stopped under one aggregator has no repeats left to re-aggregate under another.
 - Untested at scale. The largest run so far is the synthetic problem set on two
   cores; every timing claim here waits on milestone 2.

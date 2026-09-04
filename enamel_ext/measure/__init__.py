@@ -30,7 +30,13 @@ from enamel_ext.measure.sandbox import (
     SandboxError,
     run_level,
 )
-from enamel_ext.measure.timing import AGGREGATORS, aggregate_repeats, hodges_lehmann
+from enamel_ext.measure.timing import (
+    AGGREGATORS,
+    aggregate_lower_bound,
+    aggregate_repeats,
+    hodges_lehmann,
+    reaches_limit,
+)
 from enamel_ext.measure.values import brief, decode, encode, values_equal
 
 __all__ = [
@@ -51,6 +57,7 @@ __all__ = [
     "RunConfig",
     "SandboxError",
     "SolutionMeasurement",
+    "aggregate_lower_bound",
     "aggregate_repeats",
     "brief",
     "decode",
@@ -59,6 +66,7 @@ __all__ = [
     "evaluate_solution",
     "hodges_lehmann",
     "measure_reference",
+    "reaches_limit",
     "run_level",
     "score_solution",
     "values_equal",
