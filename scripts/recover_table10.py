@@ -7,21 +7,37 @@ one sweep isolate that level's mean. See docs/analysis/table10-recovery.md.
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from enamel_ext.data.published import (  # noqa: E402
+    LEVEL_WEIGHTS,
+    TABLE10_ALPHA,
+    TABLE10_HARDNESS,
+    TABLE3_GREEDY,
+    leaderboard,
+)
+
 # Table 10 (b), (c), (d): eff@1 as one hardness varies, the others at defaults.
+# Copied rather than aliased so a caller poking at SWEEPS cannot edit the table.
 SWEEPS: dict[int, dict[int, float]] = {
-    1: {1: 0.428, 2: 0.451, 3: 0.470, 4: 0.486, 5: 0.498},
-    2: {1: 0.474, 2: 0.472, 3: 0.470, 4: 0.469, 5: 0.467},
-    3: {1: 0.520, 2: 0.499, 3: 0.483, 4: 0.470, 5: 0.460},
+    level: dict(row) for level, row in TABLE10_HARDNESS.items()
 }
 # Sum of the two hardnesses held fixed during each sweep (defaults are 3, 3, 4).
-FIXED_SUM: dict[int, int] = {1: 3 + 4, 2: 3 + 4, 3: 3 + 3}
+FIXED_SUM: dict[int, int] = {
+    level: sum(LEVEL_WEIGHTS) - LEVEL_WEIGHTS[level - 1] for level in SWEEPS
+}
 
-PUBLISHED_EFF1 = 0.470
-PUBLISHED_PASS1 = 0.796
+PUBLISHED_EFF1 = TABLE3_GREEDY["GPT-4 Turbo"].eff1
+PUBLISHED_PASS1 = TABLE3_GREEDY["GPT-4 Turbo"].pass1
 # Table 10 (a): eff@1 at alpha = 1.5, 2.0, 2.5, 3.0, 3.5.
-ALPHA_SPAN = 0.541 - 0.421
-# Best (GPT-4 Turbo, 0.470) minus fourth-best (0.408) in the main leaderboard.
-TOP4_SPAN = 0.470 - 0.408
+ALPHA_SPAN = max(TABLE10_ALPHA.values()) - min(TABLE10_ALPHA.values())
+# Best minus fourth-best in the main leaderboard, both greedy.
+TOP4_SPAN = leaderboard()[0][1] - leaderboard()[3][1]
 
 
 def recover(level: int) -> tuple[float, list[float]]:

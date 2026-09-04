@@ -87,6 +87,24 @@ the upstream snapshot, and working out what it would take is where the drift
 result above came from. See
 [`docs/analysis/appendix-c1-calibration.md`](docs/analysis/appendix-c1-calibration.md).
 
+**§2.1 checks correctness at every level, not only at level 0, and leaves one
+case open in our favour.** The paper excludes a sample from `pass@k` if "the
+output of the code does not match the expected output in any test case or does
+not pass level 0", and keeps one that "passes level 0 but exceeds the time limit
+in some level `l ≥ 1`". The first clause is unconditional over test cases, so
+correctness is judged everywhere and the runner's rule that a timeout must not
+swallow a wrong answer is parity with the paper rather than a deviation from it. The second clause is stated only for `l ≥ 1`, which leaves the
+treatment of a sample that is correct but slow *at level 0* unspecified; our
+level 0 runs under a wall budget with no `Tᵢ`, so such a sample passes for us and
+would not have passed for them if they applied `Tᵢ` there. That makes "our
+`pass@1` is greater than or equal to theirs" a signed prediction rather than a
+hope, and the parity gate asserts the sign separately from the magnitude. One
+channel runs the other way with an unknown sign: a sample both wrong and over the
+limit at the same level counts as incorrect for us, and whether their
+implementation compares outputs on a level it abandoned is not something the text
+says. See
+[`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md).
+
 ## Derived from the paper's published numbers
 
 At `k = 1` the score is linear in `h`, so Table 10's `h` sweep can be inverted:
@@ -126,6 +144,77 @@ records per-level means, rank robustness under `h` is a table rather than an
 experiment. `α` is not free in the same way: raising it un-censors runs whose
 times were never observed, so a run has to measure once with a generous cap and
 derive smaller `α` by post-processing.
+
+The rest of this section is what the published tables can say about parity before
+any of it is measured, which turned out to be most of what the gate needed.
+
+**The published leaderboard cannot resolve its own neighbours at any tolerance
+that survives a change of machine.** Table 3's greedy `eff@1` column has 30
+models and so 435 pairs, of which 356 (81.8%) are separated by more than 0.05.
+That is real discriminating power over the table as a whole. The 29 adjacent
+pairs say the opposite: their median gap is 0.013, six are at or under 0.005, the
+smallest is 0.001, and **exactly one** of the 29 survives a 0.05 tolerance. So a
+claim about the ordering of neighbouring models would need agreement near 0.005,
+and nothing about running the same method on different hardware gives us a reason
+to expect that. This is a property of the published spacing rather than a defect
+in either harness, and it is why the ordering criterion is checked on resolvable
+pairs only, and why "reproduce the published ranking" cannot be a single verdict
+covering the whole table.
+
+**A rank-correlation threshold would be an empty criterion.** Kendall tau over
+the whole table is dominated by the far-apart pairs, which are the easy ones, so
+the worst case is worth constructing rather than assuming: invert as many
+near-tied adjacent pairs as disjointness allows and tau still reports **0.931**
+after 15 of the 29 adjacent pairs have been flipped. Any tau threshold a
+reasonable person would pick therefore passes a result that has every locally
+contested ordering backwards. `report/parity.py` builds that floor and prints it
+beside the measured tau so the diagnostic cannot be read as a pass, and the
+criterion is an inversion count over resolvable pairs instead.
+
+**A uniform slowdown cancels exactly, so a machine-based tolerance is a statement
+about differential speed.** `Tᵢ` is set by the reference measured on the same
+machine, so if everything is `s` times slower the ratio in Eq. (1) is unchanged
+and only a *differential* change in the relative speed of different algorithms
+survives. Writing Eq. (1) in units of the limit-setting reference time gives
+`f = (α − s·q)/(α − q)` for a candidate `s` times slower than a reference whose
+worst case is `q ≤ 1` of that constant, so scaling `s` by a factor `c` moves `f`
+by at most `(c − 1)·α/(α − 1)`, which is `2(c − 1)` at `α = 2`. The 0.05
+tolerance is therefore worth a 2.5% systematic differential in the worst case and
+considerably more once differentials of mixed sign average over problems. That is
+the anchor that sets the number, and it is executable as
+`parity.differential_bound` rather than left as prose.
+
+**Table 11 has nothing to contribute to a tolerance, and its own protocol does
+not close.** Its Rao-Blackwellized row is exactly its vanilla row put through the
+paper's Eq. (8) at both `k`, to the printed precision: `0.20·√(1/100) = 0.0200`
+and `0.25·√(10/100) = 0.0791`. Two decimals make that consistent with a derived
+row rather than proof of one, and it makes neither number wrong, but the row
+carries no information about the estimator's realized variance beyond Theorem 1.
+Relatedly, the RB estimator is a deterministic function of a fixed sample set, so
+the stated protocol for the vanilla row — 1000 random `k`-subsets of 100 samples
+— cannot be the protocol behind the RB row, and no other is given. The figures
+are also per-problem rather than benchmark-level, which is provable rather than
+merely likely: Eq. (1) and (2) bound a sample's score by `α/(α − 1) = 2`, a
+random variable on `[0, B]` has variance at most `B²/4`, so a per-problem
+standard deviation is at most 1 and the mean over 142 independent problems is at
+most `1/√142 = 0.084`, well under the printed 0.20. Carried to benchmark scale
+the RB figure is `0.02/√142 ≈ 0.0017`, and greedy decoding — the column the gate
+uses — carries no sampling noise at all. So the published side of the comparison
+is quiet to well within its three printed decimals, and the entire tolerance is
+about our side: timing, machine, reference behaviour and problem coverage.
+
+**The two gated criteria are not independent, and the independent part is the one
+that is deliberately not gated.** If every model is within 0.05 then any two move
+by at most 0.10 relative to each other, so a pair the paper separates by more
+than 0.10 cannot change places: the inversion criterion is *implied* by the
+deviation criterion and its job is to catch a comparison that contradicts itself,
+not to add difficulty. The genuinely independent content sits in the band between
+one and two tolerances, where a pair separated by 0.06 can invert while both
+models are inside 0.05, and 80 of the 435 published pairs are spaced that way,
+one of them adjacent. Those are counted and printed and not gated, because
+gating them would gate something the tolerance already declined to resolve.
+`tests/test_parity.py` asserts the implication against the real table rather than
+trusting the algebra, and every count quoted in this section is pinned by a test.
 
 ## Found while building the harness
 
@@ -227,3 +316,14 @@ reachable-`eff@1` range in one pass. The parity targets, so the comparison is
 written down before the number arrives: GPT-4 Turbo `eff@1 = 0.470` /
 `pass@1 = 0.796`, GPT-4 `0.454` / `0.831`, HumanEval canonical solutions
 `eff@1 = 0.455`, HumanEval+ `0.513`.
+
+So are the criteria those numbers will be judged against, which is the point of
+fixing them now: `eff@1` within 0.05 of the published value per model, `pass@1`
+within 0.01, no inversion of a pair the paper separates by more than 0.10, and
+coverage reported beside the verdict rather than folded into it, since a run over
+six models can satisfy all three and is not parity. A miss will be reported as a
+miss with its measured deviations attached; the tolerance does not move
+afterwards. `tests/test_parity.py` holds a saved record against all of that and
+skips until `ENAMEL_EXT_PARITY_RECORD` points at one, so the gate cannot pass
+vacuously. See
+[`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md).

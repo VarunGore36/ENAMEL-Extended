@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Sequence
 
+from enamel_ext.data.published import COLUMNS, table
 from enamel_ext.pipeline.record import RunRecord
 from enamel_ext.report.hyperparams import attainable_range, eff_at_h, reorderable_pairs
 from enamel_ext.report.levels import (
@@ -16,6 +17,7 @@ from enamel_ext.report.levels import (
     limit_level_counts,
     sensitivity_shares,
 )
+from enamel_ext.report.parity import compare, format_parity
 from enamel_ext.report.stats import (
     bootstrap_ci,
     kendall_tau,
@@ -267,6 +269,18 @@ def _comparisons(
     out.append(f"  Kendall tau-b between the eff@{k} and pass@{k} orderings: {_num(tau)}")
     return out
 
+def _parity(record: RunRecord, k: int, name: str) -> list[str]:
+    """Empty unless some model in the run is one the paper published."""
+    if f"eff{k}" not in COLUMNS:
+        return []
+    published = set(table(name))
+    if not published & set(record.models):
+        return []
+    eff = {m: record.eff_at_k(m, k) for m in record.models}
+    passes = {m: record.pass_at_k(m, k) for m in record.models}
+    return format_parity(compare(eff, passes, name=name, k=k))
+
+
 def format_summary(
     record: RunRecord,
     *,
@@ -276,6 +290,7 @@ def format_summary(
     seed: int = 0,
     alphas: Sequence[float] = ALPHA_SWEEP,
     slowdowns: Sequence[float] = PAPER_SLOWDOWNS,
+    parity_table: str = "greedy",
 ) -> str:
     """The whole report. Sections with nothing to say are left out."""
     sections = [_header(record)]
@@ -286,6 +301,7 @@ def format_summary(
         sections.append(_alpha_sweep(record, k, alphas))
         sections.append(_hardness(record, ranked))
         sections.append(_comparisons(record, ranked, k, level, resamples, seed))
+        sections.append(_parity(record, k, parity_table))
     else:
         sections.append(["Nothing was scored."])
     return "\n\n".join("\n".join(s) for s in sections if s) + "\n"

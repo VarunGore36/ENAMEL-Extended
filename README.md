@@ -12,19 +12,19 @@ That document reads as criticism because that is the honest way to write down "h
 
 ## Status
 
-Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (380 tests). Design rationale is in `docs/decisions/`, one file per decision.
+Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, the parity comparison against the published tables, and the pipeline that ties them together. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (454 tests). Design rationale is in `docs/decisions/`, one file per decision.
 
-Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness.
+Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness. The parity *criteria*, though, are already fixed in writing — [`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md) states the tolerances, what the published spacing can resolve at all, and one signed prediction, all derived before any measurement exists.
 
 ## Layout
 
 ```
 enamel_ext/
-  data/          problem schema, provenance, generators, JSON cache      [built]
-  measure/       sandboxed runner, timing backends, repeat aggregation   [built]
-  metrics/       eff@k estimator, censored scoring                       [built]
-  report/        bootstrap CIs, tests, h-sweeps, level discrimination    [built]
-  pipeline/      solution sets, run record, orchestrator, text report    [built]
+  data/          problem schema, provenance, generators, published tables  [built]
+  measure/       sandboxed runner, timing backends, repeat aggregation     [built]
+  metrics/       eff@k estimator, censored scoring                         [built]
+  report/        bootstrap CIs, tests, h-sweeps, levels, parity            [built]
+  pipeline/      solution sets, run record, orchestrator, text report      [built]
   adversarial/   property-based + evolutionary per-candidate input search
   models/        sampling adapters, feedback-loop track
 docs/
@@ -59,7 +59,7 @@ license question under "Credit".
 ## Milestones
 
 1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2. *(Estimator reproduced and checked exactly; the Appendix C.1 "further calibrate" step is [resolved](docs/analysis/appendix-c1-calibration.md) and needs no code; the `q` measurement is code waiting on data.)*
-2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.** *(Harness runs end to end and the snapshot is pinned; waiting on the data and a machine worth timing on.)*
+2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.** *(The tolerance is stated and pre-committed: `eff@1` within 0.05 and `pass@1` within 0.01 per model, no inversion of a pair the paper separates by more than 0.10, with coverage reported beside the verdict rather than folded into it — see [`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md). The comparison and the gate are written and green; the harness runs end to end and the snapshot is pinned. Waiting on the data and a machine worth timing on.)*
 3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment. *(Process-level isolation in place; containerization and the instruction-count metric not started.)*
 4. **Honest statistics.** Censored scoring, bootstrap CIs, full hyperparameter sweep across all models, pairwise significance tests. *(In every run's report already.)*
 5. **Reference audit.** All 142 references reviewed; second oracle in place; disagreement rate published; anything we beat re-anchored.
@@ -83,7 +83,7 @@ Done, in order of what matters: the reimplementation runs and reproduces the pap
 
 Multi-language benchmarking, repository-level or distributed performance, training or fine-tuning models for efficiency, and running a public leaderboard.
 
-We are also not trying to show ENAMEL's conclusion is wrong, and we should be careful not to drift into it — the incentive to find something publishable is exactly how a reimplementation turns into a rebuttal it cannot support. Our prior is that the qualitative conclusion holds: the `pass@1`/`eff@1` gap is large, it survives every α in the paper's own sweep, and the estimator behind it checks out. What we expect to change is the precision of the specific numbers and possibly the ordering of adjacent models. If hardening the method leaves even those intact, we say so and the project is still worth having done.
+We are also not trying to show ENAMEL's conclusion is wrong, and we should be careful not to drift into it — the incentive to find something publishable is exactly how a reimplementation turns into a rebuttal it cannot support. Our prior is that the qualitative conclusion holds: the `pass@1`/`eff@1` gap is large, it survives every α in the paper's own sweep, and the estimator behind it checks out. What we expect to change is the precision of the specific numbers and possibly the ordering of adjacent models — though the published spacing of neighbours (median adjacent gap 0.013 in Table 3's greedy column) means a swap between two of them is not by itself evidence about either implementation, which is why the parity gate judges ordering only on pairs the paper separates widely enough to resolve. If hardening the method leaves even those intact, we say so and the project is still worth having done.
 
 ---
 

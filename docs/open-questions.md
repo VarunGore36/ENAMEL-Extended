@@ -344,4 +344,6 @@ authors either flag themselves or would likely welcome.
 Order of work: **faithful reimplementation and parity first**, then §2.2 → §2.3
 → §2.1 → §2.4/§2.5 → §2.7. Nothing in this table gets built before the original
 method runs and reproduces. A fix we cannot compare against a working baseline
-is not a fix, it is a fork.
+is not a fix, it is a fork. What "reproduces" means is fixed in advance in
+[`decisions/0007-parity-gate.md`](decisions/0007-parity-gate.md), along with what
+the published numbers can and cannot resolve.
