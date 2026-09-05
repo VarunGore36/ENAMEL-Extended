@@ -93,6 +93,15 @@ report the miss and the measured deviations, not to widen the tolerance
 afterwards; the whole point of writing the number down first is that it cannot
 move once the numbers are in.
 
+What has changed since is that the differential is now an instrument rather than a
+hope. Decision [0011](0011-calibration-probe.md) times a fixed four-workload probe
+per session and reports its spread in `eff` units through `differential_bound`, so
+a second machine can be compared to this one when there is one. It also measured
+what the instrument can do here, and the answer bears directly on this section: on
+this VM the probe resolves a differential only to about 1.32, where 1.025 is what
+0.05 of `eff` corresponds to. So the second anchor remains unchecked, and is now
+unchecked with a number attached rather than by omission.
+
 ## Why `pass@1` is the tight test, and the one signed prediction
 
 `pass@1` is a correctness rate. Given the same problems, the same samples and the

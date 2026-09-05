@@ -4,8 +4,9 @@ What this project has established so far, and how it was established. The
 grouping is by kind of evidence, because the kinds are not interchangeable: an
 exact check of an estimator settles something permanently, a close reading of the
 paper settles what the method *is* and not how well it works, arithmetic on
-published numbers settles less than a measurement would, and a defect found while
-building the harness says nothing about ENAMEL at all.
+published numbers settles less than a measurement would, a defect found while
+building the harness says nothing about ENAMEL at all, and a timing measured on
+this VM is a fact about this VM at one moment and barely a fact about the VM.
 
 Nothing here has been measured on the 142 problems. That section is last and it
 is empty, which is the honest state of the project and most of the reason this
@@ -13,7 +14,10 @@ file exists.
 
 `§2.x` refers to [`docs/open-questions.md`](docs/open-questions.md). Everything
 here re-runs with `python3 -m unittest discover -s tests -t .`, including the
-derived numbers; `python3 scripts/recover_table10.py` prints the derivation.
+derived numbers; `python3 scripts/recover_table10.py` prints the derivation. The
+one section that cannot re-run identically is "Measured on this machine":
+`python3 scripts/probe_floor.py --report` re-measures rather than replays, and on
+the evidence below it should not be expected to agree with itself closely.
 
 ## Verified exactly
 
@@ -194,7 +198,11 @@ by at most `(c − 1)·α/(α − 1)`, which is `2(c − 1)` at `α = 2`. The 0.
 tolerance is therefore worth a 2.5% systematic differential in the worst case and
 considerably more once differentials of mixed sign average over problems. That is
 the anchor that sets the number, and it is executable as
-`parity.differential_bound` rather than left as prose.
+`parity.differential_bound` rather than left as prose. It also fixes the shape of
+any instrument for the quantity: a single timed workload can only ever report the
+factor that cancels, so a calibration probe has to be a vector of workloads with
+different cost mixes and its statistic has to be the spread of their ratios.
+Whether such an instrument can see 2.5% is a measurement, and it is below.
 
 **Table 11 has nothing to contribute to a tolerance, and its own protocol does
 not close.** Its Rao-Blackwellized row is exactly its vanilla row put through the
@@ -364,6 +372,101 @@ sessions; a recorded failure always is, because a reference that did not run may
 have lost a race rather than be unrunnable. See
 [`docs/decisions/0009-resume.md`](docs/decisions/0009-resume.md).
 
+**Nothing distinguished a record that finished from one that stopped early, and
+the problem count cannot.** Writing the record-so-far to disk as a run goes is
+what makes the first parity run survivable — resume can only continue from a file,
+and before the first crash there is no file — but it also puts records on disk
+that look exactly like finished ones. The count is no help: a run invoked with
+`--limit 40` legitimately holds 40 problems, and so does a 142-problem run that
+died at 40, so a reader gets a leaderboard averaged over a prefix chosen by when
+the crash happened, silently. The fix is to store the ids the run *set out* to
+measure and derive completeness from that, which also fixes the direction of the
+error — a record defaults to having attempted exactly what it holds, refuses to
+hold a problem it never claimed to attempt, and on a continuation takes the union
+of the two sessions' scopes, so narrowing the selection cannot make an interrupted
+run look finished. Being a prefix then prints as a caveat in the report header,
+next to the resume and load caveats, rather than being something a reader has to
+notice. Designing this also turned up a fault in the resume code that no finished
+record could have shown: prior failures were dropped from the list as soon as a
+session *planned* to retry them, which is invisible when the file is only written
+after the loop and loses the reason a reference failed the moment a checkpoint
+lands mid-retry. See
+[`docs/decisions/0010-checkpointing.md`](docs/decisions/0010-checkpointing.md).
+
+**A measurement small enough to be affordable can be big enough to be
+confidently wrong.** The calibration probe's location estimator was chosen by
+measuring how often each candidate reported drift on a machine that had not
+drifted, and two 48-sample collections gave opposite answers: the first favoured
+the minimum, 0/66 false alarms against 13/66, and the second went the other way,
+14/66 against 1/66. By then the
+first had been written into the code as a conclusion, with a docstring asserting
+that the minimum "is the only estimator here that improved with replication". A
+480-sample collection settles it against the minimum at every replicate count
+tested. The mistake was not the sample size but reading a small sample's answer as
+an answer rather than as a draw — on a quantity the same collection later showed
+moving by ten times the effect of interest over five minutes. Nothing in the
+output flagged it, because a false drift alarm reads as a machine that moved
+rather than as an instrument that cannot see.
+
+## Measured on this machine
+
+One result, and it is about this hardware rather than about ENAMEL. It is here
+because it is the number that says how much of the parity tolerance's own
+justification is checkable in this environment, and the answer is: not the part
+that matters. Tables and method in
+[`docs/analysis/probe-floor.md`](docs/analysis/probe-floor.md), design in
+[`docs/decisions/0011-calibration-probe.md`](docs/decisions/0011-calibration-probe.md).
+
+**The calibration probe resolves a differential to about 1.32 here, where the
+parity tolerance corresponds to 1.025.** The instrument is four fixed workloads
+chosen to separate the interpreter's eval loop from the C-level builtins it
+competes against, timed at every session through the same sandbox and clock as
+the run, with the statistic being `max/min` over the per-workload ratios between
+two probes. Because that statistic is a range — bounded below by 1, biased
+upward, growing with noise — it cannot be compared against 1.025 directly, so each
+probe measures its own floor by splitting its replicates into disjoint equal
+halves where the true differential is known to be exactly 1. Over 480 samples per
+workload, formed into 60 independent probes and 1770 pairs whose every firing is
+therefore a false alarm: median floor **1.3198**, p90 1.656, worst 3.129, median
+differential between two probes 1.107, and **0 of 1770** pairs fired. Power
+against a differential injected into one workload is 2/1770 at ×1.10, 286 at
+×1.20, 1046 at ×1.40 and 1669 at ×2.00. So it detects a doubling 94% of the time
+and the 2.5% the parity tolerance cares about essentially never. What it buys is
+still real — a resume refusal the four machine strings would have missed, and a
+recorded number where there was previously silence — but the honest summary is
+that on this VM a caveat and a refusal fire together, since both thresholds
+collapse onto the floor, and 0007's timing anchor remains unchecked with a number
+attached rather than by omission. The raw material explains the size: one of these
+13-16 ms workloads, already a Hodges-Lehmann over six repeats, spans 2.2× to 3.0×
+between its fastest and slowest observation across the window.
+
+**Replication does not sharpen the floor, which caps what a longer probe can
+buy.** The median floor is flat in the replicate count: 1.309, 1.310, 1.320,
+1.341, 1.323 at 4, 6, 8, 12 and 16. It is a maximum over splits and the number of
+splits grows combinatorially, so each split improving and there being more chances
+to find a bad one cancel out on this machine. What does improve is the other side
+of the comparison — the median differential between two probes falls 1.151, 1.134,
+1.107, 1.082, 1.086 — so the false-alarm rate drops against a threshold that stays
+put: with Hodges-Lehmann, 188/7140 at 4 replicates, 20/3160 at 6, and none at 8
+and above. Eight is therefore the shipped setting, at a measured 5.2 s per
+session, and sixteen would cost twice that for no additional reach. Getting under
+1.32 needs a quieter machine, not a longer probe. The same table settled the
+estimator: the minimum invents drift at every count tested (354, 74, 20, 6, 1),
+and its nominally higher sensitivity is not a comparable number, since the lower
+threshold that finds more injected drift is the same lower threshold that finds
+drift which is not there.
+
+**The floor is a property of the moment rather than of the machine.** Median floor
+over each quarter of that single five-and-a-half-minute window, in order: **1.252,
+1.269, 1.361, 1.499**, with worst-split values 1.45, 1.52, 1.84 and 3.13. An idle
+VM with nothing else scheduled became measurably noisier as it was watched, and the
+median moved by 0.25 — ten times the differential the parity tolerance is trying to
+police. Two things follow and both are in the code: a pair of probes is judged by
+whichever was taken at the worse moment, `max` of the two floors rather than either
+or an average; and the floor is printed in the report and the record's caveats,
+because a quiet verdict has two very different causes and only the number
+distinguishes "nothing moved" from "nothing could have been seen".
+
 ## Measured on the 142 problems
 
 Nothing yet. Two things are missing, neither of them code.
@@ -375,8 +478,12 @@ fetcher and the lock are written and tested against synthetic archives; they
 have never seen the real one, which is also why no upstream path is hard-coded.
 
 The hardware: two cores under a hypervisor cannot produce a timing number anyone
-should trust, least of all one compared against a published figure. Real
-measurement runs belong on a machine chosen for it.
+should trust, least of all one compared against a published figure. That is no
+longer only an impression: the section above puts a number on it, a differential
+floor near 1.32 against the 1.025 the tolerance would need, on a machine whose
+floor moved by 0.25 while being watched for five minutes. Real measurement runs
+belong on a machine chosen for the job, and the probe is what will let that
+machine and this one be compared rather than merely distinguished.
 
 What is ready and waiting on those two things: `report/levels.py` computes the
 `q` distribution across levels, the slowdown `α/q` past which a level scores 0

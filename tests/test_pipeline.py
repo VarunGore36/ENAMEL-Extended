@@ -23,6 +23,12 @@ from enamel_ext.measure import (
     ReferenceMeasurement,
     SolutionMeasurement,
 )
+from enamel_ext.measure.calibrate import (
+    CALIBRATION_VERSION,
+    DRIFT_CAVEAT,
+    REPLICATES,
+    Calibration,
+)
 from enamel_ext.measure.runner import PAPER_REPEATS, RunConfig
 from enamel_ext.measure.sandbox import SandboxError
 from enamel_ext.metrics.effk import eff_at_k as raw_eff_at_k
@@ -90,6 +96,8 @@ def _record(
     repeats=PAPER_REPEATS,
     cpu_count=8,
     segments=(),
+    attempted=(),
+    calibration=None,
 ):
     return RunRecord(
         started="2026-01-01T00:00:00+00:00",
@@ -99,6 +107,7 @@ def _record(
             platform="test",
             machine="x86_64",
             cpu_count=cpu_count,
+            calibration=calibration,
         ),
         metric=metric,
         repeats=repeats,
@@ -110,18 +119,53 @@ def _record(
         problems=problems,
         failures=failures,
         segments=segments,
+        attempted=attempted,
     )
 
 
-def _segment(started, ids, *, cpu_count=8, python="CPython 3.10.12", platform="test"):
+def _segment(
+    started,
+    ids,
+    *,
+    cpu_count=8,
+    python="CPython 3.10.12",
+    platform="test",
+    calibration=None,
+):
     return Segment(
         started=started,
         finished=started,
         environment=Environment(
-            python=python, platform=platform, machine="x86_64", cpu_count=cpu_count
+            python=python,
+            platform=platform,
+            machine="x86_64",
+            cpu_count=cpu_count,
+            calibration=calibration,
         ),
         problem_ids=ids,
     )
+
+
+def _probe(noise=(1.0, 1.0), scale=1.0, **kwargs):
+    """A stand-in calibration: four workloads a decade apart, scaled and jittered.
+
+    ``noise`` multiplies every workload's replicates, so it costs no resolution;
+    pass a per-workload mapping to make the probe coarse. ``scale`` moves only the
+    first workload, which is a differential of exactly ``scale``.
+    """
+    base = {"w1": 0.010 * scale, "w2": 0.012, "w3": 0.014, "w4": 0.016}
+    if not isinstance(noise, dict):
+        noise = {name: noise for name in base}
+    return Calibration(
+        times={name: tuple(t * f for f in noise[name]) for name, t in base.items()},
+        repeats=kwargs.pop("repeats", PAPER_REPEATS),
+        aggregator=kwargs.pop("aggregator", "hodges_lehmann"),
+        **kwargs,
+    )
+
+
+#: A probe whose own replicate noise is 1.3, so it cannot see a parity-sized change.
+_COARSE = {"w1": (1.0, 1.3), "w2": (1.0, 1.0), "w3": (1.0, 1.0), "w4": (1.0, 1.0)}
 
 
 def _one_model_record(**kwargs):
@@ -622,6 +666,138 @@ class RecordSegmentsTest(unittest.TestCase):
         self.assertIn("CPython 3.12.1", moved.caveats()[1])
 
 
+class RecordCalibrationTest(unittest.TestCase):
+    """A probe turns "same machine" from a claim about strings into a measurement."""
+
+    def setUp(self):
+        self.problems = tuple(
+            _problem(pid, ((1.0,),), {"m": (_sample(0, ((1.0,),)),)}) for pid in (0, 1, 2)
+        )
+
+    def _two_sessions(self, first, later):
+        return _record(
+            self.problems,
+            calibration=first,
+            segments=(
+                _segment("2026-01-01", (0, 1), calibration=first),
+                _segment("2026-01-02", (2,), calibration=later),
+            ),
+        )
+
+    def test_a_record_without_a_probe_reports_neither_drift_nor_a_gap(self):
+        record = _record(self.problems)
+        self.assertIsNone(record.environment.calibration)
+        self.assertEqual(record.calibration_drift(), ())
+        self.assertEqual(record.calibration_gaps(), ())
+        self.assertEqual(record.caveats(), ())
+
+    def test_a_fine_probe_that_did_not_move_says_nothing(self):
+        record = self._two_sessions(_probe(), _probe())
+        (started, drift), = record.calibration_drift()
+        self.assertEqual(started, "2026-01-02")
+        self.assertAlmostEqual(drift.factor, 1.0)
+        self.assertEqual(record.calibration_gaps(), ())
+        self.assertEqual(len(record.caveats()), 1)  # the resume itself, nothing more
+
+    def test_a_coarse_probe_says_so_even_on_a_single_session_run(self):
+        record = _record(self.problems, calibration=_probe(noise=_COARSE))
+        caveat = record.caveats()[0]
+        self.assertIn("resolves a differential only to 1.300", caveat)
+        self.assertIn(f"coarser than the {DRIFT_CAVEAT}", caveat)
+
+    def test_measured_drift_becomes_a_caveat_naming_both_components(self):
+        record = self._two_sessions(_probe(), _probe(scale=1.20))
+        caveat = record.caveats()[1]
+        self.assertIn("2026-01-02: relative speed drifted by 1.200", caveat)
+        self.assertIn(f"past the {DRIFT_CAVEAT:.3f}", caveat)
+        self.assertIn("which cancels in Eq. (1) and this does not", caveat)
+
+    def test_a_uniform_slowdown_between_sessions_is_not_a_caveat(self):
+        """The component Eq. (1) cancels must not read as an incomparable session."""
+        slower = Calibration(
+            times={n: tuple(2.0 * t for t in s) for n, s in _probe().times.items()},
+            repeats=PAPER_REPEATS,
+            aggregator="hodges_lehmann",
+        )
+        record = self._two_sessions(_probe(), slower)
+        (_, drift), = record.calibration_drift()
+        self.assertAlmostEqual(drift.uniform, 2.0)
+        self.assertAlmostEqual(drift.factor, 1.0)
+        self.assertEqual(len(record.caveats()), 1)
+
+    def test_drift_within_what_the_probes_resolve_is_not_reported_as_drift(self):
+        record = self._two_sessions(_probe(noise=_COARSE), _probe(noise=_COARSE, scale=1.2))
+        (_, drift), = record.calibration_drift()
+        self.assertAlmostEqual(drift.factor, 1.2)
+        self.assertFalse(drift.caveat)
+        self.assertNotIn("relative speed drifted", " ".join(record.caveats()))
+
+    def test_a_session_without_a_probe_is_a_gap_not_a_silence(self):
+        record = self._two_sessions(_probe(), None)
+        self.assertEqual(record.calibration_drift(), ())
+        self.assertEqual(record.calibration_gaps(), ("2026-01-02: no calibration probe",))
+        self.assertIn("drift unmeasured, 2026-01-02: no calibration probe", record.caveats())
+
+    def test_a_first_session_without_a_probe_cannot_be_compared_against(self):
+        record = _record(
+            self.problems,
+            segments=(
+                _segment("2026-01-01", (0, 1)),
+                _segment("2026-01-02", (2,), calibration=_probe()),
+            ),
+        )
+        self.assertEqual(record.calibration_drift(), ())
+        self.assertIn("the first session has no calibration probe", record.caveats()[1])
+
+    def test_probes_of_different_work_are_a_gap_rather_than_a_comparison(self):
+        record = self._two_sessions(_probe(), _probe(version=CALIBRATION_VERSION + 1))
+        self.assertEqual(record.calibration_drift(), ())
+        self.assertIn("measures different work", record.calibration_gaps()[0])
+        self.assertIn("v1 6xhodges_lehmann over 2 replicates, then v2", record.caveats()[1])
+
+
+class RecordAttemptedTest(unittest.TestCase):
+    """What lets a checkpoint of an interrupted run own up to being one."""
+
+    def setUp(self):
+        self.problems = tuple(
+            _problem(pid, ((1.0,),), {"m": (_sample(0, ((1.0,),)),)}) for pid in (0, 1, 2)
+        )
+
+    def test_a_record_that_says_nothing_attempted_what_it_holds(self):
+        record = _record(self.problems)
+        self.assertEqual(record.attempted, (0, 1, 2))
+        self.assertEqual(record.missing(), ())
+        self.assertTrue(record.complete)
+
+    def test_a_recorded_failure_counts_as_reached(self):
+        record = _record(self.problems, failures=((9, "reference crashed"),))
+        self.assertEqual(record.attempted, (0, 1, 2, 9))
+        self.assertTrue(record.complete)
+
+    def test_an_interrupted_record_names_what_it_never_reached(self):
+        record = _record(self.problems, attempted=(0, 1, 2, 3, 4))
+        self.assertEqual(record.missing(), (3, 4))
+        self.assertFalse(record.complete)
+
+    def test_attempted_is_sorted_and_typed(self):
+        self.assertEqual(_record(self.problems, attempted=("2", 1, 0)).attempted, (0, 1, 2))
+
+    def test_a_record_cannot_hold_a_problem_it_never_attempted(self):
+        with self.assertRaisesRegex(ValueError, r"never attempted: \[2\]"):
+            _record(self.problems, attempted=(0, 1))
+
+    def test_nor_a_failure_it_never_attempted(self):
+        with self.assertRaisesRegex(ValueError, r"never attempted: \[9\]"):
+            _record(self.problems, failures=((9, "x"),), attempted=(0, 1, 2))
+
+    def test_being_interrupted_is_a_caveat_where_the_means_are_read(self):
+        caveats = _record(self.problems, attempted=(0, 1, 2, 3, 4)).caveats()
+        self.assertIn("interrupted: 2 of 5 attempted", caveats[0])
+        self.assertIn("over a prefix", caveats[0])
+        self.assertEqual(_record(self.problems).caveats(), ())
+
+
 class RecordCodecTest(unittest.TestCase):
     def setUp(self):
         self.record = _record(
@@ -697,10 +873,41 @@ class RecordCodecTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "schema version"):
             record_from_json(json.dumps(raw))
 
+    def test_an_interrupted_record_survives_the_round_trip_as_interrupted(self):
+        record = _record(
+            self.record.problems,
+            failures=self.record.failures,
+            attempted=(1, 2, 3, 9),
+        )
+        parsed = record_from_json(record_to_json(record))
+        self.assertEqual(parsed, record)
+        self.assertEqual(parsed.missing(), (3,))
+        self.assertFalse(parsed.complete)
+
     def test_saving_leaves_no_scratch_file_behind(self):
         with tempfile.TemporaryDirectory() as tmp:
             save_record(self.record, Path(tmp) / "run.json")
             self.assertEqual([p.name for p in Path(tmp).iterdir()], ["run.json"])
+
+    def test_calibrations_survive_the_round_trip_per_segment(self):
+        record = _record(
+            self.record.problems,
+            failures=self.record.failures,
+            calibration=_probe(),
+            segments=(
+                _segment("2026-01-01", (1,), calibration=_probe()),
+                _segment("2026-01-02", (2,), calibration=_probe(scale=1.2)),
+            ),
+        )
+        parsed = record_from_json(record_to_json(record))
+        self.assertEqual(parsed, record)
+        self.assertAlmostEqual(parsed.calibration_drift()[0][1].factor, 1.2)
+
+    def test_a_record_without_a_probe_writes_no_calibration_key(self):
+        """An existing schema 3 record has to stay byte-identical through a rewrite."""
+        raw = json.loads(record_to_json(self.record))
+        self.assertNotIn("calibration", raw["environment"])
+        self.assertIsNone(record_from_json(json.dumps(raw)).environment.calibration)
 
     def test_a_failed_write_leaves_the_old_record_intact(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1049,6 +1256,166 @@ class ResumeMismatchTest(_ResumeCase):
         self.assertIn("repeats:", message)
 
 
+class ResumeCalibrationTest(_ResumeCase):
+    """A probe can add a refusal that strings missed; it can never remove one."""
+
+    def _why(self, first, later, **kwargs):
+        record = self._first(calibration=first)
+        return resume_mismatches(
+            record,
+            self.problems,
+            self.solutions,
+            environment=dataclass_replace(record.environment, calibration=later),
+            **kwargs,
+        )
+
+    def test_a_machine_that_measurably_did_not_move_still_resumes(self):
+        self.assertEqual(self._why(_probe(), _probe()), ())
+
+    def test_a_uniformly_slower_machine_still_resumes(self):
+        """T_i comes from the same session's reference, so a uniform factor cancels."""
+        slower = Calibration(
+            times={n: tuple(2.0 * t for t in s) for n, s in _probe().times.items()},
+            repeats=PAPER_REPEATS,
+            aggregator="hodges_lehmann",
+        )
+        self.assertEqual(self._why(_probe(), slower), ())
+
+    def test_gross_drift_is_refused_in_the_terms_the_score_cares_about(self):
+        why = self._why(_probe(), _probe(scale=1.5))
+        self.assertEqual(len(why), 1)
+        self.assertIn("relative speed drifted by 1.500", why[0])
+        self.assertIn("which cancels in Eq. (1) and this does not", why[0])
+
+    def test_drift_the_probes_cannot_resolve_is_not_refused(self):
+        """Refusing on the instrument's own noise would make every resume impossible."""
+        coarse = _probe(noise=_COARSE)
+        self.assertEqual(self._why(coarse, _probe(noise=_COARSE, scale=1.2)), ())
+
+    def test_a_missing_or_mismatched_probe_never_refuses_on_its_own(self):
+        for first, later in (
+            (None, _probe()),
+            (_probe(), None),
+            (_probe(), _probe(version=CALIBRATION_VERSION + 1, scale=9.0)),
+        ):
+            with self.subTest(first=first is None, later=later is None):
+                self.assertEqual(self._why(first, later), ())
+
+    def test_a_probe_cannot_rescue_a_machine_whose_strings_disagree(self):
+        record = self._first(calibration=_probe())
+        elsewhere = dataclass_replace(
+            record.environment, machine="vax", calibration=_probe()
+        )
+        why = resume_mismatches(
+            record, self.problems, self.solutions, environment=elsewhere
+        )
+        self.assertEqual(len(why), 1)
+        self.assertIn("machine machine:", why[0])
+
+
+class CheckpointTest(_ResumeCase):
+    """Every checkpoint is loaded back off disk, so a bad one fails as a bad record."""
+
+    def setUp(self):
+        super().setUp()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.path = Path(tmp.name) / "nested" / "run.json"
+        self.saved = []
+
+    def _watch(self):
+        real = record_module.save_record
+
+        def spy(record, path):
+            written = real(record, path)
+            self.saved.append(load_record(written))
+            return written
+
+        return mock.patch.object(orchestrate, "save_record", spy)
+
+    def _first(self, **kwargs):
+        kwargs.setdefault("checkpoint", self.path)
+        with self._watch():
+            return super()._first(**kwargs)
+
+    def _resume(self, record, **kwargs):
+        kwargs.setdefault("checkpoint", self.path)
+        with self._watch():
+            return super()._resume(record, **kwargs)
+
+    def test_each_finished_problem_leaves_a_record_that_says_what_is_left(self):
+        self._first(ids=None)
+        self.assertEqual([c.ids() for c in self.saved], [(0,), (0, 1), (0, 1, 2)])
+        self.assertEqual([c.attempted for c in self.saved], [(0, 1, 2)] * 3)
+        self.assertEqual([c.missing() for c in self.saved], [(1, 2), (2,), ()])
+        self.assertEqual([c.complete for c in self.saved], [False, False, True])
+        self.assertIn("interrupted: 2 of 3 attempted", " ".join(self.saved[0].caveats()))
+
+    def test_the_last_checkpoint_holds_everything_the_finished_run_does(self):
+        record = self._first(ids=None)
+        last = self.saved[-1]
+        self.assertEqual(last.problems, record.problems)
+        self.assertEqual(last.failures, record.failures)
+        self.assertEqual(last.attempted, record.attempted)
+        self.assertEqual(
+            [s.problem_ids for s in last.segments], [s.problem_ids for s in record.segments]
+        )
+        self.assertLessEqual(last.finished, record.finished)
+
+    def test_a_crash_leaves_a_prefix_on_disk_that_resume_carries_to_the_end(self):
+        with self.assertRaises(SandboxError):
+            self._first(ids=None, crash=(1,))
+        interrupted = load_record(self.path)
+        self.assertEqual(interrupted.ids(), (0,))
+        self.assertEqual(interrupted.missing(), (1, 2))
+
+        finished = self._resume(interrupted)
+        self.assertEqual(finished.ids(), (0, 1, 2))
+        self.assertTrue(finished.complete)
+        self.assertEqual([s.problem_ids for s in finished.segments], [(0,), (1, 2)])
+
+    def test_a_reference_that_failed_is_checkpointed_with_the_reason(self):
+        self._first(ids=(0, 1), crash=(0,), keep_going=True)
+        self.assertEqual(self.saved[0].problems, ())
+        self.assertEqual(self.saved[0].failures, ((0, "reference crashed"),))
+        self.assertEqual(self.saved[0].missing(), (1,))
+
+    def test_a_prior_failure_keeps_its_reason_until_the_retry_reaches_it(self):
+        first = self._first(ids=(0, 2), crash=(2,), keep_going=True, checkpoint=None)
+        self.assertEqual(self.saved, [])
+
+        self._resume(first, crash=(2,), keep_going=True)
+        # Problem 1 is measured before the retry of 2, and that checkpoint must not
+        # drop the failure it has not yet re-attempted.
+        self.assertEqual(self.saved[0].ids(), (0, 1))
+        self.assertEqual(self.saved[0].failures, ((2, "reference crashed"),))
+        self.assertEqual(self.saved[-1].failures, ((2, "reference crashed"),))
+
+    def test_a_resumed_session_checkpoints_the_whole_record_not_its_own_half(self):
+        first = self._first(ids=(0, 1), checkpoint=None)
+        self._resume(first)
+        self.assertEqual([c.ids() for c in self.saved], [(0, 1, 2)])
+        self.assertEqual([s.problem_ids for s in self.saved[0].segments], [(0, 1), (2,)])
+        self.assertEqual(self.saved[0].attempted, (0, 1, 2))
+
+    def test_a_stride_writes_every_nth_problem_and_no_more(self):
+        record = self._first(ids=None, checkpoint_every=2)
+        self.assertEqual([c.ids() for c in self.saved], [(0, 1)])
+        self.assertEqual(record.ids(), (0, 1, 2))
+
+    def test_nothing_is_written_when_checkpointing_is_off(self):
+        for why, kwargs in {
+            "no destination": {"checkpoint": None},
+            "zero stride": {"checkpoint_every": 0},
+            "negative stride": {"checkpoint_every": -1},
+        }.items():
+            with self.subTest(why=why):
+                self.saved.clear()
+                self._first(ids=None, **kwargs)
+                self.assertEqual(self.saved, [])
+                self.assertFalse(self.path.exists())
+
+
 def _report_record(models=("fast", "slow"), *, metric=PAPER, n_problems=4):
     """A record with enough shape for every report section to have something to say."""
     reference = ((0.4,), (0.7,), (1.0,))
@@ -1130,6 +1497,35 @@ class SummaryTest(unittest.TestCase):
     def test_a_single_session_run_says_nothing_about_sessions(self):
         self.assertNotIn("sessions:", format_summary(_report_record(), resamples=200))
 
+    def test_the_header_states_the_probe_resolution_in_eff_units(self):
+        """A quiet verdict has to be distinguishable from an instrument that is blind."""
+        record = _record(
+            _report_record().problems, metric=PAPER, calibration=_probe(noise=_COARSE)
+        )
+        text = format_summary(record, resamples=200)
+        self.assertIn("calibration: v1, 4 workloads over 2 replicates", text)
+        self.assertIn("resolves a differential to 1.300 (eff@1 to 0.600)", text)
+
+    def test_a_run_without_a_probe_says_comparability_rests_on_strings(self):
+        text = format_summary(_report_record(), resamples=200)
+        self.assertIn("calibration: none, so comparability rests on the strings", text)
+
+    def test_a_resumed_run_reports_the_measured_differential_and_its_verdict(self):
+        record = _record(
+            _report_record().problems,
+            metric=PAPER,
+            calibration=_probe(),
+            segments=(
+                _segment("2026-01-01T00:00:00+00:00", (0,), calibration=_probe()),
+                _segment(
+                    "2026-01-02T00:00:00+00:00", (1, 2, 3), calibration=_probe(scale=1.2)
+                ),
+            ),
+        )
+        text = format_summary(record, resamples=200)
+        self.assertIn("differential 1.200, past what these probes resolve (1.025)", text)
+        self.assertIn("overall speed x1.047, which cancels", text)
+
     def test_a_zero_weight_leaves_the_h_column_unfilled(self):
         record = _report_record(metric=MetricConfig(2.0, (3.0, 3.0, 0.0)))
         text = format_summary(record, resamples=200)
@@ -1192,6 +1588,14 @@ class CliTest(unittest.TestCase):
         cls.script = _script()
 
     def _main(self, argv):
+        """Runs the CLI with the probe off unless the test asked for it.
+
+        A calibration probe is seconds of real timing, so only the test that is
+        about the probe pays for one.
+        """
+        if argv and argv[0] == "run" and "--calibrate" not in argv:
+            argv = [*argv, "--no-calibrate"]
+        argv = [a for a in argv if a != "--calibrate"]
         out, err = io.StringIO(), io.StringIO()
         with redirect_stdout(out), redirect_stderr(err):
             code = self.script.main(argv)
@@ -1216,6 +1620,25 @@ class CliTest(unittest.TestCase):
         self.assertEqual(record.repeats, 1)
         self.assertEqual(record.metric, PAPER)
         self.assertEqual(record.incorrect_samples("reference-copy"), 0)
+
+    def test_a_calibrated_run_records_the_probe_it_timed(self):
+        """The other test that times code: the probe, at its smallest useful size."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "run.json"
+            code, out, err = self._main(
+                ["run", "--calibrate", "--repeats", "1", "--limit", "1",
+                 "--resamples", "50", "--out", str(path)]
+            )
+            self.assertEqual(code, self.script.OK)
+            record = load_record(path)
+        self.assertIn("calibrating", err)
+        self.assertIn("calibration resolves a differential to", err)
+        probe = record.environment.calibration
+        self.assertIsNotNone(probe)
+        self.assertEqual(probe.repeats, 1)
+        self.assertEqual(probe.replicates, REPLICATES)
+        self.assertEqual(record.segments[0].environment.calibration, probe)
+        self.assertIn(f"calibration: v{probe.version}", out)
 
     def test_report_rereads_a_record_without_measuring(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1276,6 +1699,55 @@ class CliTest(unittest.TestCase):
             self.script._out_path(namespace(out=Path("other.json"), resume=resumed)),
             Path("other.json"),
         )
+
+    def test_a_default_destination_is_resolved_once_not_once_per_ask(self):
+        """The checkpoint asks before the run and the crash hint after."""
+        args = self.script.argparse.Namespace(out=None, resume=None)
+        first = self.script._out_path(args)
+        with mock.patch.object(
+            self.script, "_default_out", return_value=Path("runs/elsewhere.json")
+        ):
+            self.assertEqual(self.script._out_path(args), first)
+
+    def test_the_checkpoint_destination_and_stride_reach_the_run(self):
+        seen = {}
+
+        def spy(problems, solutions, **kwargs):
+            seen.update(kwargs)
+            return _report_record()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "run.json"
+            base = ["run", "--quiet", "--resamples", "50"]
+            with mock.patch.object(self.script, "run_evaluation", spy):
+                code, _, _ = self._main(
+                    [*base, "--out", str(path), "--checkpoint-every", "3"]
+                )
+                self.assertEqual(code, self.script.OK)
+                self.assertEqual(seen["checkpoint"], path)
+                self.assertEqual(seen["checkpoint_every"], 3)
+
+                self._main([*base, "--no-save"])
+                self.assertIsNone(seen["checkpoint"])
+
+    def test_a_crash_says_whether_anything_survived_and_how_to_continue(self):
+        def raiser(*args, **kwargs):
+            raise SandboxError("the reference did not run")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "run.json"
+            base = ["run", "--quiet", "--out", str(path)]
+            with mock.patch.object(self.script, "run_evaluation", raiser):
+                _, _, absent = self._main(base)
+                save_record(_report_record(), path)
+                _, _, present = self._main(base)
+                _, _, off = self._main([*base, "--checkpoint-every", "0"])
+                _, _, unsaved = self._main(["run", "--quiet", "--no-save"])
+
+        self.assertIn(f"nothing reached {path} yet", absent)
+        self.assertIn(f"continue it with --resume {path}", present)
+        self.assertIn("no record was being written", off)
+        self.assertIn("no record was being written", unsaved)
 
     def test_resume_extends_a_real_record_in_place(self):
         """Also times code, so it stays at two problems and R = 1."""

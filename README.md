@@ -12,16 +12,16 @@ That document reads as criticism because that is the honest way to write down "h
 
 ## Status
 
-Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, the parity comparison against the published tables, and the pipeline that ties them together, including resumable runs. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (544 tests). Design rationale is in `docs/decisions/`, one file per decision.
+Built and green: the metric core, the timing layer, the sandboxed runner, the data adapter with snapshot pinning, the reporting layer, the parity comparison against the published tables, and the pipeline that ties them together, including resumable and checkpointed runs and a timed calibration probe per session. Everything is stdlib-only and the suite runs with `python3 -m unittest discover -s tests -t .` (612 tests). Design rationale is in `docs/decisions/`, one file per decision.
 
-Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness. The parity *criteria*, though, are already fixed in writing — [`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md) states the tolerances, what the published spacing can resolve at all, and one signed prediction, all derived before any measurement exists.
+Blocked, and not on code: the upstream snapshot needs network access this environment does not have, and no timing number from a 2-core VM is worth reporting. Parity and the §2.2 measurement are both waiting on the data and on hardware, not on more harness. The parity *criteria*, though, are already fixed in writing — [`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md) states the tolerances, what the published spacing can resolve at all, and one signed prediction, all derived before any measurement exists. And "not worth timing on" is now itself a measurement rather than an impression: the calibration probe resolves a differential to about 1.32 here, where the parity tolerance corresponds to 1.025 ([`docs/analysis/probe-floor.md`](docs/analysis/probe-floor.md)).
 
 ## Layout
 
 ```
 enamel_ext/
   data/          problem schema, provenance, generators, published tables, naming  [built]
-  measure/       sandboxed runner, timing backends, repeat aggregation             [built]
+  measure/       sandboxed runner, timing backends, repeats, calibration probe     [built]
   metrics/       eff@k estimator, censored scoring                                 [built]
   report/        bootstrap CIs, tests, h-sweeps, levels, parity                    [built]
   pipeline/      solution sets, run record, resumable orchestrator, text report    [built]
@@ -31,7 +31,7 @@ docs/
   open-questions.md  what the paper leaves to the implementer, and our answers
   decisions/     one file per methodological decision, with rationale
   analysis/      what the paper's own text and published numbers can be made to say
-scripts/         fetch, recovery, and the evaluate entry point
+scripts/         fetch, recovery, probe-floor measurement, the evaluate entry point
 tests/           harness unit tests + parity tests against published numbers
 rpaper1.pdf      the paper itself
 ```
@@ -57,6 +57,31 @@ recorded beside the problems it contributed. It refuses to continue onto a
 different metric, a different snapshot or a different machine, and reports every
 such reason at once. See `docs/decisions/0009-resume.md`.
 
+There is something to resume from because the record is written as the run goes,
+not at the end: every finished problem flushes a complete record to the file the
+run will end up in, so recovery is the same command with `--resume` and the file
+you already have. A record therefore has to be able to say it is a prefix — it
+stores the ids the run set out to attempt, and a report over an interrupted run
+says so in its header rather than quietly averaging over however far it got.
+`--checkpoint-every N` trades granularity for writes. See
+`docs/decisions/0010-checkpointing.md`.
+
+Every session also times a fixed four-workload probe, through the same sandbox
+and the same clock as the run itself, and stores it beside that session's
+problems. It is a vector rather than a stopwatch because a uniform slowdown
+cancels exactly in Eq. (1) — `T_i` is set by the same problem's reference in the
+same session — so the only thing that breaks comparability is a *differential*
+change, and one workload cannot see one. The statistic is the spread of the
+per-workload ratios, judged against a floor each probe measures on its own
+replicates rather than against a constant. It costs 5.2 s and buys two things: a
+resume refusal the four machine strings would have missed, and a number in the
+report saying how blind the check was. On this VM that number is about 1.32,
+where the parity tolerance corresponds to 1.025, so it catches gross drift and
+not the drift parity cares about. See
+`docs/decisions/0011-calibration-probe.md` and
+[`docs/analysis/probe-floor.md`](docs/analysis/probe-floor.md), reproducible with
+`scripts/probe_floor.py`.
+
 The data itself is not in the tree: `scripts/fetch_upstream.py` fetches one
 pinned commit into a git-ignored cache, verifies it against a committed lock, and
 `ENAMEL_EXT_DATA` repoints the cache at that snapshot. See
@@ -67,7 +92,7 @@ license question under "Credit".
 
 1. **Reimplement the metric.** Eq. (1)–(6) with `α=2, h=(3,3,4), R=6, M=(8,4,4,4)`, level 0 as correctness filter, `Tᵢ = 2·max` over all levels. Along the way: measure the distribution of `q = t*(level l) / t*(level 3)` across all 142 problems to settle §2.2. *(Estimator reproduced and checked exactly; the Appendix C.1 "further calibrate" step is [resolved](docs/analysis/appendix-c1-calibration.md) and needs no code; the `q` measurement is code waiting on data.)*
 2. **Parity.** Reproduce the published ranking on our hardware within a stated tolerance. Document every discrepancy. **This gates the rest of the list.** *(The tolerance is stated and pre-committed: `eff@1` within 0.05 and `pass@1` within 0.01 per model, no inversion of a pair the paper separates by more than 0.10, with coverage reported beside the verdict rather than folded into it — see [`docs/decisions/0007-parity-gate.md`](docs/decisions/0007-parity-gate.md). The comparison and the gate are written and green; the harness runs end to end and the snapshot is pinned. Waiting on the data and a machine worth timing on.)*
-3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment. *(Process-level isolation in place; containerization and the instruction-count metric not started.)*
+3. **Reproducible measurement.** Containerized runner, sandbox, CPU pinning, instruction-count metric, cross-machine and cross-CPython rank-stability experiment. *(Process-level isolation in place; containerization and the instruction-count metric not started. The instrument the cross-machine experiment needs now exists — every session records a calibration probe, and its reach has been measured rather than assumed: about 1.32 on this VM against the 1.025 the parity tolerance would need, and non-stationary enough that it moved 0.25 across five minutes of an idle VM. So the experiment is waiting on a second machine, and a quieter one.)*
 4. **Honest statistics.** Censored scoring, bootstrap CIs, full hyperparameter sweep across all models, pairwise significance tests. *(In every run's report already.)*
 5. **Reference audit.** All 142 references reviewed; second oracle in place; disagreement rate published; anything we beat re-anchored.
 6. **Adversarial generation.** Per-candidate worst-case search; quantify how much scores move versus the fixed generators.

@@ -207,6 +207,19 @@ experiment appears in the paper. Consequence: published `eff@k` values are not
 comparable across labs, nor across time on one lab's evolving toolchain. For a
 benchmark whose stated contribution is rigor, this is the first thing to fix.
 
+What this reimplementation does about it, so far, is measure rather than assert.
+Every session times a fixed four-workload probe and the run record carries it, so
+"same machine" is a measurement rather than a comparison of platform strings
+(decision [0011](decisions/0011-calibration-probe.md)). Two results from building
+it sharpen the paragraphs above. A *uniform* slowdown cancels exactly in Eq. (1),
+because `Tᵢ` comes from the same problem's reference timed in the same session, so
+the quantity that breaks comparability is only the differential the CPython 3.11
+example above describes, and one timed workload cannot see it at all. And the
+instrument's reach on commodity hardware is poor: on this 2-core VM the probe
+resolves a differential to about 1.32, where the 0.05 parity tolerance corresponds
+to 1.025 ([`docs/analysis/probe-floor.md`](analysis/probe-floor.md)). The gap
+between those two numbers is the honest size of this open question.
+
 ### 2.4 The reference is simultaneously the ceiling and the oracle, and there is one annotator
 
 `eff = 1.0` means "expert level" because one expert wrote the reference and
@@ -366,7 +379,7 @@ authors either flag themselves or would likely welcome.
 | *(authors' D.2)* Complexity not measured | Time across ≥5 input scales and fit a scaling exponent, reporting an estimated complexity class. The authors' objection — that high-degree polynomials are indistinguishable from exponentials — is correct, so we report a confidence band and abstain rather than guess when the fit is ambiguous |
 | *(authors' D.2)* Time-only metric | Peak-memory tracking (`tracemalloc` + RSS ceiling) reported as a second axis, never folded into one number, since the time–space tradeoff has no principled exchange rate |
 | §2.8 Unsandboxed execution | Container isolation, no network, read-only mounts, seccomp, hard resource caps |
-| §2.8 Replication cost | Resumable runs, so a crash costs one session instead of the whole run and "start again with fewer problems" stops being the cheap option; each session's machine and clock are recorded beside the problems it contributed, and a continuation onto a differently-behaving machine is refused. See [`decisions/0009-resume.md`](decisions/0009-resume.md). Still open: content-addressed result cache, pinned dependencies, CI on a smoke subset |
+| §2.8 Replication cost | Checkpointed, resumable runs, so a crash costs at most one problem instead of the whole run and "start again with fewer problems" stops being the cheap option; each session's machine and clock are recorded beside the problems it contributed, a continuation onto a differently-behaving machine is refused, and a record that stopped early says so where its means are read. See [`decisions/0009-resume.md`](decisions/0009-resume.md) and [`decisions/0010-checkpointing.md`](decisions/0010-checkpointing.md). Still open: content-addressed result cache, pinned dependencies, CI on a smoke subset |
 | §2.9 25 of 30 rows have no stated checkpoint | Record the five the paper does state, resolve run names onto table keys through case/punctuation normalization only, and report every name we could not match instead of guessing one. See [`decisions/0008-model-naming.md`](decisions/0008-model-naming.md) |
 | §2.9 `n` per model unpublished | Count the released samples per model and publish the table the paper omits; until then target the greedy column, which has no `n`, and state any sampling comparison as an interval rather than a point |
 

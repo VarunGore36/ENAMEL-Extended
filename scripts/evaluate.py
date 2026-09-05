@@ -20,6 +20,7 @@ from enamel_ext.data.sources import (  # noqa: E402
     problem_set_from_json,
     synthetic_problem_set,
 )
+from enamel_ext.measure.calibrate import probe  # noqa: E402
 from enamel_ext.measure.runner import PAPER_REPEATS, RunConfig  # noqa: E402
 from enamel_ext.measure.sandbox import SandboxError  # noqa: E402
 from enamel_ext.metrics.score import PAPER, MetricConfig  # noqa: E402
@@ -68,6 +69,13 @@ def _parser() -> argparse.ArgumentParser:
         default=None,
         help="extend this record: measure only what it is missing, retrying its failures",
     )
+    run.add_argument(
+        "--checkpoint-every",
+        type=int,
+        default=1,
+        metavar="N",
+        help="save the record-so-far every N problems; 0 to save only at the end",
+    )
     run.add_argument("--models", default="", help="comma-separated subset of models")
     run.add_argument("--ids", default="", help="comma-separated subset of problem ids")
     run.add_argument("--limit", type=int, default=0, help="attempt only the first N problems")
@@ -80,6 +88,11 @@ def _parser() -> argparse.ArgumentParser:
         help="record problems whose reference fails instead of stopping",
     )
     run.add_argument("--quiet", action="store_true", help="no per-problem progress on stderr")
+    run.add_argument(
+        "--no-calibrate",
+        action="store_true",
+        help="skip the calibration probe; comparability then rests on machine strings",
+    )
     _report_flags(run)
 
     report = sub.add_parser("report", help="print the report for an existing record")
@@ -140,6 +153,17 @@ def _run(args: argparse.Namespace) -> int:
         raise ValueError("no problem is both present in the data and answered by a model")
 
     on_progress = None if args.quiet else lambda msg: print(msg, file=sys.stderr)
+    calibration = None
+    if not args.no_calibrate:
+        if on_progress is not None:
+            on_progress("calibrating")
+        calibration = probe(repeats=config.repeats, aggregator=config.aggregator)
+        if on_progress is not None:
+            on_progress(
+                f"calibration resolves a differential to {calibration.resolution():.3f}"
+            )
+    # Resolved before measuring, because a checkpoint has to know where it lands.
+    destination = None if args.no_save else _out_path(args)
     if args.resume is not None:
         record = resume_evaluation(
             load_record(args.resume),
@@ -151,6 +175,9 @@ def _run(args: argparse.Namespace) -> int:
             ids=ids,
             keep_going=args.keep_going,
             on_progress=on_progress,
+            checkpoint=destination,
+            checkpoint_every=args.checkpoint_every,
+            calibration=calibration,
         )
     else:
         record = run_evaluation(
@@ -162,19 +189,35 @@ def _run(args: argparse.Namespace) -> int:
             ids=ids,
             keep_going=args.keep_going,
             on_progress=on_progress,
+            checkpoint=destination,
+            checkpoint_every=args.checkpoint_every,
+            calibration=calibration,
         )
-    if not args.no_save:
-        path = save_record(record, _out_path(args))
-        print(f"record written to {path}", file=sys.stderr)
+    if destination is not None:
+        print(f"record written to {save_record(record, destination)}", file=sys.stderr)
     print(_summary(record, args), end="")
     return OK
 
 
 def _out_path(args: argparse.Namespace) -> Path:
-    """Resume writes back over the record it extended unless told otherwise."""
-    if args.out is not None:
-        return args.out
-    return args.resume if args.resume is not None else _default_out()
+    """Resume writes back over the record it extended unless told otherwise.
+
+    Memoized into ``args.out``: checkpointing asks before the run and the crash
+    hint asks after, and a default name must not restamp itself in between.
+    """
+    if args.out is None:
+        args.out = args.resume if args.resume is not None else _default_out()
+    return args.out
+
+
+def _resume_hint(args: argparse.Namespace) -> str:
+    """What is salvageable after a run dies, true whether or not anything is."""
+    if args.command != "run" or args.no_save or args.checkpoint_every <= 0:
+        return "no record was being written as it went, so this run starts over"
+    path = _out_path(args)
+    if not path.is_file():
+        return f"nothing reached {path} yet, so this run starts over"
+    return f"what was measured is in {path}; continue it with --resume {path}"
 
 
 def _summary(record, args: argparse.Namespace) -> str:
@@ -200,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         return _run(args) if args.command == "run" else _report(args)
     except SandboxError as exc:
         print(f"the run did not finish: {exc}", file=sys.stderr)
+        print(_resume_hint(args), file=sys.stderr)
         return RUN_FAILURE
     except (ValueError, KeyError, OSError) as exc:
         print(f"error: {_message(exc)}", file=sys.stderr)

@@ -2,7 +2,9 @@
 
 Status: accepted. Code: `enamel_ext/pipeline/record.py`,
 `enamel_ext/pipeline/orchestrate.py`, `enamel_ext/pipeline/summary.py`,
-`scripts/evaluate.py`, tests `tests/test_pipeline.py` (121 tests).
+`scripts/evaluate.py`, tests `tests/test_pipeline.py`: `SegmentTest`,
+`RecordSegmentsTest`, `ResumeTest` and `ResumeMismatchTest`, plus the segment
+cases in `RecordCodecTest` and `SummaryTest`.
 
 Decision 0006 left resume as an open item: "the record is the right place to
 build resume on, since it already says exactly what was measured, but nothing
@@ -168,13 +170,21 @@ longest. `--out` still overrides it for anyone who wants the intermediate kept.
   current session measured since it started, because the record is written once
   at the end. Periodic saves would need the segment to be closed and reopened,
   or a partial segment concept, and the retry rule already makes the loss
-  bounded by one session.
+  bounded by one session. **Resolved** by
+  [`0010-checkpointing.md`](0010-checkpointing.md), which rewrites the
+  in-progress segment at each flush rather than closing it; the "bounded by one
+  session" reasoning was wrong for the first run, which has no earlier session.
 - Comparability is judged on fields that are cheap to read, not on evidence. Two
   sessions on the same `platform` string can still differ in CPU frequency
   scaling, thermal state, or a kernel update that did not change the string. A
   stronger check would time a fixed calibration workload at the start of every
   session and compare, which is the same instrument decision 0007's differential
-  bound wants and neither has yet.
+  bound wants and neither has yet. **Addressed** by
+  [`0011-calibration-probe.md`](0011-calibration-probe.md), with a large caveat:
+  the probe now adds a refusal the strings would have missed, but on this hardware
+  it resolves a differential only to about 1.32, so it catches gross drift and not
+  the 1.025 the parity tolerance needs. The four string fields are unchanged and
+  still carry every refusal they did before.
 - The tolerance argument above assumes the paper's global normalization. Under
   the per-level normalization of §2.2 each level has its own limit but still one
   reference per problem per level measured in the same session, so a uniform

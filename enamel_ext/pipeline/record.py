@@ -17,6 +17,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from enamel_ext.data.schema import Provenance
 from enamel_ext.data.sources import provenance_from_json, provenance_to_json
+from enamel_ext.measure.calibrate import DRIFT_CAVEAT, Calibration, Drift, compare
 from enamel_ext.measure.runner import PAPER_REPEATS, SolutionMeasurement
 from enamel_ext.metrics import effk
 from enamel_ext.metrics.score import TIMEOUT, MetricConfig, sample_score
@@ -37,7 +38,7 @@ __all__ = [
     "save_record",
 ]
 
-RECORD_SCHEMA_VERSION = 2
+RECORD_SCHEMA_VERSION = 3
 
 #: Environment fields that have to agree for two measurement sessions to belong
 #: to one run. ``load_average`` is deliberately absent; see decision 0009.
@@ -99,9 +100,15 @@ class Environment:
     machine: str
     cpu_count: int
     load_average: tuple[float, ...] | None = None
+    calibration: Calibration | None = None
 
     @classmethod
-    def capture(cls) -> Environment:
+    def capture(cls, calibration: Calibration | None = None) -> Environment:
+        """Read the cheap facts. The probe is passed in, never taken here.
+
+        ``capture`` is called all over the test suite and has to stay free; timing
+        a probe is seconds of work and is the caller's decision.
+        """
         try:
             load: tuple[float, ...] | None = tuple(round(x, 3) for x in os.getloadavg())
         except (AttributeError, OSError):  # not available on every platform
@@ -112,6 +119,7 @@ class Environment:
             machine=platform.machine(),
             cpu_count=os.cpu_count() or 0,
             load_average=load,
+            calibration=calibration,
         )
 
     def differences(self, other: Environment) -> tuple[str, ...]:
@@ -119,7 +127,8 @@ class Environment:
 
         ``load_average`` is left out on purpose: it differs between almost any two
         sessions and is noise on the measurement rather than a change in what is
-        being measured.
+        being measured. The calibration is left out too, because it is compared by
+        magnitude rather than by equality; see :meth:`RunRecord.calibration_drift`.
         """
         return tuple(
             f"{field}: {getattr(self, field)!r} then {getattr(other, field)!r}"
@@ -272,7 +281,9 @@ class RunRecord:
     a number computed over fewer problems can be seen for what it is.
     ``started``, ``finished`` and ``environment`` describe the session the run
     began in; ``segments`` describes each session separately, which for a resumed
-    run is the only place the second machine is named.
+    run is the only place the second machine is named. ``attempted`` is what the
+    run set out to measure, which is what makes an interrupted record
+    distinguishable from a finished one.
     """
 
     started: str
@@ -288,6 +299,7 @@ class RunRecord:
     problems: tuple[ProblemRecord, ...]
     failures: tuple[tuple[int, str], ...] = ()
     segments: tuple[Segment, ...] = ()
+    attempted: tuple[int, ...] = ()
     schema_version: int = RECORD_SCHEMA_VERSION
 
     def __post_init__(self) -> None:
@@ -304,6 +316,7 @@ class RunRecord:
             raise ValueError("a run record needs at least one problem or one failure")
         if self.repeats < 1:
             raise ValueError(f"repeats must be >= 1, got {self.repeats}")
+        self._check_attempted(ids)
         self._check_segments(ids)
         for problem in ordered:
             if problem.n_timed_levels != self.metric.n_levels:
@@ -317,6 +330,19 @@ class RunRecord:
                     f"problem {problem.problem_id}: stored time limit {problem.time_limit} is "
                     f"not alpha * worst reference case ({expected})"
                 )
+
+    def _check_attempted(self, ids: Sequence[int]) -> None:
+        """Default to "attempted exactly what it holds", and never claim fewer.
+
+        A checkpoint of an interrupted run is otherwise indistinguishable from a
+        finished one. See docs/decisions/0010-checkpointing.md.
+        """
+        accounted = set(ids) | {pid for pid, _ in self.failures}
+        attempted = sorted({int(pid) for pid in self.attempted}) or sorted(accounted)
+        object.__setattr__(self, "attempted", tuple(attempted))
+        unclaimed = sorted(accounted - set(attempted))
+        if unclaimed:
+            raise ValueError(f"record holds problems it never attempted: {unclaimed}")
 
     def _check_segments(self, ids: Sequence[int]) -> None:
         """Default a single-session run to one segment; otherwise account for every id.
@@ -356,6 +382,16 @@ class RunRecord:
     def resumed(self) -> bool:
         return len(self.segments) > 1
 
+    @property
+    def complete(self) -> bool:
+        """Whether every attempted problem has a measurement or a recorded failure."""
+        return not self.missing()
+
+    def missing(self) -> tuple[int, ...]:
+        """Attempted problems with neither, which is what an interruption leaves."""
+        accounted = set(self.ids()) | {pid for pid, _ in self.failures}
+        return tuple(pid for pid in self.attempted if pid not in accounted)
+
     def drift(self) -> tuple[str, ...]:
         """How later sessions' machines differed from the first one's."""
         first = self.segments[0].environment
@@ -363,6 +399,44 @@ class RunRecord:
         for segment in self.segments[1:]:
             for difference in first.differences(segment.environment):
                 out.append(f"{segment.started}: {difference}")
+        return tuple(out)
+
+    def calibration_drift(self) -> tuple[tuple[str, Drift], ...]:
+        """Each later session's probe against the first session's, where both exist.
+
+        Compared against the first segment for the same reason :meth:`drift` is: the
+        first session is the one the reference times were taken in, and every later
+        session's numbers are read against those.
+        """
+        first = self.segments[0].environment.calibration
+        if first is None:
+            return ()
+        return tuple(
+            (segment.started, compare(first, later))
+            for segment in self.segments[1:]
+            for later in (segment.environment.calibration,)
+            if later is not None and first.comparable(later)
+        )
+
+    def calibration_gaps(self) -> tuple[str, ...]:
+        """Sessions whose drift against the first one could not be measured."""
+        first = self.segments[0].environment.calibration
+        if first is None:
+            if any(s.environment.calibration is not None for s in self.segments[1:]):
+                return ("the first session has no calibration probe to compare against",)
+            return ()
+        out = []
+        for segment in self.segments[1:]:
+            later = segment.environment.calibration
+            if later is None:
+                out.append(f"{segment.started}: no calibration probe")
+            elif not first.comparable(later):
+                out.append(
+                    f"{segment.started}: calibration probe measures different work "
+                    f"(v{first.version} {first.repeats}x{first.aggregator} over "
+                    f"{first.replicates} replicates, then v{later.version} "
+                    f"{later.repeats}x{later.aggregator} over {later.replicates})"
+                )
         return tuple(out)
 
     def __len__(self) -> int:
@@ -545,6 +619,11 @@ class RunRecord:
     def caveats(self) -> tuple[str, ...]:
         """Everything that should be read alongside this run's numbers."""
         out = list(self.environment.caveats())
+        if not self.complete:
+            out.append(
+                f"interrupted: {len(self.missing())} of {len(self.attempted)} attempted "
+                "problems were never measured, so every mean here is over a prefix"
+            )
         if self.repeats < PAPER_REPEATS:
             out.append(f"{self.repeats} repeats per case, below the paper's R = {PAPER_REPEATS}")
         if self.failures:
@@ -563,7 +642,29 @@ class RunRecord:
                 )
             )
             out += [f"machine changed between sessions, {d}" for d in self.drift()]
+        out += self._calibration_caveats()
         return tuple(out)
+
+    def _calibration_caveats(self) -> list[str]:
+        """What the probe can and cannot say, which is not the same question."""
+        first = self.segments[0].environment.calibration
+        out = []
+        if first is not None and not first.resolves_parity():
+            out.append(
+                f"calibration probe resolves a differential only to "
+                f"{first.resolution():.3f}, coarser than the {DRIFT_CAVEAT} a parity "
+                "tolerance needs, so drift below that is undetectable on this machine"
+            )
+        for started, drift in self.calibration_drift():
+            if drift.caveat:
+                out.append(
+                    f"{started}: relative speed drifted by {drift.factor:.3f}, past the "
+                    f"{drift.caveat_at:.3f} these probes can resolve; overall speed "
+                    f"changed by {drift.uniform:.3f}, which cancels in Eq. (1) and this "
+                    "does not"
+                )
+        out += [f"drift unmeasured, {gap}" for gap in self.calibration_gaps()]
+        return out
 
 def _sample_to_json(record: SampleRecord) -> dict[str, Any]:
     out: dict[str, Any] = {
@@ -612,8 +713,29 @@ def _problem_from_json(raw: Mapping[str, Any]) -> ProblemRecord:
         },
     )
 
-def _environment_to_json(environment: Environment) -> dict[str, Any]:
+def _calibration_to_json(calibration: Calibration) -> dict[str, Any]:
     return {
+        "version": calibration.version,
+        "repeats": calibration.repeats,
+        "aggregator": calibration.aggregator,
+        "times": {name: list(series) for name, series in calibration.times.items()},
+    }
+
+
+def _calibration_from_json(raw: Mapping[str, Any]) -> Calibration:
+    return Calibration(
+        times={
+            str(name): tuple(_check_time(float(t), what=f"calibration {name}") for t in series)
+            for name, series in raw["times"].items()
+        },
+        repeats=int(raw["repeats"]),
+        aggregator=str(raw["aggregator"]),
+        version=int(raw["version"]),
+    )
+
+
+def _environment_to_json(environment: Environment) -> dict[str, Any]:
+    out: dict[str, Any] = {
         "python": environment.python,
         "platform": environment.platform,
         "machine": environment.machine,
@@ -622,16 +744,21 @@ def _environment_to_json(environment: Environment) -> dict[str, Any]:
             list(environment.load_average) if environment.load_average is not None else None
         ),
     }
+    if environment.calibration is not None:
+        out["calibration"] = _calibration_to_json(environment.calibration)
+    return out
 
 
 def _environment_from_json(raw: Mapping[str, Any]) -> Environment:
     load = raw.get("load_average")
+    calibration = raw.get("calibration")
     return Environment(
         python=raw["python"],
         platform=raw["platform"],
         machine=raw["machine"],
         cpu_count=int(raw["cpu_count"]),
         load_average=tuple(float(x) for x in load) if load is not None else None,
+        calibration=_calibration_from_json(calibration) if calibration else None,
     )
 
 
@@ -660,6 +787,7 @@ def record_to_json(record: RunRecord) -> str:
         "finished": record.finished,
         "environment": _environment_to_json(record.environment),
         "segments": [_segment_to_json(s) for s in record.segments],
+        "attempted": list(record.attempted),
         "metric": {
             "alpha": record.metric.alpha,
             "level_weights": list(record.metric.level_weights),
@@ -678,6 +806,7 @@ def record_to_json(record: RunRecord) -> str:
         "problems": [_problem_to_json(p) for p in record.problems],
     }
     return json.dumps(payload, indent=2, sort_keys=True, allow_nan=False)
+
 
 def record_from_json(text: str) -> RunRecord:
     """Parse a run record. Validation lives in the dataclasses, so a file that
@@ -706,6 +835,7 @@ def record_from_json(text: str) -> RunRecord:
         problems=tuple(_problem_from_json(p) for p in raw["problems"]),
         failures=tuple((int(pid), why) for pid, why in raw.get("failures", ())),
         segments=tuple(_segment_from_json(s) for s in raw.get("segments", ())),
+        attempted=tuple(int(pid) for pid in raw.get("attempted", ())),
     )
 
 

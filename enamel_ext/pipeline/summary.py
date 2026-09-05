@@ -18,7 +18,7 @@ from enamel_ext.report.levels import (
     limit_level_counts,
     sensitivity_shares,
 )
-from enamel_ext.report.parity import compare, format_parity
+from enamel_ext.report.parity import compare, differential_bound, format_parity
 from enamel_ext.report.stats import (
     bootstrap_ci,
     kendall_tau,
@@ -65,6 +65,27 @@ def _machine(env: Environment) -> str:
     return f"{env.python}, {env.platform}, {env.cpu_count} cores, {load}"
 
 
+def _calibration(record: RunRecord) -> list[str]:
+    """What the probe measured, and what a differential that size costs in eff@1."""
+    first = record.environment.calibration
+    if first is None:
+        return ["  calibration: none, so comparability rests on the strings above"]
+    resolution = first.resolution()
+    out = [
+        f"  calibration: v{first.version}, {len(first.names)} workloads over "
+        f"{first.replicates} replicates, resolves a differential to "
+        f"{_num(resolution)} (eff@1 to {_num(differential_bound(resolution))})"
+    ]
+    for started, drift in record.calibration_drift():
+        verdict = "past" if drift.caveat else "within"
+        out.append(
+            f"    {started}: differential {_num(drift.factor)}, {verdict} what these "
+            f"probes resolve ({_num(drift.caveat_at)}); overall speed "
+            f"x{_num(drift.uniform)}, which cancels"
+        )
+    return out
+
+
 def _header(record: RunRecord) -> list[str]:
     out = [
         "ENAMEL-Extended run",
@@ -78,6 +99,7 @@ def _header(record: RunRecord) -> list[str]:
         f"  solutions: {record.solutions.name} ({record.solutions.url}) "
         f"{record.solutions_fingerprint[:12]}",
     ]
+    out += _calibration(record)
     if record.resumed:
         out.append(f"  sessions: {len(record.segments)}")
         for index, segment in enumerate(record.segments, start=1):
