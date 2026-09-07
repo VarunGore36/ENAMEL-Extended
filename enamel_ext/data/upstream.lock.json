@@ -1,0 +1,129 @@
+{
+  "archive_bytes": 175947,
+  "archive_sha256": "fc1b73d05ef5be6ce8af6bddddba53d42f61686587ec8fc4dd788916f85f0bf1",
+  "archive_url": "https://codeload.github.com/q-rz/enamel/tar.gz/b97da79c779b98eaa8b2a1b17a13d2eb0b6d16a5",
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "d1dc73e74bf6f92c30d109caa1505619ae61ec69570593aaf1a04d2c4e1df2b3",
+      "size": 3103
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "size": 11357
+    },
+    {
+      "path": "README.md",
+      "sha256": "885ec63741c8cc583937475e5ba62a588cdeec595cf43091dff28703ba5e8adb",
+      "size": 6817
+    },
+    {
+      "path": "cache/__init__.py",
+      "sha256": "334359b90efed75da5f0ada1d5e6b256f4a6bd0aee7eb39c0f90182a021ffc8b",
+      "size": 1
+    },
+    {
+      "path": "dataset/enamel.csv",
+      "sha256": "1b77dba08bd3dedec199abce593c86a4f611c288475c318e1775bd56d1419b14",
+      "size": 197530
+    },
+    {
+      "path": "demo.py",
+      "sha256": "494b414b0ceb86d485d97338487546c1d7850a5bc2bf8384308242afd541b6ad",
+      "size": 6075
+    },
+    {
+      "path": "enam/__init__.py",
+      "sha256": "23807f6486112d766c1b51722c6e927d1d90bc661af4c4162e9083c477499ae1",
+      "size": 185
+    },
+    {
+      "path": "enam/datautils.py",
+      "sha256": "f29a4e881e30baa6d498108f6f1a646cb3cb8a4d585d23cc7bf1581e6bbad43f",
+      "size": 2453
+    },
+    {
+      "path": "enam/evaluate.py",
+      "sha256": "7b2bab46734aea01c5b102d5673ff9e7a0409d87f88ac692b7b4f12776287d45",
+      "size": 11536
+    },
+    {
+      "path": "enam/execute.py",
+      "sha256": "67ef5ea56ef6eef37f6b5b154a4f786c96cae7b9c9ff77b0a8450828adf3f416",
+      "size": 5299
+    },
+    {
+      "path": "enam/header.py",
+      "sha256": "4e2eda22a1f77bff64cf6e663c745e73ece6820f70b9cd3ebcd9e84066680586",
+      "size": 295
+    },
+    {
+      "path": "enam/utils.py",
+      "sha256": "bc82bec953f079faa2a1b5d3b0269262f159d8a4f51235e8e71c370935ff3f2a",
+      "size": 594
+    },
+    {
+      "path": "figures/fig-enamel.svg",
+      "sha256": "30086eb5e25094b7998457516b8adefd754ca68acb7ea53e1b54582d42ef8f9c",
+      "size": 95739
+    },
+    {
+      "path": "figures/img.shields.io badge 2025-ICLR-60C332.svg",
+      "sha256": "51bb4ff6f24544466ac15424a19d4544384feebb038aacf3d215e51cd9fb097c",
+      "size": 1122
+    },
+    {
+      "path": "figures/img.shields.io badge 2406.06647-arXiv-B31B1B.svg",
+      "sha256": "ea15fb245ea7297b541bcbb1014bed6f49d64caf7170838091cacb96241b83c7",
+      "size": 1153
+    },
+    {
+      "path": "figures/img.shields.io badge enam-PyPI-006DAD.svg",
+      "sha256": "526d2528b866dbdfe85e05762dba3db647878bee566983072bba39537c05185c",
+      "size": 1122
+    },
+    {
+      "path": "figures/img.shields.io badge enamel-GitHub-892793.svg",
+      "sha256": "80d5c574ebba242b210bada56fedc77c9735a15062b4445cbe1ddc1e8844ef46",
+      "size": 1138
+    },
+    {
+      "path": "figures/img.shields.io badge enamel-HuggingFace-FF9D0B.svg",
+      "sha256": "3bb559d40c1fc79e4d914150750c5b207a9ec3ea9868c14b5f7de23885d15dab",
+      "size": 1161
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "363dd8617b1aba339f87fc2eb813281d6da748270e69cb75032f5236d589a20f",
+      "size": 85
+    },
+    {
+      "path": "samples/enamel-references.json",
+      "sha256": "039af367c681d4437aec4249e216931bab9041f0f5fff80b9ec7ca48fb0c19a2",
+      "size": 115835
+    },
+    {
+      "path": "samples/humaneval-canonical.json",
+      "sha256": "e7d6b0af682d681c2f7869e1f7a56ccf03f9cdb1e1794f2748b0a7753f179681",
+      "size": 109348
+    },
+    {
+      "path": "samples/humanevalplus-canonical.json",
+      "sha256": "7f1e1387d9f428bedc7def6b106d404f9d8a7f5bf51dc99dc7b0a08bb4837834",
+      "size": 133208
+    },
+    {
+      "path": "setup.cfg",
+      "sha256": "19ae0d97469a263c67f718cbb0cca1f0f0aa3f8eb02dbd9a339ecee1dea30ebc",
+      "size": 773
+    }
+  ],
+  "license": "unknown",
+  "name": "ENAMEL (q-rz/enamel)",
+  "repo": "q-rz/enamel",
+  "retrieved": "2026-09-07",
+  "revision": "b97da79c779b98eaa8b2a1b17a13d2eb0b6d16a5",
+  "schema_version": 1,
+  "url": "https://github.com/q-rz/enamel"
+}

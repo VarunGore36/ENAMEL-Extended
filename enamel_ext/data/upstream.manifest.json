@@ -1,0 +1,9 @@
+{
+  "name": "ENAMEL (q-rz/enamel)",
+  "repo": "q-rz/enamel",
+  "revision": "b97da79c779b98eaa8b2a1b17a13d2eb0b6d16a5",
+  "archive_sha256": "fc1b73d05ef5be6ce8af6bddddba53d42f61686587ec8fc4dd788916f85f0bf1",
+  "license": "unknown",
+  "url": "https://github.com/q-rz/enamel",
+  "include": ["*"]
+}
