@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-08T17:28:35.923650+00:00",
-  "generator_commit": "d5eb3e8",
-  "run_count": 14,
+  "generated_at": "2026-09-08T18:10:52.870944+00:00",
+  "generator_commit": "495a333",
+  "run_count": 16,
   "latest": {
-    "experiment_id": "2026-09-08T11:16:23_d5eb3e8",
-    "timestamp": "2026-09-08T11:16:23+00:00",
-    "finished": "2026-09-08T11:26:07+00:00",
-    "git_commit": "d5eb3e8",
+    "experiment_id": "2026-09-08T17:57:56_495a333",
+    "timestamp": "2026-09-08T17:57:56+00:00",
+    "finished": "2026-09-08T18:07:42+00:00",
+    "git_commit": "495a333",
     "git_dirty": true,
     "benchmark": "ENAMEL-Extended v0.0.1",
     "python": "CPython 3.14.7",
@@ -28,225 +28,113 @@
       "fingerprint": "6b53df26d6c7"
     },
     "solutions": {
-      "name": "EvalPlus (evalplus/evalplus)",
-      "fingerprint": "382e21fead6f"
+      "name": "BigCode Evaluation Harness",
+      "fingerprint": "9bd5c5b5bbb4"
     },
     "summary": {
       "problems_attempted": 50,
-      "problems_scored": 34,
+      "problems_scored": 31,
       "problems_failed": 0,
-      "models": 17
+      "models": 3
     },
     "calibration": {
       "aggregator": "hodges_lehmann",
       "repeats": 6,
       "times": {
         "alloc_churn": [
-          0.011755716499465052,
-          0.01601201000084984,
-          0.015475689000595594,
-          0.015769214000101783,
-          0.012788812500730273,
-          0.011583573499592603,
-          0.015739420499812695,
-          0.013767411500339222
+          0.010992588999215513,
+          0.011250198500420083,
+          0.011061309000069741,
+          0.011327596999763045,
+          0.013239551999504329,
+          0.012086755501513835,
+          0.013728903000810533,
+          0.011041592500987463
         ],
         "attr_call": [
-          0.006514028499623237,
-          0.007189472000391106,
-          0.009285848500439897,
-          0.0074031959993590135,
-          0.00756497250040411,
-          0.00650802299969655,
-          0.010545239999373734,
-          0.010288741000294976
+          0.0066125320008723065,
+          0.0066242770008102525,
+          0.007491013999242568,
+          0.007576710500870831,
+          0.008250525999756064,
+          0.006472080498497235,
+          0.006524133999846526,
+          0.006616019996727118
         ],
         "bulk_builtin": [
-          0.011065813499953947,
-          0.015039447999697586,
-          0.01228439399983472,
-          0.01182073850031884,
-          0.011315974999888567,
-          0.011780516000726493,
-          0.011106661499979964,
-          0.016249930999038043
+          0.01225492899902747,
+          0.010954765997666982,
+          0.010994721500537707,
+          0.012085124999430263,
+          0.011136386998259695,
+          0.011126817500553443,
+          0.011785148497438058,
+          0.011074907499278197
         ],
         "loop_arith": [
-          0.013675782500286005,
-          0.01819824999984121,
-          0.014245636500163528,
-          0.012990564000574523,
-          0.01432969100005721,
-          0.017060925500118174,
-          0.014280977499765868,
-          0.016151427999830048
+          0.01487555799758411,
+          0.013251394500912284,
+          0.01263177600048948,
+          0.012807295499442262,
+          0.014405052497750148,
+          0.012844481499996618,
+          0.012673991001065588,
+          0.01490220599953318
         ]
       },
       "version": 1
     },
     "leaderboard": [
       {
-        "model": "Phind Code Llama V2",
-        "eff1": 0.7353,
-        "pass1": 0.8824,
-        "problems": 34,
-        "correct": 30,
-        "censored": 26
+        "model": "StarCoder (BigCode)",
+        "eff1": 0.6806,
+        "pass1": 0.6629,
+        "problems": 31,
+        "correct": 411,
+        "censored": 829
       },
       {
-        "model": "ChatGPT",
-        "eff1": 0.6824,
-        "pass1": 0.8824,
-        "problems": 34,
-        "correct": 30,
-        "censored": 31
-      },
-      {
-        "model": "GPT-4",
-        "eff1": 0.6765,
-        "pass1": 0.9412,
-        "problems": 34,
-        "correct": 32,
-        "censored": 32
-      },
-      {
-        "model": "GPT-4 Turbo",
-        "eff1": 0.6676,
-        "pass1": 0.8824,
-        "problems": 34,
-        "correct": 30,
-        "censored": 33
-      },
-      {
-        "model": "Code Llama 7B Python",
-        "eff1": 0.5,
-        "pass1": 0.6471,
-        "problems": 34,
-        "correct": 22,
-        "censored": 50
-      },
-      {
-        "model": "Mistral 7B",
-        "eff1": 0.4735,
-        "pass1": 0.5882,
-        "problems": 34,
-        "correct": 20,
-        "censored": 52
-      },
-      {
-        "model": "CodeGen 6B",
-        "eff1": 0.4265,
-        "pass1": 0.5294,
-        "problems": 34,
-        "correct": 18,
-        "censored": 58
-      },
-      {
-        "model": "CodeGen 16B",
-        "eff1": 0.4176,
-        "pass1": 0.6176,
-        "problems": 34,
-        "correct": 21,
-        "censored": 59
-      },
-      {
-        "model": "StarCoder",
-        "eff1": 0.3971,
-        "pass1": 0.5294,
-        "problems": 34,
-        "correct": 18,
-        "censored": 61
-      },
-      {
-        "model": "CodeT5+ 16B",
-        "eff1": 0.3471,
-        "pass1": 0.5294,
-        "problems": 34,
-        "correct": 18,
-        "censored": 66
-      },
-      {
-        "model": "Incoder 6B",
-        "eff1": 0.3324,
-        "pass1": 0.3529,
-        "problems": 34,
+        "model": "SantaCoder-PJJ (BigCode)",
+        "eff1": 0.0323,
+        "pass1": 0.0234,
+        "problems": 31,
         "correct": 12,
-        "censored": 68
+        "censored": 1500
       },
       {
-        "model": "Vicuna 13B",
-        "eff1": 0.3324,
-        "pass1": 0.3529,
-        "problems": 34,
-        "correct": 12,
-        "censored": 68
-      },
-      {
-        "model": "GPT-J",
-        "eff1": 0.2647,
-        "pass1": 0.2647,
-        "problems": 34,
-        "correct": 9,
-        "censored": 75
-      },
-      {
-        "model": "Incoder 1B",
-        "eff1": 0.2059,
-        "pass1": 0.2059,
-        "problems": 34,
-        "correct": 7,
-        "censored": 81
-      },
-      {
-        "model": "SantaCoder",
-        "eff1": 0.2059,
-        "pass1": 0.2059,
-        "problems": 34,
-        "correct": 7,
-        "censored": 81
-      },
-      {
-        "model": "Vicuna 7B",
-        "eff1": 0.1941,
-        "pass1": 0.2353,
-        "problems": 34,
-        "correct": 8,
-        "censored": 82
-      },
-      {
-        "model": "GPT-Neo 2B",
-        "eff1": 0.1176,
-        "pass1": 0.1176,
-        "problems": 34,
-        "correct": 4,
-        "censored": 90
+        "model": "SantaCoder (BigCode)",
+        "eff1": 0.0,
+        "pass1": 0.0,
+        "problems": 31,
+        "correct": 0,
+        "censored": 1626
       }
     ],
     "q_distribution": [
       {
         "level": 1,
-        "q_median": 0.3012,
+        "q_median": 0.305,
         "q_min": 0.003,
-        "q_max": 1.0,
+        "q_max": 0.9081,
         "tolerated_slowdown": 6.6,
-        "score_at_2x": 0.823,
-        "score_at_5x": 0.291,
+        "score_at_2x": 0.82,
+        "score_at_5x": 0.28,
         "score_at_10x": 0.0
       },
       {
         "level": 2,
-        "q_median": 0.5389,
-        "q_min": 0.0202,
+        "q_median": 0.5552,
+        "q_min": 0.0285,
         "q_max": 1.0,
-        "tolerated_slowdown": 3.7,
-        "score_at_2x": 0.631,
+        "tolerated_slowdown": 3.6,
+        "score_at_2x": 0.616,
         "score_at_5x": 0.0,
         "score_at_10x": 0.0
       },
       {
         "level": 3,
         "q_median": 1.0,
-        "q_min": 0.8777,
+        "q_min": 0.7468,
         "q_max": 1.0,
         "tolerated_slowdown": 2.0,
         "score_at_2x": 0.0,
@@ -257,10 +145,292 @@
   },
   "history": [
     {
-      "experiment_id": "2026-09-08T11:16:23_d5eb3e8",
+      "experiment_id": "2026-09-08T17:57:56_495a333",
+      "timestamp": "2026-09-08T17:57:56+00:00",
+      "finished": "2026-09-08T18:07:42+00:00",
+      "git_commit": "495a333",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "BigCode Evaluation Harness",
+        "fingerprint": "9bd5c5b5bbb4"
+      },
+      "summary": {
+        "problems_attempted": 50,
+        "problems_scored": 31,
+        "problems_failed": 0,
+        "models": 3
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.010992588999215513,
+            0.011250198500420083,
+            0.011061309000069741,
+            0.011327596999763045,
+            0.013239551999504329,
+            0.012086755501513835,
+            0.013728903000810533,
+            0.011041592500987463
+          ],
+          "attr_call": [
+            0.0066125320008723065,
+            0.0066242770008102525,
+            0.007491013999242568,
+            0.007576710500870831,
+            0.008250525999756064,
+            0.006472080498497235,
+            0.006524133999846526,
+            0.006616019996727118
+          ],
+          "bulk_builtin": [
+            0.01225492899902747,
+            0.010954765997666982,
+            0.010994721500537707,
+            0.012085124999430263,
+            0.011136386998259695,
+            0.011126817500553443,
+            0.011785148497438058,
+            0.011074907499278197
+          ],
+          "loop_arith": [
+            0.01487555799758411,
+            0.013251394500912284,
+            0.01263177600048948,
+            0.012807295499442262,
+            0.014405052497750148,
+            0.012844481499996618,
+            0.012673991001065588,
+            0.01490220599953318
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "StarCoder (BigCode)",
+          "eff1": 0.6806,
+          "pass1": 0.6629,
+          "problems": 31,
+          "correct": 411,
+          "censored": 829
+        },
+        {
+          "model": "SantaCoder-PJJ (BigCode)",
+          "eff1": 0.0323,
+          "pass1": 0.0234,
+          "problems": 31,
+          "correct": 12,
+          "censored": 1500
+        },
+        {
+          "model": "SantaCoder (BigCode)",
+          "eff1": 0.0,
+          "pass1": 0.0,
+          "problems": 31,
+          "correct": 0,
+          "censored": 1626
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.305,
+          "q_min": 0.003,
+          "q_max": 0.9081,
+          "tolerated_slowdown": 6.6,
+          "score_at_2x": 0.82,
+          "score_at_5x": 0.28,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5552,
+          "q_min": 0.0285,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.6,
+          "score_at_2x": 0.616,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.7468,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-08T17:45:45_495a333",
+      "timestamp": "2026-09-08T17:45:45+00:00",
+      "finished": "2026-09-08T17:54:53+00:00",
+      "git_commit": "495a333",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "BigCode Evaluation Harness",
+        "fingerprint": "526c2dfd089d"
+      },
+      "summary": {
+        "problems_attempted": 50,
+        "problems_scored": 15,
+        "problems_failed": 0,
+        "models": 3
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.011304926498269197,
+            0.011245155499636894,
+            0.011158430001160013,
+            0.011680729501676979,
+            0.011326290999932098,
+            0.011100522000560886,
+            0.011051287499867612,
+            0.011574516000109725
+          ],
+          "attr_call": [
+            0.0067494219983927906,
+            0.006808072501371498,
+            0.006784069000786985,
+            0.007457170000634505,
+            0.007237991001602495,
+            0.006504198001493933,
+            0.0070554300018557115,
+            0.007258214998728363
+          ],
+          "bulk_builtin": [
+            0.010900970501097618,
+            0.01111324150042492,
+            0.011535619498317828,
+            0.011533280499861576,
+            0.011142903000290971,
+            0.011789381998823956,
+            0.011179561000972171,
+            0.010982189500282402
+          ],
+          "loop_arith": [
+            0.014021775999935926,
+            0.012973403499927372,
+            0.012859490501796245,
+            0.01352981649870344,
+            0.01273485500132665,
+            0.013148157500836533,
+            0.013094488000206184,
+            0.012913178499729838
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "StarCoder (BigCode)",
+          "eff1": 0.7267,
+          "pass1": 0.6233,
+          "problems": 15,
+          "correct": 187,
+          "censored": 430
+        },
+        {
+          "model": "SantaCoder-PJJ (BigCode)",
+          "eff1": 0.2667,
+          "pass1": 0.0114,
+          "problems": 15,
+          "correct": 29,
+          "censored": 7570
+        },
+        {
+          "model": "SantaCoder (BigCode)",
+          "eff1": 0.0,
+          "pass1": 0.0,
+          "problems": 15,
+          "correct": 0,
+          "censored": 7263
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.3062,
+          "q_min": 0.0029,
+          "q_max": 0.7382,
+          "tolerated_slowdown": 6.5,
+          "score_at_2x": 0.819,
+          "score_at_5x": 0.277,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.6096,
+          "q_min": 0.0423,
+          "q_max": 0.8073,
+          "tolerated_slowdown": 3.3,
+          "score_at_2x": 0.562,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 1.0,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-08T11:16:23_495a333",
       "timestamp": "2026-09-08T11:16:23+00:00",
       "finished": "2026-09-08T11:26:07+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -510,10 +680,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:37:46_d5eb3e8",
+      "experiment_id": "2026-09-08T09:37:46_495a333",
       "timestamp": "2026-09-08T09:37:46+00:00",
       "finished": "2026-09-08T09:42:42+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -691,10 +861,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:26:49_d5eb3e8",
+      "experiment_id": "2026-09-08T09:26:49_495a333",
       "timestamp": "2026-09-08T09:26:49+00:00",
       "finished": "2026-09-08T09:35:51+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -872,10 +1042,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:16:00_d5eb3e8",
+      "experiment_id": "2026-09-08T09:16:00_495a333",
       "timestamp": "2026-09-08T09:16:00+00:00",
       "finished": "2026-09-08T09:22:37+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1005,10 +1175,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:11:33_d5eb3e8",
+      "experiment_id": "2026-09-08T09:11:33_495a333",
       "timestamp": "2026-09-08T09:11:33+00:00",
       "finished": "2026-09-08T09:13:50+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1138,10 +1308,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:57:02_d5eb3e8",
+      "experiment_id": "2026-09-07T18:57:02_495a333",
       "timestamp": "2026-09-07T18:57:02+00:00",
       "finished": "2026-09-07T19:04:19+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1271,10 +1441,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:51:38_d5eb3e8",
+      "experiment_id": "2026-09-07T18:51:38_495a333",
       "timestamp": "2026-09-07T18:51:38+00:00",
       "finished": "2026-09-07T18:54:38+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1404,10 +1574,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:48:58_d5eb3e8",
+      "experiment_id": "2026-09-07T18:48:58_495a333",
       "timestamp": "2026-09-07T18:48:58+00:00",
       "finished": "2026-09-07T18:51:07+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1537,10 +1707,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:44:11_d5eb3e8",
+      "experiment_id": "2026-09-07T18:44:11_495a333",
       "timestamp": "2026-09-07T18:44:11+00:00",
       "finished": "2026-09-07T18:46:20+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1670,10 +1840,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:43:09_d5eb3e8",
+      "experiment_id": "2026-09-07T18:43:09_495a333",
       "timestamp": "2026-09-07T18:43:09+00:00",
       "finished": "2026-09-07T18:43:48+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1803,10 +1973,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:42:11_d5eb3e8",
+      "experiment_id": "2026-09-07T18:42:11_495a333",
       "timestamp": "2026-09-07T18:42:11+00:00",
       "finished": "2026-09-07T18:42:38+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1936,10 +2106,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:41:44_d5eb3e8",
+      "experiment_id": "2026-09-07T18:41:44_495a333",
       "timestamp": "2026-09-07T18:41:44+00:00",
       "finished": "2026-09-07T18:42:00+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -2069,10 +2239,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:38:01_d5eb3e8",
+      "experiment_id": "2026-09-07T18:38:01_495a333",
       "timestamp": "2026-09-07T18:38:01+00:00",
       "finished": "2026-09-07T18:38:15+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -2202,10 +2372,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:25:31_d5eb3e8",
+      "experiment_id": "2026-09-07T18:25:31_495a333",
       "timestamp": "2026-09-07T18:25:31+00:00",
       "finished": "2026-09-07T18:25:39+00:00",
-      "git_commit": "d5eb3e8",
+      "git_commit": "495a333",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -2287,7 +2457,7 @@
         {
           "model": "mixed-bag",
           "eff1": 1.0,
-          "pass1": 3.0,
+          "pass1": 0.75,
           "problems": 3,
           "correct": 9,
           "censored": 15

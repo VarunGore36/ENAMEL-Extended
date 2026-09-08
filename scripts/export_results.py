@@ -95,7 +95,8 @@ def extract_leaderboard(record: dict, k: int = 1) -> list[dict]:
     rows = []
     for model_name, m in models.items():
         eff = sum(m["effs"]) / len(m["effs"]) if m["effs"] else 0.0
-        pas = m["correct"] / m["total"] if m["total"] else 0.0
+        total_samples = sum(len(prob.get("samples", {}).get(model_name, [])) for prob in record["problems"])
+        pas = m["correct"] / total_samples if total_samples else 0.0
         rows.append({
             "model": model_name,
             "eff1": round(eff, 4),
