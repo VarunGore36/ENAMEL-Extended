@@ -1,0 +1,1006 @@
+{
+  "source": "EvalPlus Leaderboard (evalplus.github.io)",
+  "model_count": 125,
+  "leaderboard": [
+    {
+      "model": "O1 Preview (Sept 2024)",
+      "pass1_humaneval": 96.3,
+      "pass1_humaneval_plus": 89.0,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://platform.openai.com/docs/models/"
+    },
+    {
+      "model": "O1 Mini (Sept 2024)",
+      "pass1_humaneval": 96.3,
+      "pass1_humaneval_plus": 89.0,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://platform.openai.com/docs/models/"
+    },
+    {
+      "model": "Qwen2.5-Coder-32B-Instruct",
+      "pass1_humaneval": 92.1,
+      "pass1_humaneval_plus": 87.2,
+      "size": 32,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct"
+    },
+    {
+      "model": "GPT 4o (Aug 2024)",
+      "pass1_humaneval": 92.7,
+      "pass1_humaneval_plus": 87.2,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://platform.openai.com/docs/models/"
+    },
+    {
+      "model": "DeepSeek-V3 (Nov 2024)",
+      "pass1_humaneval": 91.5,
+      "pass1_humaneval_plus": 86.6,
+      "size": 37,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/DeepSeek-V3"
+    },
+    {
+      "model": "GPT-4-Turbo (April 2024)",
+      "pass1_humaneval": 90.2,
+      "pass1_humaneval_plus": 86.6,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://openai.com/blog/new-models-and-developer-products-announced-at-devday"
+    },
+    {
+      "model": "DeepSeek-V2.5 (Nov 2024)",
+      "pass1_humaneval": 90.2,
+      "pass1_humaneval_plus": 83.5,
+      "size": 21,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/DeepSeek-V2.5"
+    },
+    {
+      "model": "GPT 4o Mini (July 2024)",
+      "pass1_humaneval": 88.4,
+      "pass1_humaneval_plus": 83.5,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://platform.openai.com/docs/models/"
+    },
+    {
+      "model": "DeepSeek-Coder-V2-Instruct",
+      "pass1_humaneval": 85.4,
+      "pass1_humaneval_plus": 82.3,
+      "size": 21,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Instruct"
+    },
+    {
+      "model": "Claude Sonnet 3.5 (June 2024)",
+      "pass1_humaneval": 87.2,
+      "pass1_humaneval_plus": 81.7,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://platform.openai.com/docs/models/"
+    },
+    {
+      "model": "GPT-4-Turbo (Nov 2023)",
+      "pass1_humaneval": 85.4,
+      "pass1_humaneval_plus": 81.7,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://openai.com/blog/new-models-and-developer-products-announced-at-devday"
+    },
+    {
+      "model": "Grok Beta",
+      "pass1_humaneval": 88.4,
+      "pass1_humaneval_plus": 80.5,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://x.ai/blog/grok-2"
+    },
+    {
+      "model": "Gemini 1.5 Pro 002",
+      "pass1_humaneval": 89.0,
+      "pass1_humaneval_plus": 79.3,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://ai.google.dev/"
+    },
+    {
+      "model": "GPT-4 (May 2023)",
+      "pass1_humaneval": 88.4,
+      "pass1_humaneval_plus": 79.3,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://openai.com/research/gpt-4"
+    },
+    {
+      "model": "CodeQwen1.5-7B-Chat",
+      "pass1_humaneval": 83.5,
+      "pass1_humaneval_plus": 78.7,
+      "size": 7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Qwen/CodeQwen1.5-7B-Chat"
+    },
+    {
+      "model": "OpenCoder-8B-Instruct",
+      "pass1_humaneval": 81.7,
+      "pass1_humaneval_plus": 77.4,
+      "size": 8.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/infly/OpenCoder-8B-Instruct"
+    },
+    {
+      "model": "claude-3-opus (Mar 2024)",
+      "pass1_humaneval": 82.9,
+      "pass1_humaneval_plus": 77.4,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://www.anthropic.com/news/claude-3-family"
+    },
+    {
+      "model": "Gemini 1.5 Flash 002",
+      "pass1_humaneval": 82.3,
+      "pass1_humaneval_plus": 75.6,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://ai.google.dev/"
+    },
+    {
+      "model": "DeepSeek-Coder-33B-instruct",
+      "pass1_humaneval": 81.1,
+      "pass1_humaneval_plus": 75.0,
+      "size": 33.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-33b-instruct"
+    },
+    {
+      "model": "Codestral-22B-v0.1",
+      "pass1_humaneval": 79.9,
+      "pass1_humaneval_plus": 73.8,
+      "size": 22,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/mistralai/Codestral-22B-v0.1"
+    },
+    {
+      "model": "OpenCodeInterpreter-DS-33B",
+      "pass1_humaneval": 79.3,
+      "pass1_humaneval_plus": 73.8,
+      "size": 33.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-33B"
+    },
+    {
+      "model": "WizardCoder-33B-V1.1",
+      "pass1_humaneval": 79.9,
+      "pass1_humaneval_plus": 73.2,
+      "size": 33.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/WizardLM/WizardCoder-33B-V1.1"
+    },
+    {
+      "model": "Artigenz-Coder-DS-6.7B",
+      "pass1_humaneval": 75.6,
+      "pass1_humaneval_plus": 72.6,
+      "size": 6.7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Artigenz/Artigenz-Coder-DS-6.7B"
+    },
+    {
+      "model": "Llama3-70B-instruct",
+      "pass1_humaneval": 77.4,
+      "pass1_humaneval_plus": 72.0,
+      "size": 70.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct"
+    },
+    {
+      "model": "Mixtral-8x22B-Instruct-v0.1",
+      "pass1_humaneval": 76.2,
+      "pass1_humaneval_plus": 72.0,
+      "size": 44,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/mistralai/Mixtral-8x22B-Instruct-v0.1"
+    },
+    {
+      "model": "OpenCodeInterpreter-DS-6.7B",
+      "pass1_humaneval": 77.4,
+      "pass1_humaneval_plus": 72.0,
+      "size": 6.7,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-6.7B"
+    },
+    {
+      "model": "speechless-codellama-34B-v2.0",
+      "pass1_humaneval": 77.4,
+      "pass1_humaneval_plus": 72.0,
+      "size": 34.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/uukuguy/speechless-codellama-34b-v2.0"
+    },
+    {
+      "model": "DeepSeek-Coder-6.7B-instruct",
+      "pass1_humaneval": 74.4,
+      "pass1_humaneval_plus": 71.3,
+      "size": 6.7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct"
+    },
+    {
+      "model": "DeepSeek-Coder-7B-instruct-v1.5",
+      "pass1_humaneval": 75.6,
+      "pass1_humaneval_plus": 71.3,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-7b-instruct-v1.5"
+    },
+    {
+      "model": "Magicoder-S-DS-6.7B",
+      "pass1_humaneval": 76.8,
+      "pass1_humaneval_plus": 71.3,
+      "size": 6.7,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ise-uiuc/Magicoder-S-DS-6.7B"
+    },
+    {
+      "model": "starchat2-15b-v0.1",
+      "pass1_humaneval": 73.8,
+      "pass1_humaneval_plus": 71.3,
+      "size": 15.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/HuggingFaceH4/starchat2-15b-v0.1"
+    },
+    {
+      "model": "GPT-3.5-Turbo (Nov 2023)",
+      "pass1_humaneval": 76.8,
+      "pass1_humaneval_plus": 70.7,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://openai.com/blog/new-models-and-developer-products-announced-at-devday"
+    },
+    {
+      "model": "code-millenials-34B",
+      "pass1_humaneval": 74.4,
+      "pass1_humaneval_plus": 70.7,
+      "size": 34.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/budecosystem/code-millenials-34b"
+    },
+    {
+      "model": "databricks/dbrx-instruct",
+      "pass1_humaneval": 75.0,
+      "pass1_humaneval_plus": 70.1,
+      "size": 36,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/databricks/dbrx-instruct"
+    },
+    {
+      "model": "WaveCoder-Ultra-6.7B",
+      "pass1_humaneval": 75.0,
+      "pass1_humaneval_plus": 69.5,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/microsoft/wavecoder-ultra-6.7b"
+    },
+    {
+      "model": "XwinCoder-34B",
+      "pass1_humaneval": 75.6,
+      "pass1_humaneval_plus": 69.5,
+      "size": 34.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Xwin-LM/XwinCoder-34B"
+    },
+    {
+      "model": "claude-3-haiku (Mar 2024)",
+      "pass1_humaneval": 76.8,
+      "pass1_humaneval_plus": 68.9,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://www.anthropic.com/news/claude-3-family"
+    },
+    {
+      "model": "Magicoder-S-CL-7B",
+      "pass1_humaneval": 70.7,
+      "pass1_humaneval_plus": 67.7,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ise-uiuc/Magicoder-S-CL-7B"
+    },
+    {
+      "model": "OpenChat-3.5-7B-0106",
+      "pass1_humaneval": 72.6,
+      "pass1_humaneval_plus": 67.7,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/openchat/openchat-3.5-0106"
+    },
+    {
+      "model": "Phind-CodeLlama-34B-v2",
+      "pass1_humaneval": 71.3,
+      "pass1_humaneval_plus": 67.1,
+      "size": 34.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Phind/Phind-CodeLlama-34B-v2"
+    },
+    {
+      "model": "GPT-3.5 (May 2023)",
+      "pass1_humaneval": 73.2,
+      "pass1_humaneval_plus": 66.5,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://openai.com/blog/chatgpt"
+    },
+    {
+      "model": "CodeLlama-70B-Instruct",
+      "pass1_humaneval": 72.0,
+      "pass1_humaneval_plus": 65.9,
+      "size": 70.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/codellama/CodeLlama-70b-Instruct-hf"
+    },
+    {
+      "model": "WhiteRabbitNeo-33B-v1",
+      "pass1_humaneval": 72.0,
+      "pass1_humaneval_plus": 65.9,
+      "size": 33.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/WhiteRabbitNeo/WhiteRabbitNeo-33B-v1"
+    },
+    {
+      "model": "speechless-coder-ds-6.7B",
+      "pass1_humaneval": 71.3,
+      "pass1_humaneval_plus": 65.9,
+      "size": 6.7,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/uukuguy/speechless-coder-ds-6.7b"
+    },
+    {
+      "model": "WizardCoder-Python-34B-V1.0",
+      "pass1_humaneval": 73.2,
+      "pass1_humaneval_plus": 64.6,
+      "size": 34.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/WizardLM/WizardCoder-Python-34B-V1.0"
+    },
+    {
+      "model": "claude-3-sonnet (Mar 2024)",
+      "pass1_humaneval": 70.7,
+      "pass1_humaneval_plus": 64.0,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://www.anthropic.com/news/claude-3-family"
+    },
+    {
+      "model": "Llama3.1-8B-instruct",
+      "pass1_humaneval": 69.5,
+      "pass1_humaneval_plus": 62.8,
+      "size": 8.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct"
+    },
+    {
+      "model": "speechless-starcoder2-15b",
+      "pass1_humaneval": 67.1,
+      "pass1_humaneval_plus": 62.8,
+      "size": 15.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/uukuguy/speechless-starcoder2-15b"
+    },
+    {
+      "model": "Mistral Large (Mar 2024)",
+      "pass1_humaneval": 69.5,
+      "pass1_humaneval_plus": 62.2,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://mistral.ai/news/mistral-large/"
+    },
+    {
+      "model": "claude-2 (Mar 2024)",
+      "pass1_humaneval": 69.5,
+      "pass1_humaneval_plus": 61.6,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://www.anthropic.com/news/claude-2"
+    },
+    {
+      "model": "Gemini Pro 1.5",
+      "pass1_humaneval": 68.3,
+      "pass1_humaneval_plus": 61.0,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/"
+    },
+    {
+      "model": "DeepSeek-Coder-1.3B-instruct",
+      "pass1_humaneval": 65.9,
+      "pass1_humaneval_plus": 60.4,
+      "size": 1.3,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-1.3b-instruct"
+    },
+    {
+      "model": "starcoder2-15b-instruct-v0.1",
+      "pass1_humaneval": 67.7,
+      "pass1_humaneval_plus": 60.4,
+      "size": 15.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoder2-15b-instruct-v0.1"
+    },
+    {
+      "model": "Code-290k-6.7B-Instruct",
+      "pass1_humaneval": 64.6,
+      "pass1_humaneval_plus": 59.7,
+      "size": 6.7,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ajibawa-2023/Code-290k-6.7B-Instruct"
+    },
+    {
+      "model": "Qwen1.5-72B-Chat",
+      "pass1_humaneval": 68.3,
+      "pass1_humaneval_plus": 59.1,
+      "size": 72,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Qwen/Qwen1.5-72B-Chat"
+    },
+    {
+      "model": "Phi-3-mini-4k-instruct",
+      "pass1_humaneval": 64.6,
+      "pass1_humaneval_plus": 59.1,
+      "size": 3.8,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct"
+    },
+    {
+      "model": "dolphin-2.6-mixtral-8x7b",
+      "pass1_humaneval": 64.0,
+      "pass1_humaneval_plus": 57.3,
+      "size": 13,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/cognitivecomputations/dolphin-2.6-mixtral-8x7b"
+    },
+    {
+      "model": "Command-R+",
+      "pass1_humaneval": 64,
+      "pass1_humaneval_plus": 56.7,
+      "size": 104,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/CohereForAI/c4ai-command-r-plus"
+    },
+    {
+      "model": "Llama3-8B-instruct",
+      "pass1_humaneval": 61.6,
+      "pass1_humaneval_plus": 56.7,
+      "size": 8.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct"
+    },
+    {
+      "model": "Gemini Pro 1.0",
+      "pass1_humaneval": 63.4,
+      "pass1_humaneval_plus": 55.5,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://deepmind.google/technologies/gemini/"
+    },
+    {
+      "model": "Code-13B",
+      "pass1_humaneval": 56.1,
+      "pass1_humaneval_plus": 52.4,
+      "size": 13.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ajibawa-2023/Code-13B"
+    },
+    {
+      "model": "codegemma-7b-it",
+      "pass1_humaneval": 60.4,
+      "pass1_humaneval_plus": 51.8,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/codegemma-7b-it"
+    },
+    {
+      "model": "speechless-starcoder2-7b",
+      "pass1_humaneval": 56.1,
+      "pass1_humaneval_plus": 51.8,
+      "size": 7.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/uukuguy/speechless-starcoder2-7b"
+    },
+    {
+      "model": "CodeLlama-70B",
+      "pass1_humaneval": 55.5,
+      "pass1_humaneval_plus": 50.6,
+      "size": 70.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/codellama/CodeLlama-70b-Python-hf"
+    },
+    {
+      "model": "WizardCoder-15B-V1.0",
+      "pass1_humaneval": 56.7,
+      "pass1_humaneval_plus": 50.6,
+      "size": 15.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/WizardLM/WizardCoder-15B-V1.0"
+    },
+    {
+      "model": "claude-instant-1 (Mar 2024)",
+      "pass1_humaneval": 57.3,
+      "pass1_humaneval_plus": 50.6,
+      "size": null,
+      "open_data": "NONE",
+      "link": "https://www.anthropic.com/news/releasing-claude-instant-1-2"
+    },
+    {
+      "model": "speechless-coding-7B-16k-tora",
+      "pass1_humaneval": 54.9,
+      "pass1_humaneval_plus": 50.6,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/uukuguy/speechless-coding-7b-16k-tora"
+    },
+    {
+      "model": "Code-33B",
+      "pass1_humaneval": 54.9,
+      "pass1_humaneval_plus": 49.4,
+      "size": 33.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ajibawa-2023/Code-33B"
+    },
+    {
+      "model": "OpenHermes-2.5-Code-290k-13B",
+      "pass1_humaneval": 54.3,
+      "pass1_humaneval_plus": 48.8,
+      "size": 13.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ajibawa-2023/OpenHermes-2.5-Code-290k-13B"
+    },
+    {
+      "model": "CodeQwen1.5-7B",
+      "pass1_humaneval": 51.8,
+      "pass1_humaneval_plus": 45.7,
+      "size": 7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/Qwen/CodeQwen1.5-7B"
+    },
+    {
+      "model": "WizardCoder-Python-7B-V1.0",
+      "pass1_humaneval": 50.6,
+      "pass1_humaneval_plus": 45.1,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/WizardLM/WizardCoder-Python-7B-V1.0"
+    },
+    {
+      "model": "phi-2-2.7B",
+      "pass1_humaneval": 49.4,
+      "pass1_humaneval_plus": 45.1,
+      "size": 2.7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/microsoft/phi-2"
+    },
+    {
+      "model": "DeepSeek-Coder-33B-base",
+      "pass1_humaneval": 51.2,
+      "pass1_humaneval_plus": 44.5,
+      "size": 33.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-33b-base"
+    },
+    {
+      "model": "CodeLlama-34B",
+      "pass1_humaneval": 51.8,
+      "pass1_humaneval_plus": 43.9,
+      "size": 34.0,
+      "open_data": "NONE",
+      "link": "https://about.fb.com/news/2023/08/code-llama-ai-for-coding/amp/"
+    },
+    {
+      "model": "Mistral-codealpaca-7B",
+      "pass1_humaneval": 48.2,
+      "pass1_humaneval_plus": 42.1,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/Nondzu/Mistral-7B-codealpaca-lora"
+    },
+    {
+      "model": "MistralHermes-CodePro-7B-v1",
+      "pass1_humaneval": 47.6,
+      "pass1_humaneval_plus": 42.1,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/beowolx/MistralHermes-CodePro-7B-v1"
+    },
+    {
+      "model": "codegemma-7b",
+      "pass1_humaneval": 44.5,
+      "pass1_humaneval_plus": 41.5,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/codegemma-7b"
+    },
+    {
+      "model": "speechless-code-mistral-7B-v1.0",
+      "pass1_humaneval": 48.2,
+      "pass1_humaneval_plus": 41.5,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/uukuguy/speechless-code-mistral-7b-v1.0"
+    },
+    {
+      "model": "DeepSeek-Coder-6.7B-base",
+      "pass1_humaneval": 47.6,
+      "pass1_humaneval_plus": 39.6,
+      "size": 6.7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-base"
+    },
+    {
+      "model": "Mixtral-8x7B-Instruct-v0.1",
+      "pass1_humaneval": 45.1,
+      "pass1_humaneval_plus": 39.6,
+      "size": 13,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1"
+    },
+    {
+      "model": "CodeLlama-13B",
+      "pass1_humaneval": 42.7,
+      "pass1_humaneval_plus": 38.4,
+      "size": 13.0,
+      "open_data": "NONE",
+      "link": "https://about.fb.com/news/2023/08/code-llama-ai-for-coding/amp/"
+    },
+    {
+      "model": "StarCoder2-15B",
+      "pass1_humaneval": 46.3,
+      "pass1_humaneval_plus": 37.8,
+      "size": 15.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoder2-15b"
+    },
+    {
+      "model": "SOLAR-10.7B-Instruct-v1.0",
+      "pass1_humaneval": 43.3,
+      "pass1_humaneval_plus": 37.2,
+      "size": 10.7,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/upstage/SOLAR-10.7B-Instruct-v1.0"
+    },
+    {
+      "model": "Mistral-7B-Instruct-v0.2",
+      "pass1_humaneval": 42.1,
+      "pass1_humaneval_plus": 36.0,
+      "size": 7,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2"
+    },
+    {
+      "model": "CodeLlama-7B",
+      "pass1_humaneval": 37.8,
+      "pass1_humaneval_plus": 35.4,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://about.fb.com/news/2023/08/code-llama-ai-for-coding/amp/"
+    },
+    {
+      "model": "gemma-1.1-7b-it",
+      "pass1_humaneval": 42.7,
+      "pass1_humaneval_plus": 35.4,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/gemma-1.1-7b-it"
+    },
+    {
+      "model": "xDAN-L1-Chat-RL-v1-7B",
+      "pass1_humaneval": 40.2,
+      "pass1_humaneval_plus": 32.9,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/xDAN-AI/xDAN-L1-Chat-RL-v1"
+    },
+    {
+      "model": "Python-Code-13B",
+      "pass1_humaneval": 32.9,
+      "pass1_humaneval_plus": 30.5,
+      "size": 13.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/ajibawa-2023/Python-Code-13B"
+    },
+    {
+      "model": "StarCoder2-7B",
+      "pass1_humaneval": 35.4,
+      "pass1_humaneval_plus": 29.9,
+      "size": 7.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoder2-7b"
+    },
+    {
+      "model": "Llama3-8B-base",
+      "pass1_humaneval": 33.5,
+      "pass1_humaneval_plus": 29.3,
+      "size": 8.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/meta-llama/Meta-Llama-3-8B"
+    },
+    {
+      "model": "StarCoder-15B",
+      "pass1_humaneval": 34.1,
+      "pass1_humaneval_plus": 29.3,
+      "size": 15.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoder"
+    },
+    {
+      "model": "gemma-7b",
+      "pass1_humaneval": 35.4,
+      "pass1_humaneval_plus": 28.7,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/gemma-7b"
+    },
+    {
+      "model": "CodeGen-16B",
+      "pass1_humaneval": 32.9,
+      "pass1_humaneval_plus": 28.0,
+      "size": 16.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2203.13474"
+    },
+    {
+      "model": "StarCoder2-3B",
+      "pass1_humaneval": 31.7,
+      "pass1_humaneval_plus": 27.4,
+      "size": 3.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoder2-3b"
+    },
+    {
+      "model": "CodeT5+-16B",
+      "pass1_humaneval": 31.7,
+      "pass1_humaneval_plus": 26.8,
+      "size": 16.0,
+      "open_data": "Full",
+      "link": "https://blog.salesforceairesearch.com/codet5/"
+    },
+    {
+      "model": "CodeGen-6B",
+      "pass1_humaneval": 29.3,
+      "pass1_humaneval_plus": 25.6,
+      "size": 6.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2203.13474"
+    },
+    {
+      "model": "DeepSeek-Coder-1.3B-base",
+      "pass1_humaneval": 28.7,
+      "pass1_humaneval_plus": 25.6,
+      "size": 1.3,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/deepseek-ai/deepseek-coder-1.3b-base"
+    },
+    {
+      "model": "stable-code-3B",
+      "pass1_humaneval": 29.3,
+      "pass1_humaneval_plus": 25.6,
+      "size": 3.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/stabilityai/stable-code-3b"
+    },
+    {
+      "model": "gemma-7b-it",
+      "pass1_humaneval": 28.7,
+      "pass1_humaneval_plus": 25.0,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/gemma-7b-it"
+    },
+    {
+      "model": "CodeT5+-6B",
+      "pass1_humaneval": 29.3,
+      "pass1_humaneval_plus": 24.4,
+      "size": 6.0,
+      "open_data": "Full",
+      "link": "https://blog.salesforceairesearch.com/codet5/"
+    },
+    {
+      "model": "Mistral-7B",
+      "pass1_humaneval": 28.7,
+      "pass1_humaneval_plus": 23.8,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://mistral.ai/news/announcing-mistral-7b/"
+    },
+    {
+      "model": "Zephyr \u03b2-7B",
+      "pass1_humaneval": 30.0,
+      "pass1_humaneval_plus": 23.2,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/HuggingFaceH4/zephyr-7b-beta"
+    },
+    {
+      "model": "CodeGen-2B",
+      "pass1_humaneval": 24.4,
+      "pass1_humaneval_plus": 22.6,
+      "size": 2.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2203.13474"
+    },
+    {
+      "model": "CodeT5+-2B",
+      "pass1_humaneval": 25.0,
+      "pass1_humaneval_plus": 22.0,
+      "size": 2.0,
+      "open_data": "Full",
+      "link": "https://blog.salesforceairesearch.com/codet5/"
+    },
+    {
+      "model": "StarCoderBase-7B",
+      "pass1_humaneval": 24.4,
+      "pass1_humaneval_plus": 21.3,
+      "size": 7.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoderbase-7b"
+    },
+    {
+      "model": "codegemma-2b",
+      "pass1_humaneval": 26.8,
+      "pass1_humaneval_plus": 20.7,
+      "size": 2.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/codegemma-2b"
+    },
+    {
+      "model": "gemma-2b",
+      "pass1_humaneval": 25.0,
+      "pass1_humaneval_plus": 20.7,
+      "size": 2.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/gemma-2b"
+    },
+    {
+      "model": "CodeGen2-7B",
+      "pass1_humaneval": 18.3,
+      "pass1_humaneval_plus": 17.7,
+      "size": 7.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2305.02309"
+    },
+    {
+      "model": "gemma-1.1-2b-it",
+      "pass1_humaneval": 22.6,
+      "pass1_humaneval_plus": 17.7,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/gemma-1.1-2b-it"
+    },
+    {
+      "model": "CodeGen2-16B",
+      "pass1_humaneval": 19.5,
+      "pass1_humaneval_plus": 16.5,
+      "size": 16.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2305.02309"
+    },
+    {
+      "model": "StarCoderBase-3B",
+      "pass1_humaneval": 17.7,
+      "pass1_humaneval_plus": 15.9,
+      "size": 3.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoderbase-3b"
+    },
+    {
+      "model": "Vicuna-13B",
+      "pass1_humaneval": 17.1,
+      "pass1_humaneval_plus": 15.9,
+      "size": 13.0,
+      "open_data": "Partial",
+      "link": "https://lmsys.org/blog/2023-03-30-vicuna/"
+    },
+    {
+      "model": "gemma-2b-it",
+      "pass1_humaneval": 17.7,
+      "pass1_humaneval_plus": 15.2,
+      "size": 2.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/google/gemma-2b-it"
+    },
+    {
+      "model": "SantaCoder-1.1B",
+      "pass1_humaneval": 14.6,
+      "pass1_humaneval_plus": 14.0,
+      "size": 1.1,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2301.03988"
+    },
+    {
+      "model": "CodeGen2-3B",
+      "pass1_humaneval": 15.9,
+      "pass1_humaneval_plus": 12.8,
+      "size": 3.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2305.02309"
+    },
+    {
+      "model": "InCoder-6.7B",
+      "pass1_humaneval": 15.9,
+      "pass1_humaneval_plus": 12.2,
+      "size": 6.7,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2204.05999"
+    },
+    {
+      "model": "StarCoderBase-1B",
+      "pass1_humaneval": 14.6,
+      "pass1_humaneval_plus": 12.2,
+      "size": 1.0,
+      "open_data": "Full",
+      "link": "https://huggingface.co/bigcode/starcoderbase-1b"
+    },
+    {
+      "model": "Vicuna-7B",
+      "pass1_humaneval": 11.6,
+      "pass1_humaneval_plus": 11.6,
+      "size": 7.0,
+      "open_data": "Partial",
+      "link": "https://lmsys.org/blog/2023-03-30-vicuna/"
+    },
+    {
+      "model": "GPT-J-6B",
+      "pass1_humaneval": 12.2,
+      "pass1_humaneval_plus": 11.0,
+      "size": 6.0,
+      "open_data": "Full",
+      "link": "https://www.eleuther.ai/artifacts/gpt-j"
+    },
+    {
+      "model": "InCoder-1.3B",
+      "pass1_humaneval": 12.2,
+      "pass1_humaneval_plus": 11.0,
+      "size": 1.3,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2204.05999"
+    },
+    {
+      "model": "CodeGen2-1B",
+      "pass1_humaneval": 11.0,
+      "pass1_humaneval_plus": 9.1,
+      "size": 1.0,
+      "open_data": "Full",
+      "link": "https://arxiv.org/abs/2305.02309"
+    },
+    {
+      "model": "GPT-Neo-2.7B",
+      "pass1_humaneval": 7.9,
+      "pass1_humaneval_plus": 6.7,
+      "size": 2.7,
+      "open_data": "Full",
+      "link": "https://www.eleuther.ai/artifacts/gpt-neo"
+    },
+    {
+      "model": "PolyCoder-2.7B",
+      "pass1_humaneval": 6.1,
+      "pass1_humaneval_plus": 6.1,
+      "size": 2.7,
+      "open_data": "Full",
+      "link": "https://github.com/VHellendoorn/Code-LMs"
+    },
+    {
+      "model": "StableLM-7B",
+      "pass1_humaneval": 2.4,
+      "pass1_humaneval_plus": 2.4,
+      "size": 7.0,
+      "open_data": "NONE",
+      "link": "https://huggingface.co/stabilityai/stablelm-base-alpha-7b"
+    },
+    {
+      "model": "zyte-1B",
+      "pass1_humaneval": 2.4,
+      "pass1_humaneval_plus": 1.8,
+      "size": 1.0,
+      "open_data": "Partial",
+      "link": "https://huggingface.co/aihub-app/zyte-1B"
+    }
+  ]
+}

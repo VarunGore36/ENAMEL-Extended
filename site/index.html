@@ -18,6 +18,7 @@
                 <a href="#experiments">Experiments</a>
                 <a href="#methodology">Methodology</a>
                 <a href="#status">Status</a>
+                <a href="#newer-models">Newer Models</a>
                 <a href="https://github.com/VarunGore36/ENAMEL-Extended" target="_blank">GitHub</a>
             </nav>
         </div>
@@ -215,6 +216,39 @@
                     <h4>Containerization</h4>
                     <p>Pinned container image, CPU affinity, instruction-count metric for cross-machine comparability.</p>
                     <span class="badge">Not started</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="newer-models">
+            <h2>Newer Models — pass@1 from EvalPlus Leaderboard</h2>
+            <p>
+                The models below are from the
+                <a href="https://evalplus.github.io/leaderboard.html" target="_blank">EvalPlus Leaderboard</a>
+                (125 models total). Their code efficiency has not been measured with ENAMEL yet —
+                only correctness (pass@1) is shown. The gap between pass@1 and eff@1 is what
+                ENAMEL measures.
+            </p>
+            <div id="newer-models-loading" class="loading">Loading…</div>
+            <div id="newer-models-content" style="display:none">
+                <div class="chart-box">
+                    <h3>pass@1 (HumanEval+) — Top 30 Models</h3>
+                    <canvas id="chart-newer-models"></canvas>
+                </div>
+                <div class="table-wrap">
+                    <table id="newer-models-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Model</th>
+                                <th>pass@1 (HE+)</th>
+                                <th>pass@1 (HE)</th>
+                                <th>Size</th>
+                                <th>Open Data</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </section>
