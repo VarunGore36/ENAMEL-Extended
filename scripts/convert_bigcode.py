@@ -37,27 +37,22 @@ def main():
     models = {}
 
     # Check for downloaded files
-    santacoder_path = CACHE_DIR / "santacoder_humaneval.json"
-    santacoder_pjj_path = CACHE_DIR / "santacoder_pjj_humaneval.json"
-    starcoder_path = CACHE_DIR / "starcoder_humaneval.json"
+    files = {
+        "SantaCoder (BigCode)": "santacoder_humaneval.json",
+        "SantaCoder-PJJ (BigCode)": "santacoder_pjj_humaneval.json",
+        "StarCoder (BigCode)": "starcoder_humaneval.json",
+        "GPT-4 (BigCode)": "gpt4_humaneval.json",
+        "StarCoder-Co-Manual (BigCode)": "starcoder_co_manual_humaneval.json",
+    }
 
-    if santacoder_path.exists():
-        samples = load_bigcode_samples(santacoder_path, "SantaCoder")
-        if samples:
-            models["SantaCoder (BigCode)"] = samples
-            print(f"  SantaCoder (BigCode): {len(samples)} problems, {sum(len(v) for v in samples.values())} samples")
-
-    if santacoder_pjj_path.exists():
-        samples = load_bigcode_samples(santacoder_pjj_path, "SantaCoder-PJJ")
-        if samples:
-            models["SantaCoder-PJJ (BigCode)"] = samples
-            print(f"  SantaCoder-PJJ (BigCode): {len(samples)} problems, {sum(len(v) for v in samples.values())} samples")
-
-    if starcoder_path.exists():
-        samples = load_bigcode_samples(starcoder_path, "StarCoder")
-        if samples:
-            models["StarCoder (BigCode)"] = samples
-            print(f"  StarCoder (BigCode): {len(samples)} problems, {sum(len(v) for v in samples.values())} samples")
+    for model_name, filename in files.items():
+        path = CACHE_DIR / filename
+        if path.exists():
+            samples = load_bigcode_samples(path, model_name)
+            if samples:
+                models[model_name] = samples
+                total = sum(len(v) for v in samples.values())
+                print(f"  {model_name}: {len(samples)} problems, {total} samples")
 
     if not models:
         print("No samples found. Download from BigCode evaluation dataset first.")
