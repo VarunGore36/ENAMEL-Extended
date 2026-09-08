@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-08T10:32:00.059799+00:00",
-  "generator_commit": "7c38d86",
-  "run_count": 13,
+  "generated_at": "2026-09-08T11:27:01.280344+00:00",
+  "generator_commit": "647a129",
+  "run_count": 14,
   "latest": {
-    "experiment_id": "2026-09-08T09:37:46_7c38d86",
-    "timestamp": "2026-09-08T09:37:46+00:00",
-    "finished": "2026-09-08T09:42:42+00:00",
-    "git_commit": "7c38d86",
+    "experiment_id": "2026-09-08T11:16:23_647a129",
+    "timestamp": "2026-09-08T11:16:23+00:00",
+    "finished": "2026-09-08T11:26:07+00:00",
+    "git_commit": "647a129",
     "git_dirty": true,
     "benchmark": "ENAMEL-Extended v0.0.1",
     "python": "CPython 3.14.7",
@@ -29,152 +29,224 @@
     },
     "solutions": {
       "name": "EvalPlus (evalplus/evalplus)",
-      "fingerprint": "86bd9b0900fd"
+      "fingerprint": "382e21fead6f"
     },
     "summary": {
       "problems_attempted": 50,
-      "problems_scored": 50,
+      "problems_scored": 34,
       "problems_failed": 0,
-      "models": 8
+      "models": 17
     },
     "calibration": {
       "aggregator": "hodges_lehmann",
       "repeats": 6,
       "times": {
         "alloc_churn": [
-          0.011375312999916787,
-          0.011256688000003123,
-          0.013266201500073294,
-          0.01306778599973768,
-          0.012877616499736178,
-          0.013042243999962011,
-          0.015517448499849706,
-          0.012784982499852049
+          0.011755716499465052,
+          0.01601201000084984,
+          0.015475689000595594,
+          0.015769214000101783,
+          0.012788812500730273,
+          0.011583573499592603,
+          0.015739420499812695,
+          0.013767411500339222
         ],
         "attr_call": [
-          0.007138667999697645,
-          0.006700494499909837,
-          0.007789314999854469,
-          0.007639450000169745,
-          0.007510409500127935,
-          0.00756583700012925,
-          0.0074715719999858266,
-          0.0076763079998727335
+          0.006514028499623237,
+          0.007189472000391106,
+          0.009285848500439897,
+          0.0074031959993590135,
+          0.00756497250040411,
+          0.00650802299969655,
+          0.010545239999373734,
+          0.010288741000294976
         ],
         "bulk_builtin": [
-          0.012142728000071656,
-          0.010937093999928038,
-          0.011284780999858413,
-          0.011711530999946262,
-          0.011256480499923782,
-          0.01341051100007462,
-          0.011559563999981037,
-          0.01471956900013538
+          0.011065813499953947,
+          0.015039447999697586,
+          0.01228439399983472,
+          0.01182073850031884,
+          0.011315974999888567,
+          0.011780516000726493,
+          0.011106661499979964,
+          0.016249930999038043
         ],
         "loop_arith": [
-          0.01566827600004217,
-          0.012704155499932313,
-          0.01419442400015214,
-          0.0174890549999418,
-          0.013124265499982357,
-          0.018398154999886174,
-          0.012734061999708501,
-          0.014483024999890404
+          0.013675782500286005,
+          0.01819824999984121,
+          0.014245636500163528,
+          0.012990564000574523,
+          0.01432969100005721,
+          0.017060925500118174,
+          0.014280977499765868,
+          0.016151427999830048
         ]
       },
       "version": 1
     },
     "leaderboard": [
       {
-        "model": "GPT-4",
-        "eff1": 0.728,
-        "pass1": 0.94,
-        "problems": 50,
-        "correct": 47,
-        "censored": 39
-      },
-      {
-        "model": "GPT-4 Turbo",
-        "eff1": 0.694,
-        "pass1": 0.9,
-        "problems": 50,
-        "correct": 45,
-        "censored": 44
+        "model": "Phind Code Llama V2",
+        "eff1": 0.7353,
+        "pass1": 0.8824,
+        "problems": 34,
+        "correct": 30,
+        "censored": 26
       },
       {
         "model": "ChatGPT",
-        "eff1": 0.686,
-        "pass1": 0.86,
-        "problems": 50,
-        "correct": 43,
-        "censored": 43
+        "eff1": 0.6824,
+        "pass1": 0.8824,
+        "problems": 34,
+        "correct": 30,
+        "censored": 31
+      },
+      {
+        "model": "GPT-4",
+        "eff1": 0.6765,
+        "pass1": 0.9412,
+        "problems": 34,
+        "correct": 32,
+        "censored": 32
+      },
+      {
+        "model": "GPT-4 Turbo",
+        "eff1": 0.6676,
+        "pass1": 0.8824,
+        "problems": 34,
+        "correct": 30,
+        "censored": 33
+      },
+      {
+        "model": "Code Llama 7B Python",
+        "eff1": 0.5,
+        "pass1": 0.6471,
+        "problems": 34,
+        "correct": 22,
+        "censored": 50
+      },
+      {
+        "model": "Mistral 7B",
+        "eff1": 0.4735,
+        "pass1": 0.5882,
+        "problems": 34,
+        "correct": 20,
+        "censored": 52
       },
       {
         "model": "CodeGen 6B",
-        "eff1": 0.43,
-        "pass1": 0.54,
-        "problems": 50,
-        "correct": 27,
-        "censored": 83
+        "eff1": 0.4265,
+        "pass1": 0.5294,
+        "problems": 34,
+        "correct": 18,
+        "censored": 58
       },
       {
         "model": "CodeGen 16B",
-        "eff1": 0.428,
-        "pass1": 0.58,
-        "problems": 50,
-        "correct": 29,
-        "censored": 83
+        "eff1": 0.4176,
+        "pass1": 0.6176,
+        "problems": 34,
+        "correct": 21,
+        "censored": 59
+      },
+      {
+        "model": "StarCoder",
+        "eff1": 0.3971,
+        "pass1": 0.5294,
+        "problems": 34,
+        "correct": 18,
+        "censored": 61
+      },
+      {
+        "model": "CodeT5+ 16B",
+        "eff1": 0.3471,
+        "pass1": 0.5294,
+        "problems": 34,
+        "correct": 18,
+        "censored": 66
+      },
+      {
+        "model": "Incoder 6B",
+        "eff1": 0.3324,
+        "pass1": 0.3529,
+        "problems": 34,
+        "correct": 12,
+        "censored": 68
       },
       {
         "model": "Vicuna 13B",
-        "eff1": 0.31,
-        "pass1": 0.36,
-        "problems": 50,
-        "correct": 18,
-        "censored": 103
+        "eff1": 0.3324,
+        "pass1": 0.3529,
+        "problems": 34,
+        "correct": 12,
+        "censored": 68
+      },
+      {
+        "model": "GPT-J",
+        "eff1": 0.2647,
+        "pass1": 0.2647,
+        "problems": 34,
+        "correct": 9,
+        "censored": 75
+      },
+      {
+        "model": "Incoder 1B",
+        "eff1": 0.2059,
+        "pass1": 0.2059,
+        "problems": 34,
+        "correct": 7,
+        "censored": 81
       },
       {
         "model": "SantaCoder",
-        "eff1": 0.3,
-        "pass1": 0.3,
-        "problems": 50,
-        "correct": 15,
-        "censored": 103
+        "eff1": 0.2059,
+        "pass1": 0.2059,
+        "problems": 34,
+        "correct": 7,
+        "censored": 81
       },
       {
         "model": "Vicuna 7B",
-        "eff1": 0.204,
-        "pass1": 0.26,
-        "problems": 50,
-        "correct": 13,
-        "censored": 117
+        "eff1": 0.1941,
+        "pass1": 0.2353,
+        "problems": 34,
+        "correct": 8,
+        "censored": 82
+      },
+      {
+        "model": "GPT-Neo 2B",
+        "eff1": 0.1176,
+        "pass1": 0.1176,
+        "problems": 34,
+        "correct": 4,
+        "censored": 90
       }
     ],
     "q_distribution": [
       {
         "level": 1,
-        "q_median": 0.2955,
-        "q_min": 0.0027,
+        "q_median": 0.3012,
+        "q_min": 0.003,
         "q_max": 1.0,
-        "tolerated_slowdown": 6.8,
-        "score_at_2x": 0.827,
-        "score_at_5x": 0.306,
+        "tolerated_slowdown": 6.6,
+        "score_at_2x": 0.823,
+        "score_at_5x": 0.291,
         "score_at_10x": 0.0
       },
       {
         "level": 2,
-        "q_median": 0.5601,
-        "q_min": 0.0158,
+        "q_median": 0.5389,
+        "q_min": 0.0202,
         "q_max": 1.0,
-        "tolerated_slowdown": 3.6,
-        "score_at_2x": 0.611,
+        "tolerated_slowdown": 3.7,
+        "score_at_2x": 0.631,
         "score_at_5x": 0.0,
         "score_at_10x": 0.0
       },
       {
         "level": 3,
         "q_median": 1.0,
-        "q_min": 0.7705,
+        "q_min": 0.8777,
         "q_max": 1.0,
         "tolerated_slowdown": 2.0,
         "score_at_2x": 0.0,
@@ -185,10 +257,263 @@
   },
   "history": [
     {
-      "experiment_id": "2026-09-08T09:37:46_7c38d86",
+      "experiment_id": "2026-09-08T11:16:23_647a129",
+      "timestamp": "2026-09-08T11:16:23+00:00",
+      "finished": "2026-09-08T11:26:07+00:00",
+      "git_commit": "647a129",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "EvalPlus (evalplus/evalplus)",
+        "fingerprint": "382e21fead6f"
+      },
+      "summary": {
+        "problems_attempted": 50,
+        "problems_scored": 34,
+        "problems_failed": 0,
+        "models": 17
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.011755716499465052,
+            0.01601201000084984,
+            0.015475689000595594,
+            0.015769214000101783,
+            0.012788812500730273,
+            0.011583573499592603,
+            0.015739420499812695,
+            0.013767411500339222
+          ],
+          "attr_call": [
+            0.006514028499623237,
+            0.007189472000391106,
+            0.009285848500439897,
+            0.0074031959993590135,
+            0.00756497250040411,
+            0.00650802299969655,
+            0.010545239999373734,
+            0.010288741000294976
+          ],
+          "bulk_builtin": [
+            0.011065813499953947,
+            0.015039447999697586,
+            0.01228439399983472,
+            0.01182073850031884,
+            0.011315974999888567,
+            0.011780516000726493,
+            0.011106661499979964,
+            0.016249930999038043
+          ],
+          "loop_arith": [
+            0.013675782500286005,
+            0.01819824999984121,
+            0.014245636500163528,
+            0.012990564000574523,
+            0.01432969100005721,
+            0.017060925500118174,
+            0.014280977499765868,
+            0.016151427999830048
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "Phind Code Llama V2",
+          "eff1": 0.7353,
+          "pass1": 0.8824,
+          "problems": 34,
+          "correct": 30,
+          "censored": 26
+        },
+        {
+          "model": "ChatGPT",
+          "eff1": 0.6824,
+          "pass1": 0.8824,
+          "problems": 34,
+          "correct": 30,
+          "censored": 31
+        },
+        {
+          "model": "GPT-4",
+          "eff1": 0.6765,
+          "pass1": 0.9412,
+          "problems": 34,
+          "correct": 32,
+          "censored": 32
+        },
+        {
+          "model": "GPT-4 Turbo",
+          "eff1": 0.6676,
+          "pass1": 0.8824,
+          "problems": 34,
+          "correct": 30,
+          "censored": 33
+        },
+        {
+          "model": "Code Llama 7B Python",
+          "eff1": 0.5,
+          "pass1": 0.6471,
+          "problems": 34,
+          "correct": 22,
+          "censored": 50
+        },
+        {
+          "model": "Mistral 7B",
+          "eff1": 0.4735,
+          "pass1": 0.5882,
+          "problems": 34,
+          "correct": 20,
+          "censored": 52
+        },
+        {
+          "model": "CodeGen 6B",
+          "eff1": 0.4265,
+          "pass1": 0.5294,
+          "problems": 34,
+          "correct": 18,
+          "censored": 58
+        },
+        {
+          "model": "CodeGen 16B",
+          "eff1": 0.4176,
+          "pass1": 0.6176,
+          "problems": 34,
+          "correct": 21,
+          "censored": 59
+        },
+        {
+          "model": "StarCoder",
+          "eff1": 0.3971,
+          "pass1": 0.5294,
+          "problems": 34,
+          "correct": 18,
+          "censored": 61
+        },
+        {
+          "model": "CodeT5+ 16B",
+          "eff1": 0.3471,
+          "pass1": 0.5294,
+          "problems": 34,
+          "correct": 18,
+          "censored": 66
+        },
+        {
+          "model": "Incoder 6B",
+          "eff1": 0.3324,
+          "pass1": 0.3529,
+          "problems": 34,
+          "correct": 12,
+          "censored": 68
+        },
+        {
+          "model": "Vicuna 13B",
+          "eff1": 0.3324,
+          "pass1": 0.3529,
+          "problems": 34,
+          "correct": 12,
+          "censored": 68
+        },
+        {
+          "model": "GPT-J",
+          "eff1": 0.2647,
+          "pass1": 0.2647,
+          "problems": 34,
+          "correct": 9,
+          "censored": 75
+        },
+        {
+          "model": "Incoder 1B",
+          "eff1": 0.2059,
+          "pass1": 0.2059,
+          "problems": 34,
+          "correct": 7,
+          "censored": 81
+        },
+        {
+          "model": "SantaCoder",
+          "eff1": 0.2059,
+          "pass1": 0.2059,
+          "problems": 34,
+          "correct": 7,
+          "censored": 81
+        },
+        {
+          "model": "Vicuna 7B",
+          "eff1": 0.1941,
+          "pass1": 0.2353,
+          "problems": 34,
+          "correct": 8,
+          "censored": 82
+        },
+        {
+          "model": "GPT-Neo 2B",
+          "eff1": 0.1176,
+          "pass1": 0.1176,
+          "problems": 34,
+          "correct": 4,
+          "censored": 90
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.3012,
+          "q_min": 0.003,
+          "q_max": 1.0,
+          "tolerated_slowdown": 6.6,
+          "score_at_2x": 0.823,
+          "score_at_5x": 0.291,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5389,
+          "q_min": 0.0202,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.7,
+          "score_at_2x": 0.631,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.8777,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-08T09:37:46_647a129",
       "timestamp": "2026-09-08T09:37:46+00:00",
       "finished": "2026-09-08T09:42:42+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -366,10 +691,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:26:49_7c38d86",
+      "experiment_id": "2026-09-08T09:26:49_647a129",
       "timestamp": "2026-09-08T09:26:49+00:00",
       "finished": "2026-09-08T09:35:51+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -547,10 +872,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:16:00_7c38d86",
+      "experiment_id": "2026-09-08T09:16:00_647a129",
       "timestamp": "2026-09-08T09:16:00+00:00",
       "finished": "2026-09-08T09:22:37+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -680,10 +1005,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-08T09:11:33_7c38d86",
+      "experiment_id": "2026-09-08T09:11:33_647a129",
       "timestamp": "2026-09-08T09:11:33+00:00",
       "finished": "2026-09-08T09:13:50+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -813,10 +1138,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:57:02_7c38d86",
+      "experiment_id": "2026-09-07T18:57:02_647a129",
       "timestamp": "2026-09-07T18:57:02+00:00",
       "finished": "2026-09-07T19:04:19+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -946,10 +1271,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:51:38_7c38d86",
+      "experiment_id": "2026-09-07T18:51:38_647a129",
       "timestamp": "2026-09-07T18:51:38+00:00",
       "finished": "2026-09-07T18:54:38+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1079,10 +1404,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:48:58_7c38d86",
+      "experiment_id": "2026-09-07T18:48:58_647a129",
       "timestamp": "2026-09-07T18:48:58+00:00",
       "finished": "2026-09-07T18:51:07+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1212,10 +1537,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:44:11_7c38d86",
+      "experiment_id": "2026-09-07T18:44:11_647a129",
       "timestamp": "2026-09-07T18:44:11+00:00",
       "finished": "2026-09-07T18:46:20+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1345,10 +1670,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:43:09_7c38d86",
+      "experiment_id": "2026-09-07T18:43:09_647a129",
       "timestamp": "2026-09-07T18:43:09+00:00",
       "finished": "2026-09-07T18:43:48+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1478,10 +1803,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:42:11_7c38d86",
+      "experiment_id": "2026-09-07T18:42:11_647a129",
       "timestamp": "2026-09-07T18:42:11+00:00",
       "finished": "2026-09-07T18:42:38+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1611,10 +1936,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:41:44_7c38d86",
+      "experiment_id": "2026-09-07T18:41:44_647a129",
       "timestamp": "2026-09-07T18:41:44+00:00",
       "finished": "2026-09-07T18:42:00+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1744,10 +2069,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:38:01_7c38d86",
+      "experiment_id": "2026-09-07T18:38:01_647a129",
       "timestamp": "2026-09-07T18:38:01+00:00",
       "finished": "2026-09-07T18:38:15+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",
@@ -1877,10 +2202,10 @@
       ]
     },
     {
-      "experiment_id": "2026-09-07T18:25:31_7c38d86",
+      "experiment_id": "2026-09-07T18:25:31_647a129",
       "timestamp": "2026-09-07T18:25:31+00:00",
       "finished": "2026-09-07T18:25:39+00:00",
-      "git_commit": "7c38d86",
+      "git_commit": "647a129",
       "git_dirty": true,
       "benchmark": "ENAMEL-Extended v0.0.1",
       "python": "CPython 3.14.7",

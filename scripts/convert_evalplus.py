@@ -48,34 +48,27 @@ def load_model_samples(archive_name: str) -> dict[int, tuple[str, ...]]:
     if not model_dir.exists():
         return {}
 
-    search_dirs = [model_dir]
-    inner = model_dir / archive_name
-    if inner.exists():
-        search_dirs.append(inner)
-    for sub in model_dir.iterdir():
-        if sub.is_dir():
-            inner2 = sub / archive_name
-            if inner2.exists():
-                search_dirs.append(inner2)
-            for sub2 in sub.iterdir():
-                if sub2.is_dir():
-                    inner3 = sub2 / archive_name
-                    if inner3.exists():
-                        search_dirs.append(inner3)
+    def find_task_dirs(root: Path) -> list[Path]:
+        found = []
+        for p in root.rglob("HumanEval_*"):
+            if p.is_dir() and p.name.split("_")[1].isdigit():
+                found.append(p)
+        return found
+
+    task_dirs = find_task_dirs(model_dir)
+    if not task_dirs:
+        return {}
 
     samples: dict[int, list[str]] = {}
-    for search_dir in search_dirs:
-        for task_dir in sorted(search_dir.iterdir()):
-            if not task_dir.is_dir() or not task_dir.name.startswith("HumanEval_"):
-                continue
-            pid = int(task_dir.name.split("_")[1])
-            if pid in samples:
-                continue
-            codes = []
-            for py_file in sorted(task_dir.glob("*.py")):
-                codes.append(py_file.read_text())
-            if codes:
-                samples[pid] = codes
+    for task_dir in sorted(task_dirs):
+        pid = int(task_dir.name.split("_")[1])
+        if pid in samples:
+            continue
+        codes = []
+        for py_file in sorted(task_dir.glob("*.py")):
+            codes.append(py_file.read_text())
+        if codes:
+            samples[pid] = codes
 
     return {pid: tuple(codes) for pid, codes in samples.items()}
 
