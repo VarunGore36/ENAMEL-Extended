@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENAMEL-Extended — Live Results</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ENAMEL-Extended</h1>
+            <p class="subtitle">A rigorous reimplementation of the ENAMEL code-efficiency benchmark</p>
+            <nav>
+                <a href="#overview">Overview</a>
+                <a href="#results">Results</a>
+                <a href="#experiments">Experiments</a>
+                <a href="#methodology">Methodology</a>
+                <a href="#status">Status</a>
+                <a href="https://github.com/VarunGore36/ENAMEL-Extended" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                ENAMEL-Extended is a from-scratch Python reimplementation of
+                <a href="https://arxiv.org/abs/2406.06647" target="_blank">ENAMEL</a>,
+                the code-efficiency benchmark introduced by Qiu, Zeng, Ezick, Lott &amp; Tong
+                (ICLR 2025). ENAMEL measures the <em>efficiency</em> of LLM-generated code —
+                not just correctness — by comparing runtime against expert reference solutions
+                on adversarial test inputs.
+            </p>
+            <p>
+                The headline finding: models that look strong on <code>pass@k</code> are far
+                from expert level on <code>eff@k</code>. GPT-4 reaches <code>pass@1 = 0.831</code>
+                but only <code>eff@1 = 0.454</code>. This reimplementation reproduces the metric,
+                builds a resumable measurement harness with bootstrap confidence intervals,
+                and investigates the published claims.
+            </p>
+            <div class="callout">
+                <strong>Key contribution:</strong> We measure the q-distribution across levels
+                (§2.2 of the open questions) — showing that level 3 carries 71% of the score's
+                sensitivity while levels 1–2 carry 60% of the weight but minimal discrimination.
+            </div>
+        </section>
+
+        <section id="results">
+            <h2>Latest Results</h2>
+            <div id="results-loading" class="loading">Loading results…</div>
+            <div id="results-content" style="display:none">
+
+                <div class="result-meta" id="result-meta"></div>
+
+                <div class="chart-row">
+                    <div class="chart-box">
+                        <h3>Leaderboard — eff@1</h3>
+                        <canvas id="chart-leaderboard"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h3>eff@1 vs pass@1</h3>
+                        <canvas id="chart-eff-pass"></canvas>
+                    </div>
+                </div>
+
+                <h3>Leaderboard Table</h3>
+                <div class="table-wrap">
+                    <table id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Model</th>
+                                <th>eff@1</th>
+                                <th>pass@1</th>
+                                <th>Problems</th>
+                                <th>Wrong</th>
+                                <th>Censored</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <h3>Level Discrimination — q-distribution</h3>
+                <div class="chart-row">
+                    <div class="chart-box">
+                        <canvas id="chart-q-dist"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chart-sensitivity"></canvas>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="q-table">
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th>q median</th>
+                                <th>q range</th>
+                                <th>Tolerated slowdown</th>
+                                <th>Score at 2×</th>
+                                <th>Score at 5×</th>
+                                <th>Score at 10×</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="experiments">
+            <h2>Experiment History</h2>
+            <div id="experiments-loading" class="loading">Loading…</div>
+            <div id="experiments-content" style="display:none">
+                <div class="table-wrap">
+                    <table id="experiments-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Commit</th>
+                                <th>Models</th>
+                                <th>Problems</th>
+                                <th>Best eff@1</th>
+                                <th>Platform</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <h3>eff@1 Over Experiments</h3>
+                <div class="chart-box">
+                    <canvas id="chart-history"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="methodology">
+            <h2>Methodology</h2>
+            <div class="method-grid">
+                <div class="method-card">
+                    <h4>Efficiency Score</h4>
+                    <p>
+                        For each problem, code is run against 4 levels of test cases
+                        (8 + 4 + 4 + 4 cases). The per-level score is:
+                    </p>
+                    <pre>f = (T_i − max_m t[i,j,l,m]) / (T_i − max_m t*[i,l,m])</pre>
+                    <p>
+                        where T_i = α · max<sub>l,m</sub> t*<sub>i,l,m</sub> with α = 2.
+                        Levels are combined by hardness-weighted mean with h = (3, 3, 4).
+                    </p>
+                </div>
+                <div class="method-card">
+                    <h4>eff@k Estimator</h4>
+                    <p>
+                        The Rao–Blackwellized estimator over n ≥ k samples, using binomial
+                        weights over order statistics (Algorithm 1 from the paper). Theorem 1
+                        proves unbiasedness and a variance bound of (k/n)·Var[max].
+                    </p>
+                </div>
+                <div class="method-card">
+                    <h4>Robust Timing</h4>
+                    <p>
+                        Each test case runs R = 6 repeats, aggregated by the Hodges–Lehmann
+                        estimator for robustness to outliers. Candidates are executed in a
+                        sandboxed subprocess with resource limits.
+                    </p>
+                </div>
+                <div class="method-card">
+                    <h4>Statistical Rigor</h4>
+                    <p>
+                        Every reported score carries a bootstrap confidence interval
+                        (10,000 resamples). No comparison is claimed without a pairwise test.
+                        The α-sweep and h-sweep are reported alongside the headline.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="status">
+            <h2>Reproduction Status</h2>
+            <div class="status-grid">
+                <div class="status-card done">
+                    <h4>Metric Core</h4>
+                    <p>Algorithm 1 recurrence, Eq. (1)–(6), verified exactly against brute-force enumeration.</p>
+                    <span class="badge">Done</span>
+                </div>
+                <div class="status-card done">
+                    <h4>Honest Statistics</h4>
+                    <p>Bootstrap CIs, censored scoring, full α and h sweeps in every report.</p>
+                    <span class="badge">Done</span>
+                </div>
+                <div class="status-card done">
+                    <h4>q-Distribution (§2.2)</h4>
+                    <p>Measured across 162 problems: level 3 carries 71% sensitivity, levels 1–2 are near-flat.</p>
+                    <span class="badge">Done</span>
+                </div>
+                <div class="status-card partial">
+                    <h4>Parity Gate</h4>
+                    <p>8 of 30 models compared. Ranking preserved (τ = 0.93). Absolute values higher due to hardware/CPython differences.</p>
+                    <span class="badge">Partial</span>
+                </div>
+                <div class="status-card pending">
+                    <h4>Full Parity</h4>
+                    <p>Need remaining 22 model samples (Llama, Mixtral, Claude) and hardware with probe resolution &lt; 1.025.</p>
+                    <span class="badge">Blocked</span>
+                </div>
+                <div class="status-card pending">
+                    <h4>Containerization</h4>
+                    <p>Pinned container image, CPU affinity, instruction-count metric for cross-machine comparability.</p>
+                    <span class="badge">Not started</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>
+                ENAMEL-Extended — Apache-2.0 —
+                <a href="https://github.com/VarunGore36/ENAMEL-Extended">GitHub</a> —
+                Original paper:
+                <a href="https://arxiv.org/abs/2406.06647">arXiv:2406.06647</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

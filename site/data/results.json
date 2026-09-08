@@ -1,0 +1,2013 @@
+{
+  "generated_at": "2026-09-08T10:32:00.059799+00:00",
+  "generator_commit": "7c38d86",
+  "run_count": 13,
+  "latest": {
+    "experiment_id": "2026-09-08T09:37:46_7c38d86",
+    "timestamp": "2026-09-08T09:37:46+00:00",
+    "finished": "2026-09-08T09:42:42+00:00",
+    "git_commit": "7c38d86",
+    "git_dirty": true,
+    "benchmark": "ENAMEL-Extended v0.0.1",
+    "python": "CPython 3.14.7",
+    "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+    "cores": 0,
+    "metric": {
+      "alpha": 2.0,
+      "level_weights": [
+        3.0,
+        3.0,
+        4.0
+      ],
+      "normalization": "global",
+      "repeats": 6,
+      "aggregator": "hodges_lehmann"
+    },
+    "data": {
+      "name": "ENAMEL (q-rz/enamel)",
+      "fingerprint": "6b53df26d6c7"
+    },
+    "solutions": {
+      "name": "EvalPlus (evalplus/evalplus)",
+      "fingerprint": "86bd9b0900fd"
+    },
+    "summary": {
+      "problems_attempted": 50,
+      "problems_scored": 50,
+      "problems_failed": 0,
+      "models": 8
+    },
+    "calibration": {
+      "aggregator": "hodges_lehmann",
+      "repeats": 6,
+      "times": {
+        "alloc_churn": [
+          0.011375312999916787,
+          0.011256688000003123,
+          0.013266201500073294,
+          0.01306778599973768,
+          0.012877616499736178,
+          0.013042243999962011,
+          0.015517448499849706,
+          0.012784982499852049
+        ],
+        "attr_call": [
+          0.007138667999697645,
+          0.006700494499909837,
+          0.007789314999854469,
+          0.007639450000169745,
+          0.007510409500127935,
+          0.00756583700012925,
+          0.0074715719999858266,
+          0.0076763079998727335
+        ],
+        "bulk_builtin": [
+          0.012142728000071656,
+          0.010937093999928038,
+          0.011284780999858413,
+          0.011711530999946262,
+          0.011256480499923782,
+          0.01341051100007462,
+          0.011559563999981037,
+          0.01471956900013538
+        ],
+        "loop_arith": [
+          0.01566827600004217,
+          0.012704155499932313,
+          0.01419442400015214,
+          0.0174890549999418,
+          0.013124265499982357,
+          0.018398154999886174,
+          0.012734061999708501,
+          0.014483024999890404
+        ]
+      },
+      "version": 1
+    },
+    "leaderboard": [
+      {
+        "model": "GPT-4",
+        "eff1": 0.728,
+        "pass1": 0.94,
+        "problems": 50,
+        "correct": 47,
+        "censored": 39
+      },
+      {
+        "model": "GPT-4 Turbo",
+        "eff1": 0.694,
+        "pass1": 0.9,
+        "problems": 50,
+        "correct": 45,
+        "censored": 44
+      },
+      {
+        "model": "ChatGPT",
+        "eff1": 0.686,
+        "pass1": 0.86,
+        "problems": 50,
+        "correct": 43,
+        "censored": 43
+      },
+      {
+        "model": "CodeGen 6B",
+        "eff1": 0.43,
+        "pass1": 0.54,
+        "problems": 50,
+        "correct": 27,
+        "censored": 83
+      },
+      {
+        "model": "CodeGen 16B",
+        "eff1": 0.428,
+        "pass1": 0.58,
+        "problems": 50,
+        "correct": 29,
+        "censored": 83
+      },
+      {
+        "model": "Vicuna 13B",
+        "eff1": 0.31,
+        "pass1": 0.36,
+        "problems": 50,
+        "correct": 18,
+        "censored": 103
+      },
+      {
+        "model": "SantaCoder",
+        "eff1": 0.3,
+        "pass1": 0.3,
+        "problems": 50,
+        "correct": 15,
+        "censored": 103
+      },
+      {
+        "model": "Vicuna 7B",
+        "eff1": 0.204,
+        "pass1": 0.26,
+        "problems": 50,
+        "correct": 13,
+        "censored": 117
+      }
+    ],
+    "q_distribution": [
+      {
+        "level": 1,
+        "q_median": 0.2955,
+        "q_min": 0.0027,
+        "q_max": 1.0,
+        "tolerated_slowdown": 6.8,
+        "score_at_2x": 0.827,
+        "score_at_5x": 0.306,
+        "score_at_10x": 0.0
+      },
+      {
+        "level": 2,
+        "q_median": 0.5601,
+        "q_min": 0.0158,
+        "q_max": 1.0,
+        "tolerated_slowdown": 3.6,
+        "score_at_2x": 0.611,
+        "score_at_5x": 0.0,
+        "score_at_10x": 0.0
+      },
+      {
+        "level": 3,
+        "q_median": 1.0,
+        "q_min": 0.7705,
+        "q_max": 1.0,
+        "tolerated_slowdown": 2.0,
+        "score_at_2x": 0.0,
+        "score_at_5x": 0.0,
+        "score_at_10x": 0.0
+      }
+    ]
+  },
+  "history": [
+    {
+      "experiment_id": "2026-09-08T09:37:46_7c38d86",
+      "timestamp": "2026-09-08T09:37:46+00:00",
+      "finished": "2026-09-08T09:42:42+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "EvalPlus (evalplus/evalplus)",
+        "fingerprint": "86bd9b0900fd"
+      },
+      "summary": {
+        "problems_attempted": 50,
+        "problems_scored": 50,
+        "problems_failed": 0,
+        "models": 8
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.011375312999916787,
+            0.011256688000003123,
+            0.013266201500073294,
+            0.01306778599973768,
+            0.012877616499736178,
+            0.013042243999962011,
+            0.015517448499849706,
+            0.012784982499852049
+          ],
+          "attr_call": [
+            0.007138667999697645,
+            0.006700494499909837,
+            0.007789314999854469,
+            0.007639450000169745,
+            0.007510409500127935,
+            0.00756583700012925,
+            0.0074715719999858266,
+            0.0076763079998727335
+          ],
+          "bulk_builtin": [
+            0.012142728000071656,
+            0.010937093999928038,
+            0.011284780999858413,
+            0.011711530999946262,
+            0.011256480499923782,
+            0.01341051100007462,
+            0.011559563999981037,
+            0.01471956900013538
+          ],
+          "loop_arith": [
+            0.01566827600004217,
+            0.012704155499932313,
+            0.01419442400015214,
+            0.0174890549999418,
+            0.013124265499982357,
+            0.018398154999886174,
+            0.012734061999708501,
+            0.014483024999890404
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "GPT-4",
+          "eff1": 0.728,
+          "pass1": 0.94,
+          "problems": 50,
+          "correct": 47,
+          "censored": 39
+        },
+        {
+          "model": "GPT-4 Turbo",
+          "eff1": 0.694,
+          "pass1": 0.9,
+          "problems": 50,
+          "correct": 45,
+          "censored": 44
+        },
+        {
+          "model": "ChatGPT",
+          "eff1": 0.686,
+          "pass1": 0.86,
+          "problems": 50,
+          "correct": 43,
+          "censored": 43
+        },
+        {
+          "model": "CodeGen 6B",
+          "eff1": 0.43,
+          "pass1": 0.54,
+          "problems": 50,
+          "correct": 27,
+          "censored": 83
+        },
+        {
+          "model": "CodeGen 16B",
+          "eff1": 0.428,
+          "pass1": 0.58,
+          "problems": 50,
+          "correct": 29,
+          "censored": 83
+        },
+        {
+          "model": "Vicuna 13B",
+          "eff1": 0.31,
+          "pass1": 0.36,
+          "problems": 50,
+          "correct": 18,
+          "censored": 103
+        },
+        {
+          "model": "SantaCoder",
+          "eff1": 0.3,
+          "pass1": 0.3,
+          "problems": 50,
+          "correct": 15,
+          "censored": 103
+        },
+        {
+          "model": "Vicuna 7B",
+          "eff1": 0.204,
+          "pass1": 0.26,
+          "problems": 50,
+          "correct": 13,
+          "censored": 117
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.2955,
+          "q_min": 0.0027,
+          "q_max": 1.0,
+          "tolerated_slowdown": 6.8,
+          "score_at_2x": 0.827,
+          "score_at_5x": 0.306,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5601,
+          "q_min": 0.0158,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.6,
+          "score_at_2x": 0.611,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.7705,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-08T09:26:49_7c38d86",
+      "timestamp": "2026-09-08T09:26:49+00:00",
+      "finished": "2026-09-08T09:35:51+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "EvalPlus (evalplus/evalplus)",
+        "fingerprint": "86bd9b0900fd"
+      },
+      "summary": {
+        "problems_attempted": 164,
+        "problems_scored": 95,
+        "problems_failed": 1,
+        "models": 8
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.012432945000000473,
+            0.011467851999896084,
+            0.012611445500169793,
+            0.012552575999961846,
+            0.010729052999977284,
+            0.011023819999763873,
+            0.011172257999987778,
+            0.011679411000159234
+          ],
+          "attr_call": [
+            0.006576487500296935,
+            0.007024292000096466,
+            0.006623910500138663,
+            0.0076932470001338515,
+            0.006378090499765676,
+            0.006633319499997015,
+            0.006566794999798731,
+            0.00679663449977852
+          ],
+          "bulk_builtin": [
+            0.011520050999934028,
+            0.011604989000034038,
+            0.011222944499877485,
+            0.011852323000084652,
+            0.011753461500120466,
+            0.01136459250005828,
+            0.011724013500270303,
+            0.011992462000080195
+          ],
+          "loop_arith": [
+            0.012683475500125496,
+            0.014166536000175256,
+            0.012661283999932493,
+            0.012015681999628214,
+            0.01278458199999477,
+            0.013189437499931955,
+            0.012602372499941339,
+            0.014415071999792417
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "GPT-4 Turbo",
+          "eff1": 0.6937,
+          "pass1": 0.9053,
+          "problems": 95,
+          "correct": 86,
+          "censored": 83
+        },
+        {
+          "model": "GPT-4",
+          "eff1": 0.6884,
+          "pass1": 0.8842,
+          "problems": 95,
+          "correct": 84,
+          "censored": 85
+        },
+        {
+          "model": "ChatGPT",
+          "eff1": 0.6316,
+          "pass1": 0.8316,
+          "problems": 95,
+          "correct": 79,
+          "censored": 97
+        },
+        {
+          "model": "CodeGen 6B",
+          "eff1": 0.3579,
+          "pass1": 0.4632,
+          "problems": 95,
+          "correct": 44,
+          "censored": 177
+        },
+        {
+          "model": "CodeGen 16B",
+          "eff1": 0.3463,
+          "pass1": 0.4632,
+          "problems": 95,
+          "correct": 44,
+          "censored": 180
+        },
+        {
+          "model": "SantaCoder",
+          "eff1": 0.2547,
+          "pass1": 0.2737,
+          "problems": 95,
+          "correct": 26,
+          "censored": 205
+        },
+        {
+          "model": "Vicuna 13B",
+          "eff1": 0.2221,
+          "pass1": 0.2947,
+          "problems": 95,
+          "correct": 28,
+          "censored": 219
+        },
+        {
+          "model": "Vicuna 7B",
+          "eff1": 0.1358,
+          "pass1": 0.1895,
+          "problems": 95,
+          "correct": 18,
+          "censored": 240
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.2851,
+          "q_min": 0.0014,
+          "q_max": 1.0,
+          "tolerated_slowdown": 7.0,
+          "score_at_2x": 0.834,
+          "score_at_5x": 0.335,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5421,
+          "q_min": 0.0231,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.7,
+          "score_at_2x": 0.628,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.6782,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-08T09:16:00_7c38d86",
+      "timestamp": "2026-09-08T09:16:00+00:00",
+      "finished": "2026-09-08T09:22:37+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "EvalPlus (evalplus/evalplus)",
+        "fingerprint": "d55228506274"
+      },
+      "summary": {
+        "problems_attempted": 164,
+        "problems_scored": 162,
+        "problems_failed": 2,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.014737578999756806,
+            0.01176048900015303,
+            0.015066989999922953,
+            0.0127529605001655,
+            0.012058517500008747,
+            0.014597858999877644,
+            0.011955589500075803,
+            0.012144618499860371
+          ],
+          "attr_call": [
+            0.011728211499985264,
+            0.009288694500128258,
+            0.011140763000184961,
+            0.008796405000111918,
+            0.008451755499891078,
+            0.007539695500099697,
+            0.008920076000094923,
+            0.008589193999796407
+          ],
+          "bulk_builtin": [
+            0.011209892999886506,
+            0.013347417499971925,
+            0.011386533999939275,
+            0.01123205599992616,
+            0.01437919799991505,
+            0.01368080999986887,
+            0.014967864000027475,
+            0.014103418000104284
+          ],
+          "loop_arith": [
+            0.013382738000245809,
+            0.016961395999715023,
+            0.015560041000071578,
+            0.022165276000123413,
+            0.018010046499739474,
+            0.013832244500008528,
+            0.013784160499881182,
+            0.017553656000018236
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "GPT-4",
+          "eff1": 0.6364,
+          "pass1": 0.8765,
+          "problems": 162,
+          "correct": 142,
+          "censored": 169
+        },
+        {
+          "model": "GPT-4 Turbo",
+          "eff1": 0.6198,
+          "pass1": 0.8457,
+          "problems": 162,
+          "correct": 137,
+          "censored": 177
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.2661,
+          "q_min": 0.0007,
+          "q_max": 1.0,
+          "tolerated_slowdown": 7.5,
+          "score_at_2x": 0.847,
+          "score_at_5x": 0.386,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5526,
+          "q_min": 0.007,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.6,
+          "score_at_2x": 0.618,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.0033,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-08T09:11:33_7c38d86",
+      "timestamp": "2026-09-08T09:11:33+00:00",
+      "finished": "2026-09-08T09:13:50+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.3-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "EvalPlus (evalplus/evalplus)",
+        "fingerprint": "d55228506274"
+      },
+      "summary": {
+        "problems_attempted": 164,
+        "problems_scored": 75,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.011464173000149458,
+            0.01365746700003001,
+            0.01405076499986535,
+            0.01172232449994226,
+            0.0119751445000702,
+            0.011664002999850709,
+            0.011910058000012214,
+            0.0119227125001089
+          ],
+          "attr_call": [
+            0.007022932499921808,
+            0.006826943999840296,
+            0.006937347000075533,
+            0.006801469000038196,
+            0.0070269375000862055,
+            0.006872323000152392,
+            0.00689890999990439,
+            0.007068561500091164
+          ],
+          "bulk_builtin": [
+            0.012328817500019795,
+            0.01119539049989271,
+            0.011260748500035334,
+            0.012240695000059532,
+            0.011359872999946674,
+            0.011092685499988875,
+            0.011277226999936829,
+            0.011453236000079414
+          ],
+          "loop_arith": [
+            0.01503594799999064,
+            0.013385491999997612,
+            0.013438752000070053,
+            0.013795293000043785,
+            0.013483568499964349,
+            0.013900904500019351,
+            0.01314020100005564,
+            0.013582949000010558
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "GPT-4",
+          "eff1": 0.7373,
+          "pass1": 0.92,
+          "problems": 75,
+          "correct": 69,
+          "censored": 57
+        },
+        {
+          "model": "GPT-4 Turbo",
+          "eff1": 0.692,
+          "pass1": 0.9333,
+          "problems": 75,
+          "correct": 70,
+          "censored": 66
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.2312,
+          "q_min": 0.0016,
+          "q_max": 1.0,
+          "tolerated_slowdown": 8.7,
+          "score_at_2x": 0.869,
+          "score_at_5x": 0.477,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5649,
+          "q_min": 0.0257,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.5,
+          "score_at_2x": 0.606,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.745,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:57:02_7c38d86",
+      "timestamp": "2026-09-07T18:57:02+00:00",
+      "finished": "2026-09-07T19:04:19+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 164,
+        "problems_scored": 162,
+        "problems_failed": 2,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.01457469249908172,
+            0.016551217000596807,
+            0.011558492496988038,
+            0.0114262700008112,
+            0.011392450000130339,
+            0.015572365000480204,
+            0.01543791299991426,
+            0.015132795000681654
+          ],
+          "attr_call": [
+            0.006769960000383435,
+            0.00848014550138032,
+            0.00873590799892554,
+            0.006637373000558,
+            0.009233592998498352,
+            0.007476587999917683,
+            0.009725008500026888,
+            0.008398341999054537
+          ],
+          "bulk_builtin": [
+            0.01641036250111938,
+            0.010983031499563367,
+            0.011198211501323385,
+            0.012180256499050301,
+            0.011895931000253768,
+            0.013240375001259963,
+            0.010857268500330974,
+            0.012005791999399662
+          ],
+          "loop_arith": [
+            0.015723718999652192,
+            0.0181025910005701,
+            0.016244190999714192,
+            0.013050735999058816,
+            0.018142993500077864,
+            0.0158082989983086,
+            0.016988983001283486,
+            0.014560321000317344
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 162,
+          "correct": 162,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.6204,
+          "pass1": 0.9259,
+          "problems": 162,
+          "correct": 150,
+          "censored": 172
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.2794,
+          "q_min": 0.0007,
+          "q_max": 1.0,
+          "tolerated_slowdown": 7.2,
+          "score_at_2x": 0.838,
+          "score_at_5x": 0.35,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5548,
+          "q_min": 0.0087,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.6,
+          "score_at_2x": 0.616,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.0022,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:51:38_7c38d86",
+      "timestamp": "2026-09-07T18:51:38+00:00",
+      "finished": "2026-09-07T18:54:38+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 164,
+        "problems_scored": 75,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.013218531999882543,
+            0.01294353950288496,
+            0.012967281001692754,
+            0.013453971499984618,
+            0.011293855999610969,
+            0.012904667000839254,
+            0.013105048499710392,
+            0.011204617499970482
+          ],
+          "attr_call": [
+            0.007173647500167135,
+            0.007502667000153451,
+            0.006606142000237014,
+            0.007756055998470401,
+            0.007627699002114241,
+            0.0066907950003951555,
+            0.007937024498460232,
+            0.007190004500444047
+          ],
+          "bulk_builtin": [
+            0.011830938999992213,
+            0.011099905999799375,
+            0.011011060998498579,
+            0.011640199501925963,
+            0.011512548002428957,
+            0.012570858500112081,
+            0.014366176999828895,
+            0.01444490349967964
+          ],
+          "loop_arith": [
+            0.01270108549761062,
+            0.014883085499604931,
+            0.012826655998651404,
+            0.01457894099985424,
+            0.012817725499189692,
+            0.012817943499612738,
+            0.013977532500575762,
+            0.013486001500496059
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 75,
+          "correct": 75,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.6693,
+          "pass1": 0.9467,
+          "problems": 75,
+          "correct": 71,
+          "censored": 69
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.2274,
+          "q_min": 0.0023,
+          "q_max": 1.0,
+          "tolerated_slowdown": 8.8,
+          "score_at_2x": 0.872,
+          "score_at_5x": 0.487,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5596,
+          "q_min": 0.0136,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.6,
+          "score_at_2x": 0.612,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.367,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:48:58_7c38d86",
+      "timestamp": "2026-09-07T18:48:58+00:00",
+      "finished": "2026-09-07T18:51:07+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "6b53df26d6c7"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 50,
+        "problems_scored": 50,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.011512537499584141,
+            0.011323965001793113,
+            0.013266044499687268,
+            0.011326366999128368,
+            0.01128385350057215,
+            0.01397511250070238,
+            0.01193915999829187,
+            0.011239792002015747
+          ],
+          "attr_call": [
+            0.006633214001340093,
+            0.0066634394988795975,
+            0.006573763999767834,
+            0.00677053500112379,
+            0.006533269999636104,
+            0.006766949498342001,
+            0.006815805500082206,
+            0.006653557999015902
+          ],
+          "bulk_builtin": [
+            0.011270470000454225,
+            0.012231609998707427,
+            0.0111258450015157,
+            0.011042519499824266,
+            0.011505567001222516,
+            0.01122282600044855,
+            0.011317402500935714,
+            0.011358693001966458
+          ],
+          "loop_arith": [
+            0.014737200001036399,
+            0.014913222001268878,
+            0.013308973999301088,
+            0.013258835000669933,
+            0.015079014499860932,
+            0.015343655499236775,
+            0.013089329499052837,
+            0.014707419999467675
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 50,
+          "correct": 50,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.698,
+          "pass1": 0.96,
+          "problems": 50,
+          "correct": 48,
+          "censored": 43
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.3097,
+          "q_min": 0.0029,
+          "q_max": 1.0,
+          "tolerated_slowdown": 6.5,
+          "score_at_2x": 0.817,
+          "score_at_5x": 0.267,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5461,
+          "q_min": 0.0258,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.7,
+          "score_at_2x": 0.624,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.8447,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:44:11_7c38d86",
+      "timestamp": "2026-09-07T18:44:11+00:00",
+      "finished": "2026-09-07T18:46:20+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "65f9147caeea"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 164,
+        "problems_scored": 50,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.014066840998566477,
+            0.01184691849994124,
+            0.012368609499390004,
+            0.013858771000741399,
+            0.012046150999594829,
+            0.012454665999030112,
+            0.012464487001125235,
+            0.01249768799971207
+          ],
+          "attr_call": [
+            0.007193694500529091,
+            0.006968619500185014,
+            0.008107366998956422,
+            0.008161740499417647,
+            0.007129493498723605,
+            0.007264883000971167,
+            0.007189200499851722,
+            0.007251087499753339
+          ],
+          "bulk_builtin": [
+            0.011496103998069884,
+            0.011655374000838492,
+            0.011184765000507468,
+            0.011397960000977037,
+            0.011259553000854794,
+            0.011700506500346819,
+            0.011215262999030529,
+            0.0113275204985257
+          ],
+          "loop_arith": [
+            0.015971775999787496,
+            0.01425171849950857,
+            0.01541757300219615,
+            0.015644751998479478,
+            0.015893166500973166,
+            0.016557572000237997,
+            0.01639781850099098,
+            0.016455454999231733
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 50,
+          "correct": 50,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.704,
+          "pass1": 0.96,
+          "problems": 50,
+          "correct": 48,
+          "censored": 42
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.3007,
+          "q_min": 0.0031,
+          "q_max": 1.0,
+          "tolerated_slowdown": 6.7,
+          "score_at_2x": 0.823,
+          "score_at_5x": 0.292,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.5627,
+          "q_min": 0.0148,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.6,
+          "score_at_2x": 0.609,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.8147,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:43:09_7c38d86",
+      "timestamp": "2026-09-07T18:43:09+00:00",
+      "finished": "2026-09-07T18:43:48+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "65f9147caeea"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 20,
+        "problems_scored": 20,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.011889473998962785,
+            0.013130968000041321,
+            0.014348955999594182,
+            0.013552582498959964,
+            0.013828642999214935,
+            0.011742691498511704,
+            0.012166674998297822,
+            0.014147486499496154
+          ],
+          "attr_call": [
+            0.006332533501336002,
+            0.00826232550025452,
+            0.006878712500110851,
+            0.006738096000844962,
+            0.006848125000033178,
+            0.0068456025001069065,
+            0.006883802998345345,
+            0.006806966999647557
+          ],
+          "bulk_builtin": [
+            0.013280943499921705,
+            0.011257287500484381,
+            0.013257859000077588,
+            0.011575005501072155,
+            0.012644226000702474,
+            0.01113191400145297,
+            0.011109304003184661,
+            0.011122932499347371
+          ],
+          "loop_arith": [
+            0.014787063000767375,
+            0.012405986000885605,
+            0.013416535997748724,
+            0.01535526000225218,
+            0.01353177499913727,
+            0.013514179499907186,
+            0.013443886000459315,
+            0.013611822501843562
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 20,
+          "correct": 20,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.825,
+          "pass1": 1.0,
+          "problems": 20,
+          "correct": 20,
+          "censored": 10
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.3437,
+          "q_min": 0.0028,
+          "q_max": 0.9385,
+          "tolerated_slowdown": 5.8,
+          "score_at_2x": 0.792,
+          "score_at_5x": 0.17,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 2,
+          "q_median": 0.6039,
+          "q_min": 0.0322,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.3,
+          "score_at_2x": 0.567,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.9385,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:42:11_7c38d86",
+      "timestamp": "2026-09-07T18:42:11+00:00",
+      "finished": "2026-09-07T18:42:38+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "5ca24bc691aa"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 20,
+        "problems_scored": 10,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.014790170000196667,
+            0.012131557001339388,
+            0.015040600499560242,
+            0.012593557001309819,
+            0.01242062450000958,
+            0.012077788000169676,
+            0.012515853999502724,
+            0.012772222498824704
+          ],
+          "attr_call": [
+            0.006974657499085879,
+            0.007269562998772017,
+            0.007343764002143871,
+            0.008313912499943399,
+            0.007161911500588758,
+            0.007247827499668347,
+            0.006964596999750938,
+            0.00858862699897145
+          ],
+          "bulk_builtin": [
+            0.012061952500516782,
+            0.01138508900112356,
+            0.01141897900015465,
+            0.011322393000227748,
+            0.01398202549898997,
+            0.01186010899800749,
+            0.011438608999014832,
+            0.011361635999492137
+          ],
+          "loop_arith": [
+            0.013914123501308495,
+            0.013738264999119565,
+            0.013688877001186484,
+            0.016555641497689066,
+            0.01441696499932732,
+            0.01393233749877254,
+            0.016355611001927173,
+            0.016155032501046662
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 10,
+          "correct": 10,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.85,
+          "pass1": 1.0,
+          "problems": 10,
+          "correct": 10,
+          "censored": 4
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.1863,
+          "q_min": 0.0015,
+          "q_max": 0.8431,
+          "tolerated_slowdown": 10.7,
+          "score_at_2x": 0.897,
+          "score_at_5x": 0.589,
+          "score_at_10x": 0.076
+        },
+        {
+          "level": 2,
+          "q_median": 0.4641,
+          "q_min": 0.0256,
+          "q_max": 1.0,
+          "tolerated_slowdown": 4.3,
+          "score_at_2x": 0.698,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.8706,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:41:44_7c38d86",
+      "timestamp": "2026-09-07T18:41:44+00:00",
+      "finished": "2026-09-07T18:42:00+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "5ca24bc691aa"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 3,
+        "problems_scored": 3,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.01158357500207785,
+            0.01303807750082342,
+            0.01126175999888801,
+            0.013270182997075608,
+            0.011558550500922138,
+            0.011760683501051972,
+            0.012072436999005731,
+            0.011722476501745405
+          ],
+          "attr_call": [
+            0.006739421498423326,
+            0.007752403998892987,
+            0.007299986998987151,
+            0.006555105501320213,
+            0.006626288000916247,
+            0.007502697000745684,
+            0.006572899001184851,
+            0.006712864500514115
+          ],
+          "bulk_builtin": [
+            0.012028481500237831,
+            0.01100119250077114,
+            0.012236813998242724,
+            0.011105229497843538,
+            0.012049412998749176,
+            0.012393913999403594,
+            0.011118443999293959,
+            0.011187856500328053
+          ],
+          "loop_arith": [
+            0.013065462500890135,
+            0.013292870000441326,
+            0.012972201498996583,
+            0.013188311000703834,
+            0.013352336000025389,
+            0.013140837498212932,
+            0.015062903999933042,
+            0.013065054998151027
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 3,
+          "correct": 3,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.7667,
+          "pass1": 1.0,
+          "problems": 3,
+          "correct": 3,
+          "censored": 2
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.0515,
+          "q_min": 0.003,
+          "q_max": 0.8687,
+          "tolerated_slowdown": 38.8,
+          "score_at_2x": 0.974,
+          "score_at_5x": 0.894,
+          "score_at_10x": 0.762
+        },
+        {
+          "level": 2,
+          "q_median": 0.649,
+          "q_min": 0.6402,
+          "q_max": 1.0,
+          "tolerated_slowdown": 3.1,
+          "score_at_2x": 0.52,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 0.9928,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:38:01_7c38d86",
+      "timestamp": "2026-09-07T18:38:01+00:00",
+      "finished": "2026-09-07T18:38:15+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "ENAMEL (q-rz/enamel)",
+        "fingerprint": "71c316639efb"
+      },
+      "solutions": {
+        "name": "ENAMEL upstream samples",
+        "fingerprint": "4e423271cba2"
+      },
+      "summary": {
+        "problems_attempted": 3,
+        "problems_scored": 1,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.013151744999049697,
+            0.013246522501503932,
+            0.011787917499532341,
+            0.01229158699788968,
+            0.011773400499805575,
+            0.013061601501249243,
+            0.01384696699824417,
+            0.012205632499899366
+          ],
+          "attr_call": [
+            0.006713454498822102,
+            0.007940890001918888,
+            0.006641027001023758,
+            0.006756252500053961,
+            0.006640011997660622,
+            0.00755790400216938,
+            0.007121548002032796,
+            0.006911109998327447
+          ],
+          "bulk_builtin": [
+            0.011998363501334097,
+            0.011426288998336531,
+            0.011586325499592931,
+            0.010990383500029566,
+            0.012573064002936007,
+            0.01292646499859984,
+            0.01140937399941322,
+            0.011303926001346554
+          ],
+          "loop_arith": [
+            0.013000677501622704,
+            0.013142587999027455,
+            0.013202702997659799,
+            0.014727922000020044,
+            0.01376586750120623,
+            0.015538875999482116,
+            0.01643026750025456,
+            0.013280992499858257
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "reference",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 1,
+          "correct": 1,
+          "censored": 0
+        },
+        {
+          "model": "humaneval-canonical",
+          "eff1": 0.3,
+          "pass1": 1.0,
+          "problems": 1,
+          "correct": 1,
+          "censored": 2
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.0025,
+          "q_min": 0.0025,
+          "q_max": 0.0025,
+          "tolerated_slowdown": 796.5,
+          "score_at_2x": 0.999,
+          "score_at_5x": 0.995,
+          "score_at_10x": 0.989
+        },
+        {
+          "level": 2,
+          "q_median": 0.5437,
+          "q_min": 0.5437,
+          "q_max": 0.5437,
+          "tolerated_slowdown": 3.7,
+          "score_at_2x": 0.627,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 1.0,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    },
+    {
+      "experiment_id": "2026-09-07T18:25:31_7c38d86",
+      "timestamp": "2026-09-07T18:25:31+00:00",
+      "finished": "2026-09-07T18:25:39+00:00",
+      "git_commit": "7c38d86",
+      "git_dirty": true,
+      "benchmark": "ENAMEL-Extended v0.0.1",
+      "python": "CPython 3.14.7",
+      "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+      "cores": 0,
+      "metric": {
+        "alpha": 2.0,
+        "level_weights": [
+          3.0,
+          3.0,
+          4.0
+        ],
+        "normalization": "global",
+        "repeats": 6,
+        "aggregator": "hodges_lehmann"
+      },
+      "data": {
+        "name": "synthetic",
+        "fingerprint": "42195f853b34"
+      },
+      "solutions": {
+        "name": "synthetic",
+        "fingerprint": "e1cfd94ab03b"
+      },
+      "summary": {
+        "problems_attempted": 3,
+        "problems_scored": 3,
+        "problems_failed": 0,
+        "models": 2
+      },
+      "calibration": {
+        "aggregator": "hodges_lehmann",
+        "repeats": 6,
+        "times": {
+          "alloc_churn": [
+            0.019651755999802845,
+            0.019184111999493325,
+            0.019086921000052826,
+            0.01906856150162639,
+            0.019445165498837014,
+            0.01933401499991305,
+            0.01935542950013769,
+            0.019396245501411613
+          ],
+          "attr_call": [
+            0.011300934002065333,
+            0.011221924001802108,
+            0.010774116999527905,
+            0.011156537500937702,
+            0.011174491000929265,
+            0.011193694997928105,
+            0.011400332499761134,
+            0.011161038999489392
+          ],
+          "bulk_builtin": [
+            0.019252367501394474,
+            0.01952032150074956,
+            0.02004529000078037,
+            0.019090772000708967,
+            0.019143986499329912,
+            0.019099474000540795,
+            0.01948880649979401,
+            0.01908520600045449
+          ],
+          "loop_arith": [
+            0.022734679499990307,
+            0.0216941209982906,
+            0.021771666999484296,
+            0.02173071449760755,
+            0.021763718999864068,
+            0.0217528119974304,
+            0.021824600000400096,
+            0.021942119499726687
+          ]
+        },
+        "version": 1
+      },
+      "leaderboard": [
+        {
+          "model": "mixed-bag",
+          "eff1": 1.0,
+          "pass1": 3.0,
+          "problems": 3,
+          "correct": 9,
+          "censored": 15
+        },
+        {
+          "model": "reference-copy",
+          "eff1": 1.0,
+          "pass1": 1.0,
+          "problems": 3,
+          "correct": 3,
+          "censored": 0
+        }
+      ],
+      "q_distribution": [
+        {
+          "level": 1,
+          "q_median": 0.0127,
+          "q_min": 0.0123,
+          "q_max": 0.0127,
+          "tolerated_slowdown": 157.6,
+          "score_at_2x": 0.994,
+          "score_at_5x": 0.974,
+          "score_at_10x": 0.943
+        },
+        {
+          "level": 2,
+          "q_median": 0.0825,
+          "q_min": 0.0815,
+          "q_max": 0.118,
+          "tolerated_slowdown": 24.2,
+          "score_at_2x": 0.957,
+          "score_at_5x": 0.828,
+          "score_at_10x": 0.613
+        },
+        {
+          "level": 3,
+          "q_median": 1.0,
+          "q_min": 1.0,
+          "q_max": 1.0,
+          "tolerated_slowdown": 2.0,
+          "score_at_2x": 0.0,
+          "score_at_5x": 0.0,
+          "score_at_10x": 0.0
+        }
+      ]
+    }
+  ]
+}
