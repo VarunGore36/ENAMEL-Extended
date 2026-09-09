@@ -22,6 +22,46 @@ from enamel_ext.metrics.score import MetricConfig
 RUNS_DIR = _ROOT / "runs"
 OUTPUT = _ROOT / "site" / "data" / "results.json"
 
+# Model classification
+OPEN_SOURCE_MODELS = {
+    "Code Llama 7B Python", "Code Llama 13B Python", "Code Llama 34B Python",
+    "StarCoder", "StarCoder-Co-Manual (BigCode)",
+    "CodeGen 2B", "CodeGen 6B", "CodeGen 16B",
+    "CodeT5+ 16B", "CodeT5+ 2B", "CodeT5+ 6B",
+    "Mistral 7B",
+    "Vicuna 7B", "Vicuna 13B",
+    "SantaCoder", "SantaCoder (BigCode)", "SantaCoder-PJJ (BigCode)",
+    "Incoder 1B", "Incoder 6B",
+    "GPT-J", "GPT-Neo 2B",
+    "PolyCoder", "StableLM 7B",
+    "Phind Code Llama V2",
+    "CodeLlama 7B", "CodeLlama 13B", "CodeLlama 34B", "CodeLlama 70B",
+    "StarCoder2-15B", "StarCoder2-7B", "StarCoder2-3B",
+    "DeepSeek-Coder-V2", "DeepSeek-Coder-33B", "DeepSeek-Coder-6.7B",
+    "Qwen2.5-Coder-32B", "Qwen2.5-Coder-7B", "Qwen2.5-Coder-3B",
+    "Llama-3.1-70B", "Llama-3.1-8B",
+    "Mixtral-8x22B", "Mixtral-8x7B",
+    "WizardCoder-33B", "WizardCoder-15B",
+    "OpenCoder-8B",
+}
+
+COMMERCIAL_MODELS = {
+    "GPT-4", "GPT-4 Turbo", "GPT-4 (BigCode)",
+    "ChatGPT", "GPT-3.5-Turbo",
+    "Claude 3 Opus", "Claude 3 Sonnet", "Claude 3 Haiku", "Claude Sonnet 3.5",
+}
+
+
+def classify_model(name: str) -> str:
+    if name in OPEN_SOURCE_MODELS:
+        return "open"
+    if name in COMMERCIAL_MODELS:
+        return "commercial"
+    # Heuristic: if it has (BigCode) in name, it's open
+    if "(BigCode)" in name:
+        return "open"
+    return "unknown"
+
 
 def git_commit() -> str:
     try:
@@ -104,6 +144,7 @@ def extract_leaderboard(record: dict, k: int = 1) -> list[dict]:
             "problems": len(m["effs"]),
             "correct": m["correct"],
             "censored": m["censored"],
+            "type": classify_model(model_name),
         })
     rows.sort(key=lambda r: -r["eff1"])
     return rows

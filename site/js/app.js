@@ -66,14 +66,15 @@
         const labels = leaderboard.map(r => r.model);
         const effs = leaderboard.map(r => r.eff1);
         const passes = leaderboard.map(r => r.pass1);
+        const colors = leaderboard.map(r => r.type === "open" ? "#16a34a" : r.type === "commercial" ? "#2563eb" : "#94a3b8");
 
         new Chart(canvas, {
             type: "bar",
             data: {
                 labels,
                 datasets: [
-                    { label: "eff@1", data: effs, backgroundColor: COLORS.accent, borderRadius: 3 },
-                    { label: "pass@1", data: passes, backgroundColor: COLORS.muted, borderRadius: 3 },
+                    { label: "eff@1", data: effs, backgroundColor: colors, borderRadius: 3 },
+                    { label: "pass@1", data: passes, backgroundColor: "#e0e0e0", borderRadius: 3 },
                 ],
             },
             options: {
@@ -92,15 +93,28 @@
     }
 
     function renderEffPassChart(canvas, leaderboard) {
+        const openModels = leaderboard.filter(r => r.type === "open");
+        const commercialModels = leaderboard.filter(r => r.type === "commercial");
+
         new Chart(canvas, {
             type: "scatter",
             data: {
-                datasets: [{
-                    data: leaderboard.map(r => ({ x: r.pass1, y: r.eff1, label: r.model })),
-                    backgroundColor: COLORS.accent,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                }],
+                datasets: [
+                    {
+                        label: "Open Source",
+                        data: openModels.map(r => ({ x: r.pass1, y: r.eff1, label: r.model })),
+                        backgroundColor: "#16a34a",
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                    },
+                    {
+                        label: "Commercial",
+                        data: commercialModels.map(r => ({ x: r.pass1, y: r.eff1, label: r.model })),
+                        backgroundColor: "#2563eb",
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                    },
+                ],
             },
             options: {
                 responsive: true,
@@ -109,7 +123,7 @@
                     y: { title: { display: true, text: "eff@1" }, min: 0, max: 1, grid: { color: COLORS.border } },
                 },
                 plugins: {
-                    legend: { display: false },
+                    legend: { position: "top", labels: { boxWidth: 12, font: { size: 11 } } },
                     tooltip: {
                         callbacks: {
                             label: ctx => {
@@ -238,14 +252,14 @@
 
     function renderLeaderboardTable(tbody, leaderboard) {
         leaderboard.forEach((r, i) => {
+            const typeLabel = r.type === "open" ? "🟢 Open" : r.type === "commercial" ? "🔵 Commercial" : "⚪";
             const tr = el("tr", null, [
                 tdNum(i + 1),
                 tdText(r.model),
+                tdText(typeLabel),
                 tdNum(pct(r.eff1)),
                 tdNum(pct(r.pass1)),
                 tdNum(r.problems),
-                tdNum(r.correct),
-                tdNum(r.censored),
             ]);
             tbody.appendChild(tr);
         });
