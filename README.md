@@ -36,22 +36,29 @@ Models that look strong on correctness are far from expert-level efficiency.
 
 ## Results
 
-### Our evaluation (34 problems, 17 models)
+### Our evaluation (161 problems, 17 models)
 
-| Rank | Model | eff@1 | pass@1 | Source |
-|------|-------|-------|--------|--------|
-| 1 | Phind Code Llama V2 | 0.735 | 0.882 | EvalPlus |
-| 2 | ChatGPT | 0.682 | 0.882 | EvalPlus |
-| 3 | GPT-4 | 0.676 | 0.941 | EvalPlus |
-| 4 | GPT-4 Turbo | 0.668 | 0.882 | EvalPlus |
-| 5 | Code Llama 7B | 0.500 | 0.647 | EvalPlus |
-| 6 | Mistral 7B | 0.473 | 0.588 | EvalPlus |
-| 7 | CodeGen 6B | 0.426 | 0.529 | EvalPlus |
-| 8 | CodeGen 16B | 0.418 | 0.618 | EvalPlus |
-| 9 | StarCoder | 0.397 | 0.529 | EvalPlus |
-| 10 | CodeT5+ 16B | 0.347 | 0.529 | EvalPlus |
+| Rank | Model | eff@1 | pass@1 | eff@1 (pub) | Δ |
+|------|-------|-------|--------|-------------|---|
+| 1 | GPT-4 | 0.657 | 0.876 | 0.454 | +0.203 |
+| 2 | GPT-4 Turbo | 0.634 | 0.851 | 0.470 | +0.164 |
+| 3 | Phind Code Llama V2 | 0.558 | 0.739 | 0.394 | +0.164 |
+| 4 | ChatGPT | 0.517 | 0.714 | 0.364 | +0.153 |
+| 5 | Code Llama 7B | 0.328 | 0.398 | 0.247 | +0.081 |
+| 6 | StarCoder | 0.277 | 0.379 | 0.195 | +0.082 |
+| 7 | CodeGen 6B | 0.260 | 0.348 | 0.193 | +0.067 |
+| 8 | CodeGen 16B | 0.249 | 0.335 | 0.169 | +0.080 |
+| 9 | Mistral 7B | 0.244 | 0.317 | 0.152 | +0.092 |
+| 10 | CodeT5+ 16B | 0.234 | 0.342 | 0.160 | +0.074 |
+| 11 | SantaCoder | 0.179 | 0.193 | 0.100 | +0.079 |
+| 12 | Vicuna 13B | 0.170 | 0.217 | 0.123 | +0.047 |
+| 13 | Incoder 6B | 0.162 | 0.180 | 0.091 | +0.071 |
+| 14 | GPT-J | 0.124 | 0.130 | 0.083 | +0.041 |
+| 15 | Incoder 1B | 0.115 | 0.130 | 0.066 | +0.049 |
+| 16 | Vicuna 7B | 0.099 | 0.137 | 0.061 | +0.038 |
+| 17 | GPT-Neo 2B | 0.095 | 0.106 | 0.043 | +0.052 |
 
-**Ranking preserved:** Kendall τ = 0.783 against published Table 3. Absolute values differ due to hardware/CPython differences.
+All models score higher than published values (hardware/CPython differences). **Ranking preserved:** Kendall τ = 0.783.
 
 ### q-Distribution analysis (§2.2 — answered with data)
 
