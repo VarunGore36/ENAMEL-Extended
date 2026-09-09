@@ -358,19 +358,31 @@
         document.getElementById("newer-models-loading").style.display = "none";
         document.getElementById("newer-models-content").style.display = "";
 
+        // Classify models
+        const openSourcePatterns = /llama|mistral|codellama|codegen|starcoder|deepseek|qwen|wizard|vicuna|incoder|gpt-j|gpt-neo|polycoder|stablelm|codet5|santacoder|opencode|codestral|magicoder|phind|code-|codellama/i;
+        const commercialPatterns = /gpt-4|gpt-3|claude|gemini|o1 |o1-preview|grok|chatgpt/i;
+
+        function classifyModel(name) {
+            if (commercialPatterns.test(name)) return "commercial";
+            if (openSourcePatterns.test(name)) return "open";
+            return "unknown";
+        }
+
         // Chart: top 30 by HE+
         const top30 = leaderboard.slice(0, 30);
         const labels = top30.map(m => m.model.length > 30 ? m.model.slice(0, 28) + "…" : m.model);
-        const heScores = top30.map(m => (m.pass1_humaneval || 0) / 100);
         const hePlusScores = top30.map(m => (m.pass1_humaneval_plus || m.pass1_humaneval || 0) / 100);
+        const barColors = top30.map(m => {
+            const t = classifyModel(m.model);
+            return t === "open" ? "#16a34a" : t === "commercial" ? "#2563eb" : "#94a3b8";
+        });
 
         new Chart(document.getElementById("chart-newer-models"), {
             type: "bar",
             data: {
                 labels,
                 datasets: [
-                    { label: "pass@1 (HE)", data: heScores, backgroundColor: "#94a3b8", borderRadius: 3 },
-                    { label: "pass@1 (HE+)", data: hePlusScores, backgroundColor: "#2563eb", borderRadius: 3 },
+                    { label: "pass@1 (HE+)", data: hePlusScores, backgroundColor: barColors, borderRadius: 3 },
                 ],
             },
             options: {
@@ -381,7 +393,7 @@
                     y: { grid: { display: false } },
                 },
                 plugins: {
-                    legend: { position: "top", labels: { boxWidth: 12, font: { size: 11 } } },
+                    legend: { display: false },
                 },
             },
         });
@@ -389,12 +401,14 @@
         // Table
         const tbody = document.querySelector("#newer-models-table tbody");
         leaderboard.forEach((m, i) => {
+            const t = classifyModel(m.model);
+            const typeLabel = t === "open" ? "🟢 Open" : t === "commercial" ? "🔵 Commercial" : "⚪";
             const od = m.open_data === "Full" ? "🟢 Full" : m.open_data === "Partial" ? "🟡 Partial" : "—";
             const tr = el("tr", null, [
                 tdNum(i + 1),
                 m.link ? el("td", null, [el("a", { href: m.link, target: "_blank", text: m.model })]) : tdText(m.model),
+                tdText(typeLabel),
                 tdNum((m.pass1_humaneval_plus || 0).toFixed(1) + "%"),
-                tdNum((m.pass1_humaneval || 0).toFixed(1) + "%"),
                 tdNum(m.size ? m.size + "B" : "—"),
                 tdText(od),
             ]);
