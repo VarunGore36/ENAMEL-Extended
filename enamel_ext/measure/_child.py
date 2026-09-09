@@ -85,7 +85,7 @@ def _time_case(
     limit: float | None,
     aggregator: str,
     no_gc: bool,
-) -> tuple[list[float], Any, bool, str]:
+) -> tuple[list[float], Any, bool, str, int]:
     """Time ``repeats`` calls, each on a fresh copy of ``args``.
 
     Copying matters: a solution that sorts its input in place would make every
@@ -98,6 +98,7 @@ def _time_case(
     times: list[float] = []
     output: Any = None
     has_output = False
+    peak_memory = 0
     for r in range(repeats):
         call_args = _DEEPCOPY(args)
         collecting = _GC_ISENABLED()
@@ -107,6 +108,10 @@ def _time_case(
             start = _PERF()
             value = fn(*call_args)
             elapsed = _PERF() - start
+            # Track memory usage
+            mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            if mem > peak_memory:
+                peak_memory = mem
         finally:
             if no_gc and collecting:
                 _GC_ENABLE()
@@ -115,8 +120,8 @@ def _time_case(
             has_output = True
         times.append(elapsed)
         if reaches_limit(times, repeats, limit, aggregator):
-            return times, output, has_output, TIMEOUT
-    return times, output, has_output, OK
+            return times, output, has_output, TIMEOUT, peak_memory
+    return times, output, has_output, OK, peak_memory
 
 
 def _run(request: dict[str, Any]) -> dict[str, Any]:
@@ -134,14 +139,14 @@ def _run(request: dict[str, Any]) -> dict[str, Any]:
     results: list[dict[str, Any]] = []
     for args in cases:
         try:
-            times, output, has_output, status = _time_case(
+            times, output, has_output, status, peak_memory = _time_case(
                 fn, args, repeats, limit, aggregator, no_gc
             )
         except BaseException as exc:
             detail = f"{type(exc).__name__}: {exc}"
             results.append({"status": ERROR, "detail": detail})
             return {"status": ERROR, "detail": detail, "cases": results}
-        entry: dict[str, Any] = {"status": status, "times": times}
+        entry: dict[str, Any] = {"status": status, "times": times, "peak_memory_kb": peak_memory}
         if has_output:
             entry["output"] = output
             entry["has_output"] = True

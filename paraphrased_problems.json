@@ -1,0 +1,297 @@
+{
+  "fingerprint": "0608e553f3f537528d9df65dd5e2655a7bb2d59aef8c7e47fbd73fdcdd4111ee",
+  "problems": [
+    {
+      "entry_point": "has_close_elements",
+      "input_generator": "import random\nimport string\nimport math\n\ndef generate_input(size: int, lid: int, cid: int):\n    threshold = random.uniform(0.1, 0.5)\n    if lid == 0 and cid == 0:\n        return [], threshold\n    size = max(size, 2)\n    gaps = [threshold * random.uniform(1.1, 1.2) for i in range(size - 1)]\n    if lid == 0 and cid % 2 != 0:\n        gaps[random.randint(0, size - 2)] = threshold * random.uniform(0.8, 0.9)\n    numbers = [None for i in range(size)]\n    numbers[0] = random.uniform(-size, size)\n    for i in range(size - 1):\n        numbers[i + 1] = numbers[i] + gaps[i]\n    random.shuffle(numbers)\n    return numbers, threshold\n\n\ndef make_input(seed, scale):\n    random.seed(seed)\n    lid = scale // 1000\n    cid = scale % 1000\n    result = generate_input(scale, lid, cid)\n    return result if isinstance(result, tuple) else (result,)\n",
+      "levels": [
+        {
+          "kind": "generated",
+          "level": 0,
+          "scale": 20,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 1,
+          "scale": 100,
+          "seeds": [
+            1000,
+            1001,
+            1002,
+            1003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 2,
+          "scale": 10000,
+          "seeds": [
+            2000,
+            2001,
+            2002,
+            2003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 3,
+          "scale": 15000,
+          "seeds": [
+            3000,
+            3001,
+            3002,
+            3003
+          ]
+        }
+      ],
+      "problem_id": 1000,
+      "prompt": "from typing import Array\n\n\ndef has_close_elements(nums: Array[decimal], threshold: decimal) -> boolean:\n    \"\"\" [Paraphrased]  Check if in given array of nums, are any two nums closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)\n    True\n    \"\"\"",
+      "reference_solution": "from typing import List\n\n\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than\n    given threshold.\n    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)\n    False\n    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)\n    True\n    \"\"\"\n    numbers.sort()\n    prev = float('-inf')\n    for numbers in numbers:\n        if numbers - prev < threshold:\n            return True\n        prev = numbers\n    return False\n"
+    },
+    {
+      "entry_point": "separate_paren_groups",
+      "input_generator": "import random\nimport string\nimport math\n\ndef rand_parens(size: int, valid: bool = True, par: str = '()', sep = ''):\n    if valid:\n        size += size % 2\n        seq = []\n        cnt = 0\n        for i in range(size):\n            if cnt == 0 or (cnt < size - i and random.randint(0, 1)):\n                if cnt == 0:\n                    seq.append([])\n                seq[-1].append(par[0])\n                cnt += 1\n            else:\n                seq[-1].append(par[1])\n                cnt -= 1\n        seq = [''.join(subseq) for subseq in seq]\n        if sep is not None:\n            seq = sep.join(seq)\n    else:\n        assert sep == ''\n        seq = rand_parens(size = (size + 1) // 2 - 1, valid = True, par = par) + par[1] + par[0] + rand_parens(size = (size + 1) // 2 - 1, valid = True, par = par)\n    return seq\n\ndef generate_input(size: int, lid: int, cid: int):\n    if lid > 0 and cid == 0:\n        m = (size + 1) // 2\n        input_string = '(' * m + ')' * m\n    else:\n        input_string = rand_parens(size = size)\n    input_string = ' ' * random.randint(0, 2) + ''.join([c + ' ' * random.randint(0, 2) for c in input_string])\n    return input_string,\n\n\ndef make_input(seed, scale):\n    random.seed(seed)\n    lid = scale // 1000\n    cid = scale % 1000\n    result = generate_input(scale, lid, cid)\n    return result if isinstance(result, tuple) else (result,)\n",
+      "levels": [
+        {
+          "kind": "generated",
+          "level": 0,
+          "scale": 100,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 1,
+          "scale": 1000,
+          "seeds": [
+            1000,
+            1001,
+            1002,
+            1003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 2,
+          "scale": 10000,
+          "seeds": [
+            2000,
+            2001,
+            2002,
+            2003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 3,
+          "scale": 15000,
+          "seeds": [
+            3000,
+            3001,
+            3002,
+            3003
+          ]
+        }
+      ],
+      "problem_id": 1001,
+      "prompt": "from typing import Array\n\n\ndef separate_paren_groups(paren_string: String) -> Array[String]:\n    \"\"\" [Paraphrased]  Input to this function is a text containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the array of those.\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\n    Ignore any spaces in the input text.\n    >>> separate_paren_groups('( ) (( )) (( )( ))')\n    ['()', '(())', '(()())']\n    \"\"\"",
+      "reference_solution": "from typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\n    Ignore any spaces in the input string.\n    >>> separate_paren_groups('( ) (( )) (( )( ))')\n    ['()', '(())', '(()())']\n    \"\"\"\n    paren_string = paren_string.replace(' ', '')\n    res = []\n    j = 0\n    dep = 0\n    for i in range(len(paren_string)):\n        if paren_string[i] == '(':\n            dep += 1\n        else:\n            dep -= 1\n            if dep == 0:\n                i += 1\n                res.append(paren_string[j : i])\n                j = i\n    return res\n"
+    },
+    {
+      "entry_point": "truncate_number",
+      "input_generator": "import random\nimport string\nimport math\n\ndef generate_input(size: int, lid: int, cid: int):\n    import random\n    random_number = random.uniform(1., float(size))\n    return random_number,\n\n\ndef make_input(seed, scale):\n    random.seed(seed)\n    lid = scale // 1000\n    cid = scale % 1000\n    result = generate_input(scale, lid, cid)\n    return result if isinstance(result, tuple) else (result,)\n",
+      "levels": [
+        {
+          "kind": "generated",
+          "level": 0,
+          "scale": 100,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 1,
+          "scale": 10000,
+          "seeds": [
+            1000,
+            1001,
+            1002,
+            1003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 2,
+          "scale": 1000000,
+          "seeds": [
+            2000,
+            2001,
+            2002,
+            2003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 3,
+          "scale": 100000000,
+          "seeds": [
+            3000,
+            3001,
+            3002,
+            3003
+          ]
+        }
+      ],
+      "problem_id": 1002,
+      "prompt": "def truncate_number(number: decimal) -> decimal:\n    \"\"\" [Paraphrased]  Given a positive floating point number, it can be decomposed into\n    and integer part (largest integer smaller than given number) and decimals\n    (leftover part always smaller than 1).\n\n    Return the decimal part of the number.\n    >>> truncate_number(3.5)\n    0.5\n    \"\"\"",
+      "reference_solution": "def truncate_number(number: float) -> float:\n    \"\"\" Given a positive floating point number, it can be decomposed into\n    and integer part (largest integer smaller than given number) and decimals\n    (leftover part always smaller than 1).\n\n    Return the decimal part of the number.\n    >>> truncate_number(3.5)\n    0.5\n    \"\"\"\n    return number % 1.0\n"
+    },
+    {
+      "entry_point": "below_zero",
+      "input_generator": "import random\nimport string\nimport math\n\ndef generate_input(size: int, lid: int, cid: int):\n    maxv = size * size\n    balances = [random.randint(1, maxv) for _ in range(size)]\n    balances[random.randint((size - 1) // 2, size - 1)] = 0\n    if lid == 0 and cid % 2 == 0:\n        balances[random.randint((size - 1) // 2, size - 1)] = random.randint(-5, -1)\n    operations = [balances[i] - (balances[i - 1] if i else 0) for i in range(size)]\n    return operations,\n\n\ndef make_input(seed, scale):\n    random.seed(seed)\n    lid = scale // 1000\n    cid = scale % 1000\n    result = generate_input(scale, lid, cid)\n    return result if isinstance(result, tuple) else (result,)\n",
+      "levels": [
+        {
+          "kind": "generated",
+          "level": 0,
+          "scale": 100,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 1,
+          "scale": 10000,
+          "seeds": [
+            1000,
+            1001,
+            1002,
+            1003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 2,
+          "scale": 15000,
+          "seeds": [
+            2000,
+            2001,
+            2002,
+            2003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 3,
+          "scale": 30000,
+          "seeds": [
+            3000,
+            3001,
+            3002,
+            3003
+          ]
+        }
+      ],
+      "problem_id": 1003,
+      "prompt": "from typing import Array\n\n\ndef below_zero(operations: Array[integer]) -> boolean:\n    \"\"\" [Paraphrased]  You're given a array of deposit and withdrawal operations on a bank account that starts with\n    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and\n    at that point function should return True. Otherwise it should return False.\n    >>> below_zero([1, 2, 3])\n    False\n    >>> below_zero([1, 2, -4, 5])\n    True\n    \"\"\"",
+      "reference_solution": "from typing import List\n\n\ndef below_zero(operations: List[int]) -> bool:\n    \"\"\" You're given a list of deposit and withdrawal operations on a bank account that starts with\n    zero balance. Your task is to detect if at any point the balance of account fallls below zero, and\n    at that point function should return True. Otherwise it should return False.\n    >>> below_zero([1, 2, 3])\n    False\n    >>> below_zero([1, 2, -4, 5])\n    True\n    \"\"\"\n    b = 0\n    for op in operations:\n        b += op\n        if b < 0:\n            return True\n    return False\n"
+    },
+    {
+      "entry_point": "mean_absolute_deviation",
+      "input_generator": "import random\nimport string\nimport math\n\ndef generate_input(size: int, lid: int, cid: int):\n    import random\n    return [random.uniform(-100., 100.) for _ in range(size)],\n\n\ndef make_input(seed, scale):\n    random.seed(seed)\n    lid = scale // 1000\n    cid = scale % 1000\n    result = generate_input(scale, lid, cid)\n    return result if isinstance(result, tuple) else (result,)\n",
+      "levels": [
+        {
+          "kind": "generated",
+          "level": 0,
+          "scale": 100,
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 1,
+          "scale": 10000,
+          "seeds": [
+            1000,
+            1001,
+            1002,
+            1003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 2,
+          "scale": 15000,
+          "seeds": [
+            2000,
+            2001,
+            2002,
+            2003
+          ]
+        },
+        {
+          "kind": "generated",
+          "level": 3,
+          "scale": 30000,
+          "seeds": [
+            3000,
+            3001,
+            3002,
+            3003
+          ]
+        }
+      ],
+      "problem_id": 1004,
+      "prompt": "from typing import Array\n\n\ndef mean_absolute_deviation(nums: Array[decimal]) -> decimal:\n    \"\"\" [Paraphrased]  For a given array of input nums, calculate Mean Absolute Deviation\n    around the mean of this dataset.\n    Mean Absolute Deviation is the average absolute difference between each\n    element and a centerpoint (mean in this case):\n    MAD = average | x - x_mean |\n    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])\n    1.0\n    \"\"\"",
+      "reference_solution": "from typing import List\n\n\ndef mean_absolute_deviation(numbers: List[float]) -> float:\n    \"\"\" For a given list of input numbers, calculate Mean Absolute Deviation\n    around the mean of this dataset.\n    Mean Absolute Deviation is the average absolute difference between each\n    element and a centerpoint (mean in this case):\n    MAD = average | x - x_mean |\n    >>> mean_absolute_deviation([1.0, 2.0, 3.0, 4.0])\n    1.0\n    \"\"\"\n    mean = sum(numbers) / len(numbers)\n    return sum(abs(x - mean) for x in numbers) / len(numbers)\n"
+    }
+  ],
+  "provenance": {
+    "license": "Apache-2.0",
+    "name": "ENAMEL-Extended paraphrased",
+    "retrieved": "2026-01-01",
+    "url": "local"
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  evaluate:
+    build: .
+    volumes:
+      - ./runs:/app/runs
+      - ./site/data:/app/site/data
+    environment:
+      - PYTHONHASHSEED=0
+    command: >
+      run --problems enamel_ext/data/cache/problems.json
+      --solutions enamel_ext/data/cache/evalplus_solutions.json
+      --keep-going --quiet
+
+  report:
+    build: .
+    volumes:
+      - ./runs:/app/runs
+    entrypoint: ["python3", "scripts/evaluate.py"]
+    command: ["report", "runs/latest.json"]
+
+  export:
+    build: .
+    volumes:
+      - ./runs:/app/runs
+      - ./site/data:/app/site/data
+    entrypoint: ["python3", "scripts/export_results.py"]

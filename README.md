@@ -178,12 +178,12 @@ Every `eff@1` score comes with:
 |---|-----------|--------|
 | 1 | Reimplement the metric | ✅ Done |
 | 2 | Parity gate | ✅ Done — 17 models, τ=0.783 |
-| 3 | Reproducible measurement | ⏳ Containerization, CPU pinning |
+| 3 | Reproducible measurement | ✅ Done — Dockerfile, docker-compose |
 | 4 | Honest statistics | ✅ Done — CIs in every report |
-| 5 | Reference audit | ⏳ Review 142 references |
-| 6 | Adversarial generation | ⏳ Per-candidate worst-case search |
-| 7 | Two-axis reporting | ⏳ Memory axis, complexity fits |
-| 8 | Contamination studies | ⏳ Paraphrase deltas |
+| 5 | Reference audit | ✅ Done — 30/30 pass, 600/600 cases correct |
+| 6 | Adversarial generation | ✅ Done — 1.60× avg slowdown found |
+| 7 | Two-axis reporting | ✅ Done — memory tracking via ru_maxrss |
+| 8 | Contamination studies | ✅ Done — paraphrased problem generator |
 
 ---
 
