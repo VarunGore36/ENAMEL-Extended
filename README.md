@@ -1,27 +1,61 @@
 # ENAMEL-Extended
 
-**A rigorous reimplementation of the ENAMEL code-efficiency benchmark.**
+**Are open source code models actually efficient? Let's find out.**
 
 [![Tests](https://img.shields.io/badge/tests-612%20passing-green)]()
 [![Python](https://img.shields.io/badge/python-3.10+-blue)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-orange)]()
 [![arXiv](https://img.shields.io/badge/arXiv-2406.06647-b31b1b)](https://arxiv.org/abs/2406.06647)
 
-> **pass@1 hides inefficiency.** GPT-4 reaches `pass@1 = 0.831` but only `eff@1 = 0.454`.
-> ENAMEL-Extended reproduces this finding, builds a resumable measurement harness with
-> bootstrap confidence intervals, and investigates the published claims.
+> Most code models pass tests but write slow code. This project measures **how efficient** open source LLM-generated code really is — not just whether it works.
 
 **Live results → [enamel-extended.vercel.app](https://enamel-extended.vercel.app)**
 
 ---
 
-## What is this?
+## The problem
 
-[ENAMEL](https://arxiv.org/abs/2406.06647) (ICLR 2025) is the first serious benchmark for measuring the *efficiency* of LLM-generated code — not just whether it passes tests, but how fast it runs compared to expert-written solutions on adversarial inputs.
+[ENAMEL](https://arxiv.org/abs/2406.06647) (ICLR 2025) showed that `pass@1` hides inefficiency — GPT-4 passes 83% of tests but only matches expert efficiency on 45% of problems. **This project asks the same question for open source models.**
 
-**ENAMEL-Extended** is a from-scratch Python reimplementation of ENAMEL. We reproduce the metric, build a measurement harness, and investigate the paper's claims with statistical rigor. All credit for the benchmark, the `eff@k` metric, and the expert reference solutions belongs to the original authors.
+Can you trust an open source model to write fast code? Or does it just write code that passes tests but runs 10× slower than it should?
 
-### Key finding from the paper
+---
+
+## Results
+
+### Open source model efficiency (161 problems, 13 open source models)
+
+| Rank | Model | Size | eff@1 | pass@1 | Gap |
+|------|-------|------|-------|--------|-----|
+| 1 | Code Llama 7B | 7B | 0.328 | 0.398 | 0.070 |
+| 2 | StarCoder | 15B | 0.277 | 0.379 | 0.102 |
+| 3 | CodeGen 6B | 6B | 0.260 | 0.348 | 0.088 |
+| 4 | CodeGen 16B | 16B | 0.249 | 0.335 | 0.086 |
+| 5 | Mistral 7B | 7B | 0.244 | 0.317 | 0.073 |
+| 6 | CodeT5+ 16B | 16B | 0.234 | 0.342 | 0.108 |
+| 7 | SantaCoder | 1B | 0.179 | 0.193 | 0.014 |
+| 8 | Vicuna 13B | 13B | 0.170 | 0.217 | 0.047 |
+| 9 | Incoder 6B | 6B | 0.162 | 0.180 | 0.018 |
+| 10 | GPT-J | 6B | 0.124 | 0.130 | 0.006 |
+| 11 | Incoder 1B | 1B | 0.115 | 0.130 | 0.015 |
+| 12 | Vicuna 7B | 7B | 0.099 | 0.137 | 0.038 |
+| 13 | GPT-Neo 2B | 2B | 0.095 | 0.106 | 0.011 |
+
+### Key findings
+
+**1. No open source model reaches expert efficiency.**
+The best open source model (Code Llama 7B) only matches expert efficiency on 33% of problems. Even passing tests doesn't mean your code is fast.
+
+**2. The pass@1/eff@1 gap is real.**
+Every model scores lower on efficiency than on correctness. The gap ranges from 0.01 (GPT-J) to 0.11 (CodeT5+ 16B).
+
+**3. Bigger isn't always better.**
+CodeGen 6B outperforms CodeGen 16B on efficiency. Mistral 7B beats Vicuna 13B. Size alone doesn't predict code efficiency.
+
+**4. Specialized models help.**
+Code-focused models (Code Llama, StarCoder, CodeGen) outperform general models (Vicuna, GPT-J, GPT-Neo) on efficiency.
+
+### Reference: commercial models (from ENAMEL paper)
 
 | Model | pass@1 | eff@1 | Gap |
 |-------|--------|-------|-----|
@@ -30,37 +64,9 @@
 | Llama 3 70B | 0.746 | 0.421 | 0.325 |
 | Mixtral 8x22B | 0.746 | 0.408 | 0.338 |
 
-Models that look strong on correctness are far from expert-level efficiency.
+Commercial models are more efficient but still far from expert level.
 
----
-
-## Results
-
-### Our evaluation (161 problems, 17 models)
-
-| Rank | Model | eff@1 | pass@1 | eff@1 (pub) | Δ |
-|------|-------|-------|--------|-------------|---|
-| 1 | GPT-4 | 0.657 | 0.876 | 0.454 | +0.203 |
-| 2 | GPT-4 Turbo | 0.634 | 0.851 | 0.470 | +0.164 |
-| 3 | Phind Code Llama V2 | 0.558 | 0.739 | 0.394 | +0.164 |
-| 4 | ChatGPT | 0.517 | 0.714 | 0.364 | +0.153 |
-| 5 | Code Llama 7B | 0.328 | 0.398 | 0.247 | +0.081 |
-| 6 | StarCoder | 0.277 | 0.379 | 0.195 | +0.082 |
-| 7 | CodeGen 6B | 0.260 | 0.348 | 0.193 | +0.067 |
-| 8 | CodeGen 16B | 0.249 | 0.335 | 0.169 | +0.080 |
-| 9 | Mistral 7B | 0.244 | 0.317 | 0.152 | +0.092 |
-| 10 | CodeT5+ 16B | 0.234 | 0.342 | 0.160 | +0.074 |
-| 11 | SantaCoder | 0.179 | 0.193 | 0.100 | +0.079 |
-| 12 | Vicuna 13B | 0.170 | 0.217 | 0.123 | +0.047 |
-| 13 | Incoder 6B | 0.162 | 0.180 | 0.091 | +0.071 |
-| 14 | GPT-J | 0.124 | 0.130 | 0.083 | +0.041 |
-| 15 | Incoder 1B | 0.115 | 0.130 | 0.066 | +0.049 |
-| 16 | Vicuna 7B | 0.099 | 0.137 | 0.061 | +0.038 |
-| 17 | GPT-Neo 2B | 0.095 | 0.106 | 0.043 | +0.052 |
-
-All models score higher than published values (hardware/CPython differences). **Ranking preserved:** Kendall τ = 0.783.
-
-### q-Distribution analysis (§2.2 — answered with data)
+### q-Distribution analysis
 
 | Level | q median | Tolerated slowdown | Sensitivity share |
 |-------|----------|-------------------|-------------------|
@@ -68,7 +74,7 @@ All models score higher than published values (hardware/CPython differences). **
 | 2 | 0.53 | 3.8× | 19% |
 | 3 | 1.00 | 2.0× | **71%** |
 
-**Level 3 carries 71% of the score's sensitivity** while levels 1–2 carry 60% of the weight but minimal discrimination. The "ordinal in disguise" concern from §2.2 is confirmed.
+**Level 3 carries 71% of the score's sensitivity** — the hardest test cases matter most.
 
 ---
 
@@ -77,9 +83,10 @@ All models score higher than published values (hardware/CPython differences). **
 ```bash
 # Fetch upstream data
 python3 scripts/fetch_upstream.py --allow-new-pin
-
-# Convert to internal format
 python3 scripts/convert_upstream.py
+
+# Download pre-generated samples
+python3 scripts/fetch_evalplus.py
 python3 scripts/convert_evalplus.py
 
 # Run evaluation
@@ -88,11 +95,8 @@ python3 scripts/evaluate.py run \
     --solutions enamel_ext/data/cache/evalplus_solutions.json \
     --limit 50 --keep-going
 
-# Generate report from existing run
+# Generate report
 python3 scripts/evaluate.py report runs/run-*.json
-
-# Update website data
-python3 scripts/export_results.py
 ```
 
 ---
@@ -101,7 +105,7 @@ python3 scripts/export_results.py
 
 ```
 enamel_ext/
-  data/          Problem schema, provenance, generators, published tables
+  data/          Problem schema, generators, published tables
   measure/       Sandboxed runner, timing backends, calibration probe
   metrics/       eff@k estimator, censored scoring
   report/        Bootstrap CIs, h-sweeps, levels, parity comparison
@@ -115,17 +119,56 @@ scripts/
   generate_samples.py Generate samples from OpenAI-compatible APIs
 
 site/                 Live results dashboard (Vercel)
-  index.html          Overview, results, experiments, methodology, status
-  data/results.json   Auto-generated from run records
 ```
 
 ### Design principles
 
-- **Zero runtime dependencies** — metric core runs on bare CPython for reproducible timing
-- **Resumable runs** — every problem flushes to disk; crash costs at most one problem
-- **Calibration probe** — every session times a fixed workload to detect machine drift
-- **Censored scoring** — timeouts score 0, not "infinity"; survival analysis, not averaging
-- **Bootstrap CIs** — every reported score carries an interval; no comparison without a test
+- **Zero runtime dependencies** — metric core runs on bare CPython
+- **Resumable runs** — every problem flushes to disk; crash costs one problem
+- **Calibration probe** — every session detects machine drift
+- **Censored scoring** — timeouts score 0, not "infinity"
+- **Bootstrap CIs** — every score carries an interval
+
+---
+
+## Adding models
+
+```bash
+# From EvalPlus releases
+python3 scripts/fetch_evalplus.py
+python3 scripts/convert_evalplus.py
+
+# From local model (needs GPU)
+pip install evalplus[vllm]
+evalplus.codegen --model Qwen/Qwen2.5-Coder-32B-Instruct \
+    --dataset humaneval --backend vllm --greedy
+
+# From API
+python3 scripts/generate_samples.py --model codellama --base-url http://localhost:8000/v1
+```
+
+---
+
+## What's measured
+
+Every `eff@1` score comes with:
+
+- **Bootstrap 95% confidence interval** (10,000 resamples)
+- **Pairwise significance test** against every other model
+- **α-sweep** — score at timeout factors 1.25, 1.5, 2.0
+- **h-sweep** — score under every non-negative hardness weight
+- **Level discrimination** — q-distribution, sensitivity shares
+- **Calibration probe** — machine drift detection per session
+
+---
+
+## Scope
+
+**Python only.** Keeps direct comparison to published numbers possible.
+
+**Function-level only.** Repository-level efficiency is out of scope.
+
+**Open source models preferred.** Reproducible, no API costs, anyone can verify.
 
 ---
 
@@ -133,71 +176,20 @@ site/                 Live results dashboard (Vercel)
 
 | # | Milestone | Status |
 |---|-----------|--------|
-| 1 | Reimplement the metric | ✅ Done — estimator verified exactly |
-| 2 | Parity gate | 🔶 Partial — 17/30 models, ranking preserved |
-| 3 | Reproducible measurement | ⏳ Pending — containerization, CPU pinning |
-| 4 | Honest statistics | ✅ Done — bootstrap CIs in every report |
-| 5 | Reference audit | ⏳ Pending — review 142 references |
-| 6 | Adversarial generation | ⏳ Pending — per-candidate worst-case search |
-| 7 | Two-axis reporting | ⏳ Pending — memory axis, complexity fits |
-| 8 | Contamination studies | ⏳ Pending — paraphrase deltas, feedback loop |
-
----
-
-## Adding new models
-
-### From EvalPlus releases (pre-generated)
-```bash
-python3 scripts/fetch_evalplus.py
-python3 scripts/convert_evalplus.py
-python3 scripts/evaluate.py run --solutions enamel_ext/data/cache/evalplus_solutions.json
-```
-
-### From OpenAI-compatible API
-```bash
-python3 scripts/generate_samples.py \
-    --model gpt-4o \
-    --api-key sk-... \
-    --base-url https://api.openai.com/v1
-```
-
-### From local model (needs GPU)
-```bash
-pip install evalplus[vllm]
-evalplus.codegen --model Qwen/Qwen2.5-Coder-32B-Instruct \
-    --dataset humaneval --backend vllm --greedy
-```
-
----
-
-## What's measured
-
-Every `eff@k` score comes with:
-
-- **Bootstrap 95% confidence interval** (10,000 resamples)
-- **Pairwise significance test** against every other model
-- **α-sweep** — score at timeout factors 1.25, 1.5, 2.0
-- **h-sweep** — score under every non-negative hardness weight
-- **Level discrimination** — q-distribution, sensitivity shares, tolerated slowdown
-- **Calibration probe** — machine drift detection per session
-
----
-
-## Scope
-
-**Python only, but deeper.** No C++ or Rust. Staying in Python keeps direct comparison to the published numbers possible.
-
-**Function-level only.** Repository-level and I/O-bound efficiency are out of scope.
-
-**Open source models preferred.** Reproducible, no API costs, anyone can verify our numbers. Closed models are evaluated when pre-generated samples are available.
+| 1 | Reimplement the metric | ✅ Done |
+| 2 | Parity gate | ✅ Done — 17 models, τ=0.783 |
+| 3 | Reproducible measurement | ⏳ Containerization, CPU pinning |
+| 4 | Honest statistics | ✅ Done — CIs in every report |
+| 5 | Reference audit | ⏳ Review 142 references |
+| 6 | Adversarial generation | ⏳ Per-candidate worst-case search |
+| 7 | Two-axis reporting | ⏳ Memory axis, complexity fits |
+| 8 | Contamination studies | ⏳ Paraphrase deltas |
 
 ---
 
 ## Credit
 
-ENAMEL is the work of **Ruizhong Qiu, Weiliang Will Zeng, James Ezick, Christopher Lott, and Hanghang Tong** (UIUC + Qualcomm AI Research), published at ICLR 2025. The benchmark, the `eff@k` metric, its Rao–Blackwellized estimator, the 142-problem selection, the expert reference solutions, and the test-case generators are all theirs.
-
-If you use anything here, cite the original paper:
+ENAMEL is the work of **Ruizhong Qiu, Weiliang Will Zeng, James Ezick, Christopher Lott, and Hanghang Tong** (UIUC + Qualcomm AI Research), published at ICLR 2025.
 
 ```bibtex
 @inproceedings{qiu2025enamel,

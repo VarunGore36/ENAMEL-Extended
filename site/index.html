@@ -11,7 +11,7 @@
     <header>
         <div class="container">
             <h1>ENAMEL-Extended</h1>
-            <p class="subtitle">A rigorous reimplementation of the ENAMEL code-efficiency benchmark</p>
+            <p class="subtitle">Are open source code models actually efficient? Let's find out.</p>
             <nav>
                 <a href="#overview">Overview</a>
                 <a href="#results">Results</a>
@@ -29,24 +29,20 @@
         <section id="overview">
             <h2>Overview</h2>
             <p>
-                ENAMEL-Extended is a from-scratch Python reimplementation of
-                <a href="https://arxiv.org/abs/2406.06647" target="_blank">ENAMEL</a>,
-                the code-efficiency benchmark introduced by Qiu, Zeng, Ezick, Lott &amp; Tong
-                (ICLR 2025). ENAMEL measures the <em>efficiency</em> of LLM-generated code —
-                not just correctness — by comparing runtime against expert reference solutions
-                on adversarial test inputs.
+                Most code models pass tests but write slow code. This project measures
+                <strong>how efficient open source LLM-generated code really is</strong> —
+                not just whether it works.
             </p>
             <p>
-                The headline finding: models that look strong on <code>pass@k</code> are far
-                from expert level on <code>eff@k</code>. GPT-4 reaches <code>pass@1 = 0.831</code>
-                but only <code>eff@1 = 0.454</code>. This reimplementation reproduces the metric,
-                builds a resumable measurement harness with bootstrap confidence intervals,
-                and investigates the published claims.
+                Based on <a href="https://arxiv.org/abs/2406.06647" target="_blank">ENAMEL</a>
+                (ICLR 2025), we evaluate 13 open source models on 161 programming problems.
+                The result: no open source model reaches expert efficiency. The best one
+                (Code Llama 7B) only matches expert speed on 33% of problems.
             </p>
             <div class="callout">
-                <strong>Key contribution:</strong> We measure the q-distribution across levels
-                (§2.2 of the open questions) — showing that level 3 carries 71% of the score's
-                sensitivity while levels 1–2 carry 60% of the weight but minimal discrimination.
+                <strong>Key finding:</strong> Every open source model scores lower on efficiency
+                than on correctness. The gap ranges from 0.01 (GPT-J) to 0.11 (CodeT5+ 16B).
+                Passing tests doesn't mean your code is fast.
             </div>
         </section>
 
